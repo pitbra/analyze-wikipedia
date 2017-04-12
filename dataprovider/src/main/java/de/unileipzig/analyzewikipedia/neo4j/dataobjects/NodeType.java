@@ -1,7 +1,7 @@
 /*
  * 
  */
-package dataprovider;
+package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 public enum NodeType {
     Article("Article"), SubArticle("SubArticle");

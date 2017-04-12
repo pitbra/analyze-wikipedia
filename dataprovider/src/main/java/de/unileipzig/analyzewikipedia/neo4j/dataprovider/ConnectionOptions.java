@@ -1,7 +1,7 @@
 /*
  * 
  */
-package dataprovider;
+package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -10,7 +10,7 @@ package dataprovider;
 public class ConnectionOptions {
 
     /** The connection string. */
-    private String _connectionString = "localhost:7474";
+    private String _connectionString = "bolt://localhost:7474";
 
     private String _userName = "neo4j";
 
@@ -24,8 +24,12 @@ public class ConnectionOptions {
      *
      * @param connectionString
      *            the connection string
+     * @param password 
      */
-    private ConnectionOptions(String connectionString) {
+    private ConnectionOptions(String connectionString, String username, String password) {
+    	_connectionString = connectionString;
+    	_userName = username;
+    	_password = password;
     }
 
     /**
@@ -50,9 +54,9 @@ public class ConnectionOptions {
      *            the connection string
      * @return the connection options
      */
-    public static ConnectionOptions GetInstance(String connectionString) {
+    public static ConnectionOptions GetInstance(String connectionString, String username, String password) {
 	if (_self == null) {
-	    _self = new ConnectionOptions(connectionString);
+	    _self = new ConnectionOptions(connectionString, username, password);
 	}
 
 	return _self;
