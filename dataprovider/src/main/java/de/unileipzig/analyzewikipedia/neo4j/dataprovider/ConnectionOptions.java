@@ -10,7 +10,7 @@ package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 public class ConnectionOptions {
 
     /** The connection string. */
-    private String _connectionString = "bolt://localhost:7474";
+    private String _connectionString = "bolt://localhost:7687";
 
     private String _userName = "neo4j";
 

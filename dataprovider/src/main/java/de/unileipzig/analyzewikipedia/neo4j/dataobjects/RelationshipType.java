@@ -1,7 +1,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 public enum RelationshipType {
-	;
+	HAS("has"), LINK("link");
 
 	String _type;
 	RelationshipType(String type){
@@ -9,8 +9,7 @@ public enum RelationshipType {
 	}
 	
 	public String GetType() {
-		// TODO Auto-generated method stub
-		return "type";
+		return _type;
 	}
 
 }

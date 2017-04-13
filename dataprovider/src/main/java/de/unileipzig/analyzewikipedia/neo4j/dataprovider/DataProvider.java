@@ -5,6 +5,8 @@ package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.IDatabaseObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 
 // TODO: Auto-generated Javadoc
@@ -76,5 +78,9 @@ public class DataProvider {
 	 */
 	public boolean DeleteDatabaseObject(IDatabaseObject object) {
 		return false;
+	}
+
+	public void CreateRelationship(RelationshipType has, INodeObject from, INodeObject to) {
+		_databaseWrapper.CreateRelationsship(has, from, to);
 	}
 }

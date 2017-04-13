@@ -16,10 +16,7 @@ public class ArticleObject implements INodeObject {
 	
 	private UUID _uid;
 	
-	public ArticleObject() {
-		_uid = UUID.randomUUID();
-		
-		AddAnnotation(AnnotationKeys.UID, _uid);
+	private ArticleObject() {
 	}
 	
 	public NodeType GetType() {
@@ -32,6 +29,15 @@ public class ArticleObject implements INodeObject {
 
 	public void AddAnnotation(String key, Object value) {
 		_annotations.put(key, value);
+	}
+	
+	public static ArticleObject CreateArticleObject() {
+		ArticleObject art = new ArticleObject();
+		
+		art._uid = UUID.randomUUID();
+		art.AddAnnotation(AnnotationKeys.UID, art._uid.toString());
+		
+		return art;
 	}
 	
 	@Override
