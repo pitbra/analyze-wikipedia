@@ -22,7 +22,6 @@ import org.neo4j.driver.v1.*;
  */
 public class TransmitorThread implements Runnable {
     
-    private Driver driver;
     private DataProvider prov;
     
     /**
@@ -30,8 +29,6 @@ public class TransmitorThread implements Runnable {
      * 
      */
     public TransmitorThread(){
-        
-        createNeo4jDriver();
         
         createNeo4jProvider();
         
@@ -58,30 +55,8 @@ public class TransmitorThread implements Runnable {
             
         } while(ThreadController.getSeekersAreAlive() || !ThreadController.pageIsEmpty());
         
-        if (driver != null) driver.close();
-        
     }
-    
-    /**
-     * METHODE: create neo4j driver for direct access
-     * 
-     */
-    public final void createNeo4jDriver() {
         
-        URI boltUri;
-        
-        try {
-            
-            boltUri = new URI(Components.getNeo4jLink());
-            
-            driver = GraphDatabase.driver(boltUri, AuthTokens.basic(Components.getNeo4jUser(), Components.getNeo4jPass()));
-        
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(TransmitorThread.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-    
     /**
      * METHODE: create neo4j provider for direct access
      */
@@ -98,9 +73,6 @@ public class TransmitorThread implements Runnable {
      */
     protected final void sendPageContent(WikiPage page){
         
-//        Session session = driver.session();
-//        session.run(...).consume();
-
 //        // create artikel
 //        ArticleObject article = ArticleObject.CreateArticleObject();		
 //        article.AddAnnotation("title", page.getName());
