@@ -8,13 +8,6 @@ import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.neo4j.driver.v1.*;
-
 /**
  * @author Danilo Morgado
  * 
