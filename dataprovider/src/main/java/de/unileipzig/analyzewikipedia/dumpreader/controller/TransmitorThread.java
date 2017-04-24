@@ -105,6 +105,11 @@ public class TransmitorThread implements Runnable {
 
             // TEST out the page data
             System.out.println(title);
+            for (String link : page.getIntLinks()) System.out.println("Link: " + link);
+            for (String[] sub : page.getIntSubLinks()) System.out.println("Sub : " + sub[0] + " :#: " + sub[1]);
+            for (String ext : page.getExtLinks()) System.out.println("Ext : " + ext);
+            for (String[] cat : page.getCategories()) System.out.println("Cat : " + cat[0] + "  :  " + cat[1]);
+            
         }
               
     }

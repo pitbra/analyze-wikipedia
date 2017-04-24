@@ -2,6 +2,8 @@ package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -131,16 +133,33 @@ public class SeekerThread implements Runnable {
                     
                 link = link.replace(" ", "_");
                 
-                // add link to page
-                page.addIntLink(link);
-
-                // TEST out the link
-//                System.out.println("Link:      " + link);
+                // check if article links on a subarticle
+                int sub = link.indexOf("#");
+                if (sub >= 0){
+                    
+                    // add link to page
+                    page.addIntSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                    
+                    // TEST out the subcategorie
+//                    System.out.println("Sublink:   " + link);
+                    
+                } else {
                 
+                    // add link to page
+                    page.addIntLink(link);
+
+                    // TEST out the link
+//                    System.out.println("Link:      " + link);
+                
+                }
+
             } else {
                 
-                // TEST read the categories
-//                String[] categorie_split = link.split(":");
+                // read the categories
+                String[] categorie_split = link.split(":");
+                
+                // add categorie to page
+                page.addCategory(categorie_split[0], categorie_split[1]);
                 
                 // TEST out categories
 //                System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);
@@ -166,6 +185,7 @@ public class SeekerThread implements Runnable {
           
         // clean inter links by replacing the start
         text = text.replace("[[", "");
+        text = text.replace("]]", "");
         
         // select external link via regular expression
         Pattern patter = Pattern.compile("\\[(.*?)\\]", Pattern.MULTILINE);
@@ -182,33 +202,46 @@ public class SeekerThread implements Runnable {
             String link = temp[0];
             
             int pos = link.indexOf(" ");
-            String link_url = "";
-            String link_txt = "";
+            String linkurl = "";
             
             // check if a whitespace is following
             if (pos > 0){
                 
                 // cut the link url
-                link_url = link.substring(0, pos);
+                linkurl = link.substring(0, pos);
+                                
+            } else {
                 
-                // check if a link description is following
-                if (pos < link.length()){
-                    
-                    // cut the link description
-                    link_txt = link.substring(pos + 1, link.length());
-                
-                }
+                // TEST out external links without a description
+//                System.out.println("Ext-err : " + link + " : " + isUrl(link));
                 
             }
                         
-            // add link to page
-            page.addExtLink(link_url, link_txt);
+            // add link to page if it is an url
+            if (isUrl(linkurl)) page.addExtLink(linkurl);
 
             // TEST out the external link
-//            System.out.println("External: " + link_url + ":" + link_txt);
+//            System.out.println("External: " + linkurl);
                         
         }
         
+    }
+    
+    /**
+     * METHODE: check if given url has correct form of an url
+     * 
+     * @param url as string
+     * @return is url as boolean
+     */
+    private boolean isUrl(String url){
+        
+        try {
+            URL tmp = new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+
     }
     
 }

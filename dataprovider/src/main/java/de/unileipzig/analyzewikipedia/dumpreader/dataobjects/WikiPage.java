@@ -11,8 +11,12 @@ import java.util.List;
 public class WikiPage {
     
     private final String page_name;
-    private final List<String> in_linklist;
-    private final List<String[]> ex_linklist;
+    
+    private final List<String> linklist_toArticle;
+    private final List<String[]> linklist_toSubArticle;
+    private final List<String> linklist_toExtern;
+    
+    private final List<String[]> categorylist;
     
     /**
      * KONSTRUCTOR: default
@@ -32,8 +36,12 @@ public class WikiPage {
     public WikiPage(String name){
         
         this.page_name = name;
-        this.in_linklist = new LinkedList();
-        this.ex_linklist = new LinkedList();
+        
+        this.linklist_toArticle = new LinkedList();
+        this.linklist_toSubArticle = new LinkedList();
+        this.linklist_toExtern = new LinkedList();
+        
+        this.categorylist = new LinkedList();
         
     }
     
@@ -44,7 +52,19 @@ public class WikiPage {
      */
     public final void addIntLink(String link){
         
-        this.in_linklist.add(link);
+        this.linklist_toArticle.add(link);
+        
+    }
+    
+    /**
+     * METHODE: add link to wiki intern sublink list
+     * 
+     * @param link as string
+     * @param sublink as string
+     */
+    public final void addIntSubLink(String link, String sublink){
+        
+        this.linklist_toSubArticle.add(new String[]{link, sublink});
         
     }
     
@@ -52,11 +72,22 @@ public class WikiPage {
      * METHODE: add link to extern link list
      * 
      * @param link as string
-     * @param description as string
      */
-    public final void addExtLink(String link, String description){
+    public final void addExtLink(String link){
         
-        this.ex_linklist.add(new String[]{link, description});
+        this.linklist_toExtern.add(link);
+        
+    }
+    
+    /**
+     * METHODE: add category wiki category list
+     * 
+     * @param category as string
+     * @param name as string
+     */
+    public final void addCategory(String category, String name){
+        
+        this.categorylist.add(new String[]{category, name});
         
     }
     
@@ -78,7 +109,18 @@ public class WikiPage {
      */
     public final List<String> getIntLinks(){
         
-        return this.in_linklist;
+        return this.linklist_toArticle;
+        
+    }
+    
+    /**
+     * GETTER: get wiki intern sublink list
+     * 
+     * @return wiki intern link list
+     */
+    public final List<String[]> getIntSubLinks(){
+        
+        return this.linklist_toSubArticle;
         
     }
     
@@ -87,9 +129,20 @@ public class WikiPage {
      * 
      * @return extern link list
      */
-    public final List<String[]> getExtLinks(){
+    public final List<String> getExtLinks(){
         
-        return this.ex_linklist;
+        return this.linklist_toExtern;
+        
+    }
+    
+    /**
+     * GETTER: get wiki category list
+     * 
+     * @return wiki category list
+     */
+    public final List<String[]> getCategories(){
+        
+        return this.categorylist;
         
     }
     
