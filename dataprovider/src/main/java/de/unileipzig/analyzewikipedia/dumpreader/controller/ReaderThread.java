@@ -85,6 +85,7 @@ public class ReaderThread implements Runnable {
                 // check if file is file (add it) or directory (add elements in it)
                 if (test_file.isFile()){
 
+                    // save file in store
                     ThreadController.addFile(test_file);
 
                 } else if (test_file.isDirectory()){
@@ -95,6 +96,7 @@ public class ReaderThread implements Runnable {
                         
                         if (directory_file.exists()) {
                             
+                            // save file in store
                             ThreadController.addFile(directory_file);
                                     
                         }

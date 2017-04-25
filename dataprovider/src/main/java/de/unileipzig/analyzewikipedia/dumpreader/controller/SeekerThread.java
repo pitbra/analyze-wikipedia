@@ -1,10 +1,22 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
+import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,13 +98,22 @@ public class SeekerThread implements Runnable {
                 // select element by text
                 String text = eElement.getElementsByTagName(Components.getTextTag()).item(0).getTextContent();
                 
-                // search wiki links in text
-                searchIntLinks(page, text);
+                // seperate text in articlesections
+                for (String[] section : generateSectionlist(text)){
+                    
+                    // create new article and add it to page
+                    WikiArticle article = new WikiArticle(section[0]);
+                    page.addArticle(article);
+                    
+                    // search wiki links in text
+                    searchIntLinks(article, section[1]);
+
+                    // search external links in text
+                    searchExtLinks(article, section[1]);
                 
-                // search external links in text
-                searchExtLinks(page, text);
+                }
                 
-                // send neo4j DB the page with links
+                // safe page in store
                 ThreadController.addPage(page);
                 
                 // TESTout the page title and linkcount
@@ -104,14 +125,78 @@ public class SeekerThread implements Runnable {
     }
     
     /**
+     * METHODE: split give text in article sections
+     * 
+     * @param text as string
+     * @ return sectionlist
+     */
+    private List<String[]> generateSectionlist(String text){
+        
+        Queue<String[]> sectionlist = new LinkedList();
+        
+        BufferedReader br;
+        
+        try {
+        
+            br = new BufferedReader(new StringReader(text));
+
+            String currentLine;
+            String lineStore = "";
+            String currentArticlename = "empty";
+
+            while ((currentLine = br.readLine()) != null) {
+                
+                // delete to small sentences for short searching
+                if (currentLine.length() < 3) {
+                    
+                    // start again
+                    continue;
+                    
+                }
+                
+                // check start of article
+                if( currentLine.length() > 4 &&
+                    currentLine.substring(0,2).contains("==") && 
+                    !currentLine.substring(3,3).equals("=") &&
+                    currentLine.substring(currentLine.length()-2,currentLine.length()).contains("==") &&
+                    !currentLine.substring(currentLine.length()-3,currentLine.length()-2).equals("=") ) {
+                    
+                    // add new article section and clear linestore
+                    sectionlist.add(new String[]{currentArticlename, lineStore});
+                    lineStore = "";
+                    
+                    // save new artcile name
+                    currentArticlename = currentLine.substring(3, currentLine.length()-3);
+                    continue;
+                            
+                }
+                
+                // store line
+                lineStore = lineStore + currentLine + "\n";
+
+            }
+            
+            // add last lines to last article
+            sectionlist.add(new String[]{currentArticlename, lineStore});
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return new LinkedList(sectionlist);
+    }
+    
+    /**
      * METHODE: search data in dopple square brackets in text
      *
      * @param text as string
      */
-    private void searchIntLinks(WikiPage page, String text){
+    private void searchIntLinks(WikiArticle article, String text){
                 
-        // TEST out the page name
-//        System.out.println(page.getName());
+        // TEST out the article name
+//        System.out.println(article.getName());
         
         // TEST out the text
 //        System.out.println("Text : " + text);
@@ -138,7 +223,7 @@ public class SeekerThread implements Runnable {
                 if (sub >= 0){
                     
                     // add link to page
-                    page.addIntSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                    article.addSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
                     
                     // TEST out the subcategorie
 //                    System.out.println("Sublink:   " + link);
@@ -146,7 +231,7 @@ public class SeekerThread implements Runnable {
                 } else {
                 
                     // add link to page
-                    page.addIntLink(link);
+                    article.addWikiLink(link);
 
                     // TEST out the link
 //                    System.out.println("Link:      " + link);
@@ -159,7 +244,7 @@ public class SeekerThread implements Runnable {
                 String[] categorie_split = link.split(":");
                 
                 // add categorie to page
-                page.addCategory(categorie_split[0], categorie_split[1]);
+                article.addCategorieName(categorie_split[0], categorie_split[1]);
                 
                 // TEST out categories
 //                System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);
@@ -175,15 +260,15 @@ public class SeekerThread implements Runnable {
      *
      * @param text as string
      */
-    private void searchExtLinks(WikiPage page, String text){
+    private void searchExtLinks(WikiArticle article, String text){
         
-        // TEST out the page name
-//        System.out.println(page.getName());
+        // TEST out the article name
+//        System.out.println(article.getName());
         
         // TEST out the text
 //        System.out.println("Text : " + text);
           
-        // clean inter links by replacing the start
+        // clean inter links by replacing the start and end sequence
         text = text.replace("[[", "");
         text = text.replace("]]", "");
         
@@ -218,7 +303,7 @@ public class SeekerThread implements Runnable {
             }
                         
             // add link to page if it is an url
-            if (isUrl(linkurl)) page.addExtLink(linkurl);
+            if (isUrl(linkurl)) article.addExternLink(linkurl);
 
             // TEST out the external link
 //            System.out.println("External: " + linkurl);

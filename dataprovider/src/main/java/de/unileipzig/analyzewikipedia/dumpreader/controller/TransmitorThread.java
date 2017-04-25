@@ -1,12 +1,16 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
+import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Danilo Morgado
@@ -93,22 +97,48 @@ public class TransmitorThread implements Runnable {
                 
         //TEST
         {
-            String title = "Page:" + page.getName();
+            String title = "Page: " + page.getName();
 
             int length = 7 - (int)(title.length()/8);
             for (int i = 0; i < length; i++) title = title + "\t";
+            
+            int lin = 0;
+            int sub = 0;
+            int ext = 0;
+            int cat = 0;
+            
+            for (WikiArticle article : page.getArticles()){
+                lin += article.getWikiLinks().size();
+                sub += article.getSubLinks().size();
+                ext += article.getExternLinks().size();
+                cat += article.getCategories().size();
+            }
+            
+            title = title + "\tLinks:" + lin;
 
-            length = page.getIntLinks().size();
-            title = title + "\tLinks:" + length;
-
-            if (length < 10) title = title + "\t\tExt:" + page.getExtLinks().size(); else title = title + "\tExt:" + page.getExtLinks().size();
+            if (lin < 10) title = title + "\t\tSub:" + sub; else title = title + "\tSub:" + sub;
+            if (sub < 10) title = title + "\t\tExt:" + ext; else title = title + "\tExt:" + ext;
+            if (ext < 10) title = title + "\t\tCat:" + cat; else title = title + "\tCat:" + cat;
 
             // TEST out the page data
             System.out.println(title);
-            for (String link : page.getIntLinks()) System.out.println("Link: " + link);
-            for (String[] sub : page.getIntSubLinks()) System.out.println("Sub : " + sub[0] + " :#: " + sub[1]);
-            for (String ext : page.getExtLinks()) System.out.println("Ext : " + ext);
-            for (String[] cat : page.getCategories()) System.out.println("Cat : " + cat[0] + "  :  " + cat[1]);
+            for (WikiArticle article : page.getArticles()){
+                System.out.println("Article: " + article.getName());
+                for (String t_lin : article.getWikiLinks()) System.out.println("Link: " + t_lin);
+                for (String[] t_sub : article.getSubLinks()) System.out.println("Sub : " + t_sub[0] + " :#: " + t_sub[1]);
+                for (String t_ext : article.getExternLinks()) System.out.println("Ext : " + t_ext);
+                for (Map.Entry<String, List<String>> t_cat : article.getCategories().entrySet()){
+                    List<String> list = t_cat.getValue();
+                    
+                    for (String tmp : list){
+                        
+                        System.out.println("Cat :" + t_cat.getKey() + " : " + tmp);
+                        
+                    }
+                    
+                }
+                
+            }
             
         }
               
