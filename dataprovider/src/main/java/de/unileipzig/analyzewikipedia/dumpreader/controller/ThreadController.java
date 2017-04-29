@@ -5,12 +5,15 @@ import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import java.io.File;
 
-import org.w3c.dom.Document;
-
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.w3c.dom.Document;
 
 /**
  * @author Danilo Morgado
@@ -31,7 +34,7 @@ public class ThreadController {
     
     protected static void initThreads(String[] args){
         
-        arguments = args;
+        arguments = checkArguments(args);
                 
         // initial seeker and transmitor thread
         for (int i = 0; i < Components.getCores(); i++){
@@ -74,6 +77,55 @@ public class ThreadController {
 
         }
                 
+    }
+    
+    /**
+     * METHODE: check arguments of correct use
+     * 
+     * @param args argarray
+     * return path list
+     */
+    private static String[] checkArguments(String[] args){
+        
+        List<String> newArg = new LinkedList();
+        
+        // iterate over all arguments
+        for (String tmpArg : args) {
+
+            boolean brk = false;
+            
+            // HELP-MODE
+            if( Arrays.asList(Components.getArgument(0)).contains(tmpArg) )
+            {
+                Components.helpText();
+                System.exit(0);
+            }
+            
+            // check all arguments (not help) and set the trickers
+            for (int i = 1; i < Components.getTrickers(); i++){
+                if( !Components.getTricker(i) && Arrays.asList(Components.getArgument(i)).contains(tmpArg))
+                {
+                    Components.setTricker(0, true); //remember if minimum one tricker is set
+                    Components.setTricker(i, true);
+                    brk = true;
+                }
+            }
+            
+            if (!brk) newArg.add(tmpArg);
+
+        }
+        
+        // when no trickers are set, set all, because the user send only a file list and want to get all
+        if (!Components.getTricker(0)){
+            for (int i = 0; i<Components.getTrickers(); i++){
+                Components.setTricker(i, true);
+            }
+        }
+        
+        //for(boolean tr : Components.getTricker(Integer.SIZE))
+        
+        return newArg.toArray(new String[newArg.size()]);
+        
     }
     
     /**

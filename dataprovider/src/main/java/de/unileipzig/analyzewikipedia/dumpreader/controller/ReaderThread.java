@@ -79,6 +79,9 @@ public class ReaderThread implements Runnable {
             
             File test_file = new File(path);
             
+            // if file hasn't correct extension, next file
+            if (!hasCorrectFileExtension(test_file)) continue;
+            
             // test if file exist
             if (test_file.exists()){
             
@@ -115,6 +118,39 @@ public class ReaderThread implements Runnable {
             ThreadController.addFile(new File(Components.getTestFile()));
             
         }
+        
+    }
+    
+    /**
+     * METHODE: check file of correct extension
+     * 
+     * @param file as object
+     * @return status as boolean
+     */
+    private boolean hasCorrectFileExtension(File file) {
+        
+        // get filepath
+        String name = file.getName();
+        
+        try {
+            
+            // try to seperate file extension
+            name = name.substring(name.lastIndexOf(".") + 1);
+                        
+        } catch (Exception e) {
+            
+            return false;
+            
+        }
+        
+        // check extension with extension list
+        for (String ext : Components.getFileExtension()){
+            
+                if(name.equals(ext)) return true;
+                
+        }
+        
+        return false;
         
     }
     

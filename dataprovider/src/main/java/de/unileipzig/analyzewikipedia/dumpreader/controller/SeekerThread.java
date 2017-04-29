@@ -223,7 +223,9 @@ public class SeekerThread implements Runnable {
                 if (sub >= 0){
                     
                     // add link to page
-                    article.addSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                    if (Components.getTricker(2)){
+                        article.addSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                    }
                     
                     // TEST out the subcategorie
 //                    System.out.println("Sublink:   " + link);
@@ -231,7 +233,9 @@ public class SeekerThread implements Runnable {
                 } else {
                 
                     // add link to page
-                    article.addWikiLink(link);
+                    if (Components.getTricker(1)){
+                        article.addWikiLink(link);
+                    }
 
                     // TEST out the link
 //                    System.out.println("Link:      " + link);
@@ -240,14 +244,18 @@ public class SeekerThread implements Runnable {
 
             } else {
                 
-                // read the categories
-                String[] categorie_split = link.split(":");
-                
-                // add categorie to page
-                article.addCategorieName(categorie_split[0], categorie_split[1]);
-                
-                // TEST out categories
-//                System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);
+                if (Components.getTricker(4)){
+                    
+                    // read the categories
+                    String[] categorie_split = link.split(":");
+
+                    // add categorie to page
+                    article.addCategorieName(categorie_split[0], categorie_split[1]);
+
+                    // TEST out categories
+//                    System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);
+
+                }
                 
             }
             
@@ -297,13 +305,23 @@ public class SeekerThread implements Runnable {
                                 
             } else {
                 
-                // TEST out external links without a description
-//                System.out.println("Ext-err : " + link + " : " + isUrl(link));
+                // check if link has no description and is link
+                if(isUrl(link)){
+                    
+                    // remember it
+                    linkurl = link;
+                    
+                }else{
+                    
+                    // TEST out external links without a description
+//                    System.out.println("Ext-err : " + link);
+                    
+                }
                 
             }
-                        
+                    
             // add link to page if it is an url
-            if (isUrl(linkurl)) article.addExternLink(linkurl);
+            if (Components.getTricker(3) && isUrl(linkurl)) article.addExternLink(linkurl);
 
             // TEST out the external link
 //            System.out.println("External: " + linkurl);
