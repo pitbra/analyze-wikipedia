@@ -23,12 +23,13 @@ public class Components {
     
     private final static String URL_WIKI = "https://de.wikipedia.org/wiki/";
     
-    private final static int CORES = 1;//Runtime.getRuntime().availableProcessors();
+    private final static int CORES = Runtime.getRuntime().availableProcessors();
     
+    // TIME in MILLISECONDS
     private final static Integer THREAD_SLEEPTIME = 100;
-    
     private final static Integer TIMER_SLEEPTIME = 5000;
-        
+    private final static Integer READER_LEADTIME = 2000;
+    
     /**
      * GETTER: return path of test file (WINDOWS)
      * 
@@ -147,6 +148,17 @@ public class Components {
     public static final Integer getTimerSleepTime(){
         
         return TIMER_SLEEPTIME;
+        
+    }
+    
+    /**
+     * GETTER: get sleep time for timer
+     * 
+     * @return sleeptime as integer
+     */
+    public static final Integer getReaderLeadtime(){
+        
+        return READER_LEADTIME;
         
     }
            

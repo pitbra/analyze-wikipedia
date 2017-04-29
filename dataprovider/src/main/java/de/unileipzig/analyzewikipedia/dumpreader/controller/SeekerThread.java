@@ -110,7 +110,7 @@ public class SeekerThread implements Runnable {
 
                     // search external links in text
                     searchExtLinks(article, section[1]);
-                
+                    
                 }
                 
                 // safe page in store

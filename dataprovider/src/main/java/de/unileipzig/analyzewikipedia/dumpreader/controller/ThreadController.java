@@ -46,7 +46,7 @@ public class ThreadController {
         
         // try to wait a second
         try {
-            java.util.concurrent.TimeUnit.SECONDS.sleep(1);
+            java.util.concurrent.TimeUnit.MILLISECONDS.sleep(Components.getReaderLeadtime());
         } catch (InterruptedException ex) {
             Logger.getLogger(ThreadController.class.getName()).log(Level.SEVERE, null, ex);
         }
