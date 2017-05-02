@@ -32,7 +32,7 @@ public class TransmitorThread implements Runnable {
     }
         
     /**
-     * METHODE: execution of thread
+     * METHOD: execution of transmitor thread
      * 
      */
     @Override
@@ -55,7 +55,7 @@ public class TransmitorThread implements Runnable {
     }
         
     /**
-     * METHODE: create neo4j provider for direct access
+     * METHOD: create neo4j provider for direct access
      */
     public final void createNeo4jProvider() {
         
@@ -64,7 +64,7 @@ public class TransmitorThread implements Runnable {
     }
     
     /**
-     * METHODE: send wikipage content to neo4j graph database
+     * METHOD: send wikipage content to neo4j graph database
      * 
      * @param page as object
      */

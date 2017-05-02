@@ -46,7 +46,7 @@ public class WikiArticle {
     }
     
     /**
-     * METHODE: add wiki link to list
+     * METHOD: add wiki link to list
      * 
      * @param link as string
      */
@@ -57,7 +57,7 @@ public class WikiArticle {
     }
     
     /**
-     * METHODE: add wiki sub link to list
+     * METHOD: add wiki sub link to list
      * 
      * @param domain as string
      * @param link as string
@@ -69,7 +69,7 @@ public class WikiArticle {
     }
     
     /**
-     * METHODE: add extern link to list
+     * METHOD: add extern link to list
      * 
      * @param link as string
      */
@@ -80,7 +80,7 @@ public class WikiArticle {
     }
     
     /**
-     * METHODE: add categorie to map
+     * METHOD: add categorie to map
      * 
      * @param categorie as string
      * @param name as string

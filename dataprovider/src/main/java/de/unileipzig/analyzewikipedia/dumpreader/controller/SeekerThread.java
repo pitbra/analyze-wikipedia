@@ -41,7 +41,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: execution of thread link seeker
+     * METHOD: execution of thread link seeker
      * 
      */
     @Override
@@ -64,7 +64,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: read the document text to page
+     * METHOD: read the document text to page
      * 
      * @param doc as document
      */
@@ -125,7 +125,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: split give text in article sections
+     * METHOD: split give text in article sections
      * 
      * @param text as string
      * @ return sectionlist
@@ -189,7 +189,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: search data in dopple square brackets in text
+     * METHOD: search data in dopple square brackets in text
      *
      * @param text as string
      */
@@ -264,7 +264,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: search data in normal square brackets in text
+     * METHOD: search data in normal square brackets in text
      *
      * @param text as string
      */
@@ -331,7 +331,7 @@ public class SeekerThread implements Runnable {
     }
     
     /**
-     * METHODE: check if given url has correct form of an url
+     * METHOD: check if given url has correct form of an url
      * 
      * @param url as string
      * @return is url as boolean

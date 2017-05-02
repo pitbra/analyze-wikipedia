@@ -80,7 +80,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: check arguments of correct use
+     * METHOD: check arguments of correct use
      * 
      * @param args argarray
      * return path list
@@ -129,7 +129,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: add a file to queue
+     * METHOD: add a file to queue
      * 
      * @param file as file
      */
@@ -140,7 +140,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: add a document to queue
+     * METHOD: add a document to queue
      * 
      * @param doc as document
      */
@@ -151,7 +151,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: add a page to queue
+     * METHOD: add a page to queue
      * 
      * @param page as object
      */
@@ -162,7 +162,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: get the top file of the queue
+     * METHOD: get the top file of the queue
      * 
      * @return file as object
      */
@@ -173,7 +173,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: get the top document of the queue
+     * METHOD: get the top document of the queue
      * 
      * @return doc as string
      */
@@ -184,7 +184,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: get the top page of the queue
+     * METHOD: get the top page of the queue
      * 
      * @return page as object
      */
@@ -195,7 +195,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: check if file queue is empty
+     * METHOD: check if file queue is empty
      * 
      * @return empty as boolean
      */
@@ -206,7 +206,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: check if document queue is empty
+     * METHOD: check if document queue is empty
      * 
      * @return empty as boolean
      */
@@ -217,7 +217,7 @@ public class ThreadController {
     }
     
     /**
-     * METHODE: check if page queue is empty
+     * METHOD: check if page queue is empty
      * 
      * @return empty as boolean
      */

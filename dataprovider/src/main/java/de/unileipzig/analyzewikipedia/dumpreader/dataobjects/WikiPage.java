@@ -38,7 +38,7 @@ public class WikiPage {
     }
     
     /**
-     * METHODE: add article to page
+     * METHOD: add article to page
      * 
      * @param article as object
      */

@@ -50,7 +50,7 @@ public class ReaderThread implements Runnable {
     }
         
     /**
-     * METHODE: execution of thread file reader
+     * METHOD: execution of thread file reader
      * 
      */
     @Override
@@ -68,7 +68,7 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHODE: get files from input arguments
+     * METHOD: get files from input arguments
      * 
      * @param pathes as string array
      */
@@ -122,7 +122,7 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHODE: check file of correct extension
+     * METHOD: check file of correct extension
      * 
      * @param file as object
      * @return status as boolean
@@ -155,7 +155,7 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHODE: read a file line by line and store the page textes
+     * METHOD: read a file line by line and store the page textes
      * 
      * @param file as object
      */
@@ -219,7 +219,7 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHODE: load xml text from string
+     * METHOD: load xml text from string
      * 
      * @param xmltext as file
      * @return document
@@ -248,7 +248,7 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHODE: add handler to show information about reading the file
+     * METHOD: add handler to show information about reading the file
      * 
      */
     protected void addTimeHandler(){

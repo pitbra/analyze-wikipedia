@@ -51,7 +51,7 @@ public class Components {
                                     /*4*/   "Search for categories."};
     
     /**
-     * METHODE: generate the helpdialog
+     * METHOD: generate the helpdialog
      * 
      */
     public static final void helpText(){
