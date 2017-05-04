@@ -47,25 +47,30 @@ public class ThreadController {
         // start reader
         READER.start();
         
-        // try to wait a second
-        try {
-            java.util.concurrent.TimeUnit.MILLISECONDS.sleep(Components.getReaderLeadtime());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ThreadController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        // start seeker and transmitor thread
+        // try to wait a while
+        waitMillis(Components.getReaderLeadtime());
+                
+        // start seeker thread
         for (int i = 0; i < Components.getCores(); i++){
 
             SEEKERS[i].start();
+
+        }
+        
+        // try to wait a while
+        waitMillis(Components.getReaderLeadtime());
+        
+        // start transmitor thread
+        for (int i = 0; i < Components.getCores(); i++){
+            
             TRANSMS[i].start();
 
         }
-                
-        // block reader
+        
+        // block main until reader is finish
         try {
             READER.join();
-        }catch (InterruptedException e) {}
+        } catch (InterruptedException e) {}
         
         // block main programm during thread execution
         for (int i = 0; i < Components.getCores(); i++){
@@ -73,10 +78,26 @@ public class ThreadController {
             try {
                 SEEKERS[i].join();
                 TRANSMS[i].join();
-            }catch (InterruptedException e) {}
+            } catch (InterruptedException e) {}
 
         }
                 
+    }
+    
+    /**
+     * METHOD: wait e specific time
+     * 
+     * @param millis as integer
+     */
+    protected static void waitMillis(Integer millis){
+        
+        // try to wait a specific time
+        try {
+            java.util.concurrent.TimeUnit.MILLISECONDS.sleep(millis);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ThreadController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     /**
@@ -146,6 +167,13 @@ public class ThreadController {
      */
     protected static void addDocument(Document doc){
         
+        // MEMORY OPTIMISATION, wait until other threads finished there jobs
+        while(DOCS.size() > Components.getDocStackLimit()) {
+            
+            waitMillis(Components.getStackLimitTime());
+            
+        }
+        
         DOCS.add(doc);
         
     }
@@ -156,6 +184,13 @@ public class ThreadController {
      * @param page as object
      */
     protected static void addPage(WikiPage page){
+        
+        // MEMORY OPTIMISATION, wait until other threads finished there jobs
+        while(PAGES.size() > Components.getPageStackLimit()) {
+            
+            waitMillis(Components.getStackLimitTime());
+            
+        }
         
         PAGES.add(page);
         
@@ -281,6 +316,39 @@ public class ThreadController {
                 
         return false;
                 
+    }
+    
+    /**
+     * GETTER: get size of file stack
+     * 
+     * @return size as integer
+     */
+    protected static Integer getFileStackSize(){
+        
+        return FILES.size();
+        
+    }
+    
+    /**
+     * GETTER: get size of doc stack
+     * 
+     * @return size as integer
+     */
+    protected static Integer getDocStackSize(){
+        
+        return DOCS.size();
+        
+    }
+    
+    /**
+     * GETTER: get size of page stack
+     * 
+     * @return size as integer
+     */
+    protected static Integer getPageStackSize(){
+        
+        return PAGES.size();
+        
     }
     
 }

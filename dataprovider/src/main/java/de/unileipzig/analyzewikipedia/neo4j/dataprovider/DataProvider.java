@@ -4,6 +4,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.IDatabaseObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
@@ -42,6 +43,12 @@ public class DataProvider {
 	
 	public boolean CreateSubArticle(SubArticleObject subArticleObject) {
 		boolean success = _databaseWrapper.CreateNode(subArticleObject);
+		
+		return success;
+	}
+        
+        public boolean CreateExternArticle(ExternObject externArticleObject) {
+		boolean success = _databaseWrapper.CreateNode(externArticleObject);
 		
 		return success;
 	}

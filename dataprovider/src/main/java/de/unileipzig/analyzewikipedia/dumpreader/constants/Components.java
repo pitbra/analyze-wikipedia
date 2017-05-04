@@ -11,7 +11,7 @@ import java.io.File;
  */
 public class Components {
     
-    private static final boolean [] tricker = {false, false, false, false, false};       //0=null   //1=TITLE-LINK   //2=ARTICLE-LINK    //3=EXTERN-LINK   //4=CATEGORIE
+    private static final boolean [] TRICKER = {false, false, false, false, false};       //0=null   //1=TITLE-LINK   //2=ARTICLE-LINK    //3=EXTERN-LINK   //4=CATEGORIE
     
     private static final String[][] ARGUMENT = {    /*0*/   {"-h","/h"},    //HELP
                                                     /*1*/   {"-a","/a"},    //TITLE-LINK
@@ -36,9 +36,14 @@ public class Components {
     private final static String[] FILE_EXTENSION = {    /* 0*/  "xml"};
     
     // TIME in MILLISECONDS
+    private final static Integer STACK_BREAK_TIME = 5;
     private final static Integer THREAD_SLEEPTIME = 100;
     private final static Integer TIMER_SLEEPTIME = 5000;
     private final static Integer READER_LEADTIME = 2000;
+    
+    // STACK SIZES
+    private final static Integer DOC_STACK_LIMIT = 1000;
+    private final static Integer PAGE_STACK_LIMIT = 500;
     
     static String[] TEXT = {/* 0*/  "WikiDumpReader",
                             /* 1*/  "Information",
@@ -73,7 +78,7 @@ public class Components {
     }
     
     /**
-     * Getter: return array of fileextensions
+     * GETTER: return array of fileextensions
      * 
      * @return extensions
      */
@@ -91,7 +96,7 @@ public class Components {
      */
     public static final boolean getTricker(Integer num){
         
-        return tricker[num];
+        return TRICKER[num];
         
     }
     
@@ -102,7 +107,7 @@ public class Components {
      */
     public static final Integer getTrickers(){
         
-        return tricker.length;
+        return TRICKER.length;
         
     }
     
@@ -218,6 +223,17 @@ public class Components {
     }
     
     /**
+     * GETTER: get sleep time for stack processes
+     * 
+     * @return sleeptime as integer
+     */
+    public static final Integer getStackLimitTime(){
+        
+        return STACK_BREAK_TIME;
+        
+    }
+    
+    /**
      * GETTER: get sleep time for thread
      * 
      * @return sleeptime as integer
@@ -251,6 +267,28 @@ public class Components {
     }
     
     /**
+     * GETTER: get doc stack limit size
+     * 
+     * @return stacklimit as integer
+     */
+    public static final Integer getDocStackLimit(){
+        
+        return DOC_STACK_LIMIT;
+        
+    }
+    
+    /**
+     * GETTER: get page stack limit size
+     * 
+     * @return stacklimit as integer
+     */
+    public static final Integer getPageStackLimit(){
+        
+        return PAGE_STACK_LIMIT;
+        
+    }
+    
+    /**
      * SETTER: set status of tricker
      * 
      * @param num as integer
@@ -259,7 +297,7 @@ public class Components {
      */
     public static final boolean setTricker(Integer num, boolean bol){
         
-        return tricker[num] = bol;
+        return TRICKER[num] = bol;
         
     }
     

@@ -31,13 +31,13 @@ import org.w3c.dom.NodeList;
  * class to use as thread to do diffrent jobs
  */
 public class SeekerThread implements Runnable {
-            
+       
     /**
      * KONSTRUCTOR: default
      * 
      */
     public SeekerThread(){
-        
+                
     }
     
     /**
@@ -52,15 +52,15 @@ public class SeekerThread implements Runnable {
         do{
             
             doc = ThreadController.removeDocument();
-            
+
             if (doc != null){
-                
+
                 readPage(doc);
-                
+
             }
             
-        } while(ThreadController.getReaderIsAlive() || !ThreadController.docIsEmpty());
-                
+        } while(ThreadController.getReaderIsAlive() || (!ThreadController.getReaderIsAlive() && !ThreadController.docIsEmpty()) );
+        
     }
     
     /**
@@ -99,8 +99,7 @@ public class SeekerThread implements Runnable {
                 String text = eElement.getElementsByTagName(Components.getTextTag()).item(0).getTextContent();
                 
                 // seperate text in articlesections
-                for (String[] section : generateSectionlist(text)){
-                    
+                generateSectionlist(page.getName(), text).forEach((section) -> {
                     // create new article and add it to page
                     WikiArticle article = new WikiArticle(section[0]);
                     page.addArticle(article);
@@ -110,8 +109,7 @@ public class SeekerThread implements Runnable {
 
                     // search external links in text
                     searchExtLinks(article, section[1]);
-                    
-                }
+                });
                 
                 // safe page in store
                 ThreadController.addPage(page);
@@ -127,10 +125,11 @@ public class SeekerThread implements Runnable {
     /**
      * METHOD: split give text in article sections
      * 
+     * @param title as string
      * @param text as string
      * @ return sectionlist
      */
-    private List<String[]> generateSectionlist(String text){
+    private List<String[]> generateSectionlist(String title, String text){
         
         Queue<String[]> sectionlist = new LinkedList();
         
@@ -142,7 +141,7 @@ public class SeekerThread implements Runnable {
 
             String currentLine;
             String lineStore = "";
-            String currentArticlename = "empty";
+            String currentArticlename = title;
 
             while ((currentLine = br.readLine()) != null) {
                 
@@ -155,7 +154,7 @@ public class SeekerThread implements Runnable {
                 }
                 
                 // check start of article
-                if( currentLine.length() > 4 &&
+                if( currentLine.length() > 5 &&
                     currentLine.substring(0,2).contains("==") && 
                     !currentLine.substring(3,3).equals("=") &&
                     currentLine.substring(currentLine.length()-2,currentLine.length()).contains("==") &&
@@ -250,7 +249,7 @@ public class SeekerThread implements Runnable {
                     String[] categorie_split = link.split(":");
 
                     // add categorie to page
-                    article.addCategorieName(categorie_split[0], categorie_split[1]);
+                    if (categorie_split.length > 1) article.addCategorieName(categorie_split[0], categorie_split[1]);
 
                     // TEST out categories
 //                    System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);

@@ -41,6 +41,8 @@ public class ReaderThread implements Runnable {
     private static long file_length = 0;
     private static long read_length = 0;
     
+    private static long time;
+    
     /**
      * KONSTRUCTOR: default
      * 
@@ -48,7 +50,7 @@ public class ReaderThread implements Runnable {
     public ReaderThread(){
                 
     }
-        
+            
     /**
      * METHOD: execution of thread file reader
      * 
@@ -58,13 +60,15 @@ public class ReaderThread implements Runnable {
         
         getFiles(ThreadController.getArguments());
         
+        time = System.currentTimeMillis();
+        
         // convert each file to documents
         while (!ThreadController.fileIsEmpty()){
             
             readFile(ThreadController.removeFile());
             
         }
-                     
+        
     }
     
     /**
@@ -259,8 +263,14 @@ public class ReaderThread implements Runnable {
             // initial action handler
             ActionListener actionListener = (ActionEvent actionEvent) -> {
                 
+                long fTime = (System.currentTimeMillis()-time)/1000;
+                fTime = (file_length+1)/(read_length+1)*fTime;
+                
                 // TEST out the read position in percent for reader task
-                System.out.println("INFO: Readertask read " + (int)((double)((double)100/file_length)*read_length) + " % of the file.");
+                System.out.println("INFO: Readertask read " + 
+                        (int)((double)((double)100/file_length)*read_length) + 
+                        " % of the file. The reader still needs " + fTime + " seconds to finish. [STACK F:" + ThreadController.getFileStackSize() + " D:" +
+                        ThreadController.getDocStackSize() + " P:" + ThreadController.getPageStackSize() + "]");
                 
             };
             
