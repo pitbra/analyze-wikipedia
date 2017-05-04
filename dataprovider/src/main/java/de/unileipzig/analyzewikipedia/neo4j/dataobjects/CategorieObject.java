@@ -9,15 +9,14 @@ import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 
-public class ArticleObject implements INodeObject {
+public class CategorieObject implements INodeObject {
 
-	private final NodeType _type = NodeType.Article;
+	private final NodeType _type = NodeType.Categorie;
 	private Map<String, Object> _annotations = new HashMap<>();
-        private boolean status;
 	
 	private UUID _uid;
 	
-	private ArticleObject() {
+	private CategorieObject() {
 	}
 	
 	public NodeType GetType() {
@@ -32,22 +31,14 @@ public class ArticleObject implements INodeObject {
 		_annotations.put(key, value);
 	}
 	
-	public static ArticleObject CreateArticleObject() {
-		ArticleObject art = new ArticleObject();
+	public static CategorieObject CreateCategorieObject() {
+		CategorieObject cat = new CategorieObject();
 		
-		art._uid = UUID.randomUUID();
-		art.AddAnnotation(AnnotationKeys.UID, art._uid.toString());
+		cat._uid = UUID.randomUUID();
+		cat.AddAnnotation(AnnotationKeys.UID, cat._uid.toString());
 		
-		return art;
+		return cat;
 	}
-        
-        public void setStatus(){
-            status = true;
-        }
-        
-        public boolean getStatus(){
-            return status;
-        }
 	
 	@Override
 	public UUID GetUUID() {

@@ -4,7 +4,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 public enum NodeType {
-    Article("Article"), SubArticle("SubArticle");
+    Article("Article"), SubArticle("SubArticle"), ExternSource("Extern"), SubExternSource("SubExtern"), Categorie("Categorie"), SubCategorie("SubCategorie");
 
     private final String _type;
 

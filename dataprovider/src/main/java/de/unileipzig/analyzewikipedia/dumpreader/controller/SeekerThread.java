@@ -9,9 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -305,7 +302,7 @@ public class SeekerThread implements Runnable {
             } else {
                 
                 // check if link has no description and is link
-                if(isUrl(link)){
+                if(ThreadController.isUrl(link)){
                     
                     // remember it
                     linkurl = link;
@@ -320,30 +317,13 @@ public class SeekerThread implements Runnable {
             }
                     
             // add link to page if it is an url
-            if (Components.getTricker(3) && isUrl(linkurl)) article.addExternLink(linkurl);
+            if (Components.getTricker(3) && ThreadController.isUrl(linkurl)) article.addExternLink(linkurl);
 
             // TEST out the external link
 //            System.out.println("External: " + linkurl);
                         
         }
         
-    }
-    
-    /**
-     * METHOD: check if given url has correct form of an url
-     * 
-     * @param url as string
-     * @return is url as boolean
-     */
-    private boolean isUrl(String url){
-        
-        try {
-            URL tmp = new URL(url);
-            return true;
-        } catch (MalformedURLException e) {
-            return false;
-        }
-
     }
     
 }

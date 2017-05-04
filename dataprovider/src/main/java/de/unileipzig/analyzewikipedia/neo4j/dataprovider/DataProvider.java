@@ -4,11 +4,14 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternSourceObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.IDatabaseObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternSourceObject;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -47,8 +50,26 @@ public class DataProvider {
 		return success;
 	}
         
-        public boolean CreateExternArticle(ExternObject externArticleObject) {
+        public boolean CreateExternSource(ExternSourceObject externArticleObject) {
 		boolean success = _databaseWrapper.CreateNode(externArticleObject);
+		
+		return success;
+	}
+        
+        public boolean CreateSubExternSource(SubExternSourceObject subExternArticleObject) {
+		boolean success = _databaseWrapper.CreateNode(subExternArticleObject);
+		
+		return success;
+	}
+        
+        public boolean CreateCategorie(CategorieObject categorieObject) {
+		boolean success = _databaseWrapper.CreateNode(categorieObject);
+		
+		return success;
+	}
+        
+        public boolean CreateSubCategorie(SubCategorieObject subCategorieObject) {
+		boolean success = _databaseWrapper.CreateNode(subCategorieObject);
 		
 		return success;
 	}

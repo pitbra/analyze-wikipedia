@@ -59,12 +59,12 @@ public class WikiArticle {
     /**
      * METHOD: add wiki sub link to list
      * 
-     * @param domain as string
-     * @param link as string
+     * @param title as string
+     * @param sub as string
      */
-    public final void addSubLink(String domain, String link){
+    public final void addSubLink(String title, String sub){
         
-        this.wiki_sublinks.add(new String[]{domain, link});
+        this.wiki_sublinks.add(new String[]{title, sub});
         
     }
     

@@ -5,6 +5,9 @@ import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import java.io.File;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,6 +101,23 @@ public class ThreadController {
             Logger.getLogger(ThreadController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    /**
+     * METHOD: check if given url has correct form of an url
+     * 
+     * @param url as string
+     * @return is url as boolean
+     */
+    protected static boolean isUrl(String url){
+        
+        try {
+            URL tmp = new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+
     }
     
     /**
