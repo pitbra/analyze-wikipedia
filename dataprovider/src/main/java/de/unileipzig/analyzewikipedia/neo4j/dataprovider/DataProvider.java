@@ -5,13 +5,13 @@ package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternSourceObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.IDatabaseObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternSourceObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -50,14 +50,14 @@ public class DataProvider {
 		return success;
 	}
         
-        public boolean CreateExternSource(ExternSourceObject externArticleObject) {
-		boolean success = _databaseWrapper.CreateNode(externArticleObject);
+        public boolean CreateExtern(ExternObject externObject) {
+		boolean success = _databaseWrapper.CreateNode(externObject);
 		
 		return success;
 	}
         
-        public boolean CreateSubExternSource(SubExternSourceObject subExternArticleObject) {
-		boolean success = _databaseWrapper.CreateNode(subExternArticleObject);
+        public boolean CreateSubExtern(SubExternObject subExternObject) {
+		boolean success = _databaseWrapper.CreateNode(subExternObject);
 		
 		return success;
 	}

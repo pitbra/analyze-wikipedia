@@ -6,11 +6,12 @@ import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternSourceObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternSourceObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
 
 import java.net.MalformedURLException;
@@ -80,7 +81,7 @@ public class TransmitorThread implements Runnable {
      * @param name as string
      * @return article as object
      */
-    private ArticleObject searchArticleInDB(String name){
+    private INodeObject searchArticleInDB(String name){
         
         return null;
         
@@ -93,7 +94,7 @@ public class TransmitorThread implements Runnable {
      * @param sub as string
      * @return article as object
      */
-    private SubArticleObject searchSubArticleInDB(String article, String sub){
+    private INodeObject searchSubArticleInDB(INodeObject article, String sub){
         
         return null;
         
@@ -105,7 +106,7 @@ public class TransmitorThread implements Runnable {
      * @param url as string
      * @return article as object
      */
-    private ExternSourceObject searchExternInDB(String url){
+    private INodeObject searchExternInDB(String url){
         
         String dom = splitUrl(url)[0];
         
@@ -119,7 +120,7 @@ public class TransmitorThread implements Runnable {
      * @param url as string
      * @return article as object
      */
-    private SubExternSourceObject searchSubExternInDB(String url){
+    private INodeObject searchSubExternInDB(String url){
         
         String sub = splitUrl(url)[1];
         
@@ -133,7 +134,7 @@ public class TransmitorThread implements Runnable {
      * @param cat as string
      * @return article as object
      */
-    private CategorieObject searchCategorieInDB(String cat){
+    private INodeObject searchCategorieInDB(String cat){
         
         return null;
         
@@ -142,11 +143,11 @@ public class TransmitorThread implements Runnable {
     /**
      * METHOD: search sub categorie in neo4j graphDB
      * 
-     * @param cat as string
+     * @param cat as object
      * @param subcat as string
      * @return article as object
      */
-    private SubCategorieObject searchSubCategorieInDB(String cat, String subcat){
+    private INodeObject searchSubCategorieInDB(INodeObject cat, String subcat){
         
         return null;
         
@@ -158,16 +159,16 @@ public class TransmitorThread implements Runnable {
      * @param title as string
      * @return article as object
      */
-    private ArticleObject createArticleInDB(String title){
+    private INodeObject createArticleNodeInDB(String title){
         
-        ArticleObject article = searchArticleInDB(title);
+        INodeObject article = searchArticleInDB(title);
         
         if (article == null){
             article = ArticleObject.CreateArticleObject();
             article.AddAnnotation("title", title);
 
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateArticle(article)){
+            while (!prov.CreateArticle((ArticleObject) article)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
@@ -185,11 +186,11 @@ public class TransmitorThread implements Runnable {
      * @param title as stringarray
      * @return article as object
      */
-    private SubArticleObject createSubArticleInDB(String art, String sub){
+    private INodeObject createSubArticleNodeInDB(String art, String sub){
         
-        ArticleObject article = createArticleInDB(art);
+        INodeObject article = createArticleNodeInDB(art);
         
-        SubArticleObject subarticle = searchSubArticleInDB(art, sub);
+        INodeObject subarticle = searchSubArticleInDB(article, sub);
         
         if (subarticle == null){
             subarticle = SubArticleObject.CreateSubArticleObject();
@@ -198,7 +199,37 @@ public class TransmitorThread implements Runnable {
             prov.CreateRelationship(RelationshipType.HAS, article, subarticle);
             
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateSubArticle(subarticle)){
+            while (!prov.CreateSubArticle((SubArticleObject) subarticle)){
+
+                ThreadController.waitMillis(Components.getThreadSleepTime());
+                
+            }
+            
+        }
+        
+        return subarticle;
+                
+    }
+    
+    /**
+     * METHOD: create sub article in neo4j database, if exist, return it
+     * 
+     * @param article as object
+     * @param title as stringarray
+     * @return article as object
+     */
+    private INodeObject createSubArticleNodeInDB(INodeObject article, String sub){
+                
+        INodeObject subarticle = searchSubArticleInDB(article, sub);
+        
+        if (subarticle == null){
+            subarticle = SubArticleObject.CreateSubArticleObject();
+            subarticle.AddAnnotation("title", sub);
+            
+            prov.CreateRelationship(RelationshipType.HAS, article, subarticle);
+            
+            // break thread for a fix time, if areticle could'n be created
+            while (!prov.CreateSubArticle((SubArticleObject) subarticle)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
@@ -216,16 +247,16 @@ public class TransmitorThread implements Runnable {
      * @param url as string
      * @return article as object
      */
-    private ExternSourceObject createExternNodeInDB(String url){
+    private INodeObject createExternNodeInDB(String url){
         
-        ExternSourceObject extern = searchExternInDB(url);
+        INodeObject extern = searchExternInDB(url);
         
         if (extern == null){
-            extern = ExternSourceObject.CreateExternObject();
+            extern = ExternObject.CreateExternObject();
             extern.AddAnnotation("title", splitUrl(url)[0]);
 
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateExternSource(extern)){
+            while (!prov.CreateExtern((ExternObject) extern)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
@@ -243,22 +274,24 @@ public class TransmitorThread implements Runnable {
      * @param url as string
      * @return article as object
      */
-    private SubExternSourceObject createSubExternNodeInDB(String url){
+    private INodeObject createSubExternNodeInDB(String url){
         
-        ExternSourceObject extern = createExternNodeInDB(url);
+        INodeObject extern = createExternNodeInDB(url);
         
-        SubExternSourceObject subextern = searchSubExternInDB(url);
+        INodeObject subextern = searchSubExternInDB(url);
         
         if (subextern == null){
-            subextern = SubExternSourceObject.CreateSubExternSourceObject();
+            subextern = SubExternObject.CreateSubExternObject();
             subextern.AddAnnotation("title", splitUrl(url)[1]);
 
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateExternSource(extern)){
+            while (!prov.CreateSubExtern((SubExternObject) subextern)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
             }
+            
+            prov.CreateRelationship(RelationshipType.HAS, extern, subextern);
             
         }
         
@@ -272,16 +305,16 @@ public class TransmitorThread implements Runnable {
      * @param categorie as string
      * @return article as object
      */
-    private CategorieObject createCategorieNodeInDB(String categorie){
+    private INodeObject createCategorieNodeInDB(String categorie){
         
-        CategorieObject cat = searchCategorieInDB(categorie);
+        INodeObject cat = searchCategorieInDB(categorie);
         
         if (cat == null){
             cat = CategorieObject.CreateCategorieObject();
             cat.AddAnnotation("title", categorie);
 
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateCategorie(cat)){
+            while (!prov.CreateCategorie((CategorieObject) cat)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
@@ -300,30 +333,16 @@ public class TransmitorThread implements Runnable {
      * @param subcategorie as string
      * @return article as object
      */
-    private SubCategorieObject createSubCategorieNodeInDB(String categorie, String subcategorie){
+    private INodeObject createSubCategorieNodeInDB(INodeObject categorie, String subcategorie){
         
-        CategorieObject cat = searchCategorieInDB(categorie);
-        SubCategorieObject sub = searchSubCategorieInDB(categorie, subcategorie);
-        
-        if (cat == null){
-            cat = CategorieObject.CreateCategorieObject();
-            cat.AddAnnotation("title", categorie);
-
-            // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateCategorie(cat)){
-
-                ThreadController.waitMillis(Components.getThreadSleepTime());
+        INodeObject sub = searchSubCategorieInDB(categorie, subcategorie);
                 
-            }
-            
-        }
-        
         if (sub == null){
             sub = SubCategorieObject.CreateSubCategorieObject();
             sub.AddAnnotation("title", subcategorie);
 
             // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateSubCategorie(sub)){
+            while (!prov.CreateSubCategorie((SubCategorieObject) sub)){
 
                 ThreadController.waitMillis(Components.getThreadSleepTime());
                 
@@ -380,27 +399,28 @@ public class TransmitorThread implements Runnable {
         int s_lin = 0, s_sub = 0, s_ext = 0, s_cat = 0;
         
         // create artikel
-        ArticleObject article = createArticleInDB(page.getName());
+        INodeObject article = createArticleNodeInDB(page.getName());
 //        article.setStatus();
         
         // travers each article
         for (WikiArticle s_art : page.getArticles()){
             
-            SubArticleObject subarticle = createSubArticleInDB(page.getName(), s_art.getName());
+            INodeObject subarticle;
+            
+            if (s_art.getName().equals(page.getName())){
+                subarticle = article;
+            } else {
+                subarticle = createSubArticleNodeInDB(article, s_art.getName());
+                prov.CreateRelationship(RelationshipType.HAS, article, subarticle);
+            }
             
             // wiki title links
-            if (s_art.getName().equals(page.getName())){
-                s_art.getWikiLinks().stream().map((link) -> createArticleInDB(link)).forEach((linkArticle) -> {
-                    prov.CreateRelationship(RelationshipType.LINK, article, linkArticle);
-                });
-            } else {
-                s_art.getWikiLinks().stream().map((link) -> createArticleInDB(link)).forEach((linkArticle) -> {
-                    prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
-                });
-            }
+            s_art.getWikiLinks().stream().map((link) -> createArticleNodeInDB(link)).forEach((linkArticle) -> {
+                prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
+            });
                                     
             // wiki article links
-            s_art.getSubLinks().stream().map((sub) -> createSubArticleInDB(sub[0], sub[1])).forEachOrdered((linkArticle) -> {
+            s_art.getSubLinks().stream().map((sub) -> createSubArticleNodeInDB(sub[0], sub[1])).forEachOrdered((linkArticle) -> {
                 prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
             });
                         
@@ -411,11 +431,12 @@ public class TransmitorThread implements Runnable {
 
             // categories
             s_art.getCategories().entrySet().forEach((cat) -> {
-                CategorieObject categorie = createCategorieNodeInDB(cat.getKey());
+                INodeObject categorie = createCategorieNodeInDB(cat.getKey());
                 prov.CreateRelationship(RelationshipType.LINK, article, categorie);
                 
-                cat.getValue().stream().map((list_element) -> createSubCategorieNodeInDB(cat.getKey(), list_element)).forEachOrdered((subcategorie) -> {
+                cat.getValue().stream().map((list_element) -> createSubCategorieNodeInDB(categorie, list_element)).forEachOrdered((subcategorie) -> {
                     prov.CreateRelationship(RelationshipType.HAS, categorie, subcategorie);
+                    prov.CreateRelationship(RelationshipType.LINK, article, subcategorie);
                 });
             });
             
