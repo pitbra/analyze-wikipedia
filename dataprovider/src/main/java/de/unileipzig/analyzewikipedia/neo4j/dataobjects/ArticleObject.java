@@ -1,6 +1,3 @@
-/*
- * 
- */
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import java.util.HashMap;

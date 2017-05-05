@@ -12,6 +12,7 @@ import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternSourceObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -22,7 +23,9 @@ import java.net.URL;
  */
 public class TransmitorThread implements Runnable {
     
-    private DataProvider prov;
+    private final Integer ID;
+    
+    private final DataProvider prov;
     
     /**
      * KONSTRUCTOR: default
@@ -30,7 +33,21 @@ public class TransmitorThread implements Runnable {
      */
     public TransmitorThread(){
         
-        createNeo4jProvider();
+        this(-1);
+                
+    }
+    
+    /**
+     * KONSTRUCTOR: set id
+     * 
+     * @param id as integer
+     */
+    public TransmitorThread(Integer id){
+        
+        this.ID = id + Components.getNeo4jPort();
+        
+        // create neo4j provider for network access
+        prov = new DataProvider(Components.getNeo4jLink() + ":" + ID + "/", Components.getNeo4jUser(), Components.getNeo4jPass());
         
     }
             
@@ -54,16 +71,6 @@ public class TransmitorThread implements Runnable {
             }
             
         } while(ThreadController.getReaderIsAlive() || ThreadController.getSeekersAreAlive() || (!ThreadController.getSeekersAreAlive() && !ThreadController.pageIsEmpty()) );
-        
-    }
-        
-    /**
-     * METHOD: create neo4j provider for direct access
-     * 
-     */
-    private void createNeo4jProvider() {
-        
-        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass());
         
     }
     
@@ -215,7 +222,7 @@ public class TransmitorThread implements Runnable {
         
         if (extern == null){
             extern = ExternSourceObject.CreateExternObject();
-            extern.AddAnnotation("title", url);
+            extern.AddAnnotation("title", splitUrl(url)[0]);
 
             // break thread for a fix time, if areticle could'n be created
             while (!prov.CreateExternSource(extern)){
@@ -238,21 +245,9 @@ public class TransmitorThread implements Runnable {
      */
     private SubExternSourceObject createSubExternNodeInDB(String url){
         
-        ExternSourceObject extern = searchExternInDB(url);
-        SubExternSourceObject subextern = searchSubExternInDB(url);
+        ExternSourceObject extern = createExternNodeInDB(url);
         
-        if (extern == null){
-            extern = ExternSourceObject.CreateExternObject();
-            extern.AddAnnotation("title", splitUrl(url)[0]);
-
-            // break thread for a fix time, if areticle could'n be created
-            while (!prov.CreateExternSource(extern)){
-
-                ThreadController.waitMillis(Components.getThreadSleepTime());
-                
-            }
-            
-        }
+        SubExternSourceObject subextern = searchSubExternInDB(url);
         
         if (subextern == null){
             subextern = SubExternSourceObject.CreateSubExternSourceObject();
@@ -386,18 +381,23 @@ public class TransmitorThread implements Runnable {
         
         // create artikel
         ArticleObject article = createArticleInDB(page.getName());
-        article.setStatus();
+//        article.setStatus();
         
         // travers each article
         for (WikiArticle s_art : page.getArticles()){
             
             SubArticleObject subarticle = createSubArticleInDB(page.getName(), s_art.getName());
-            subarticle.setStatus();
-                        
+            
             // wiki title links
-            s_art.getWikiLinks().stream().map((link) -> createArticleInDB(link)).forEach((linkArticle) -> {
-                prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
-            });
+            if (s_art.getName().equals(page.getName())){
+                s_art.getWikiLinks().stream().map((link) -> createArticleInDB(link)).forEach((linkArticle) -> {
+                    prov.CreateRelationship(RelationshipType.LINK, article, linkArticle);
+                });
+            } else {
+                s_art.getWikiLinks().stream().map((link) -> createArticleInDB(link)).forEach((linkArticle) -> {
+                    prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
+                });
+            }
                                     
             // wiki article links
             s_art.getSubLinks().stream().map((sub) -> createSubArticleInDB(sub[0], sub[1])).forEachOrdered((linkArticle) -> {
@@ -428,22 +428,22 @@ public class TransmitorThread implements Runnable {
         }
         
         // TEST out the page link stacks
-        System.out.println("STACK: " + "\tL-S-E-C: " + 
+        System.out.println("STACK -> L-S-E-C: " + 
                                         String.format("%04d", s_lin) + "-" + 
                                         String.format("%02d", s_sub) + "-" + 
                                         String.format("%03d", s_ext) + "-" + 
-                                        String.format("%02d", s_cat) + "\t" + page.getName());
+                                        String.format("%02d", s_cat) + "\t");
         
         //TEST
-//        for (WikiArticle o_article : page.getArticles()){
-//            System.out.println("Article: " + o_article.getName());
-//            o_article.getWikiLinks().forEach((t_lin) ->     { System.out.println("Link   : " + t_lin);                          });
-//            o_article.getSubLinks().forEach((t_sub) ->      { System.out.println("Sub    : " + t_sub[0] + " :#: " + t_sub[1]);  });
-//            o_article.getExternLinks().forEach((t_ext) ->   { System.out.println("Ext    : " + t_ext);                          });
-//            o_article.getCategories().entrySet().forEach((t_cat) -> {
-//                t_cat.getValue().forEach((tmp) ->           { System.out.println("Cat    : " + t_cat.getKey() + " : " + tmp);    });
-//            });  
-//        }
+        for (WikiArticle o_article : page.getArticles()){
+            System.out.println("Article: " + o_article.getName());
+            o_article.getWikiLinks().forEach((t_lin) ->     { System.out.println("Link   : " + t_lin);                          });
+            o_article.getSubLinks().forEach((t_sub) ->      { System.out.println("Sub    : " + t_sub[0] + " :#: " + t_sub[1]);  });
+            o_article.getExternLinks().forEach((t_ext) ->   { System.out.println("Ext    : " + t_ext);                          });
+            o_article.getCategories().entrySet().forEach((t_cat) -> {
+                t_cat.getValue().forEach((tmp) ->           { System.out.println("Cat    : " + t_cat.getKey() + " : " + tmp);    });
+            });  
+        }
               
     }
     

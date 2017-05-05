@@ -90,7 +90,8 @@ public class SeekerThread implements Runnable {
                 Element eElement = (Element) nNode;
                 
                 // select element by title
-                WikiPage page = new WikiPage(eElement.getElementsByTagName(Components.getTitleTag()).item(0).getTextContent());
+                String title = eElement.getElementsByTagName(Components.getTitleTag()).item(0).getTextContent();
+                WikiPage page = new WikiPage(title.replace(" ", "_"));
                 
                 // select element by text
                 String text = eElement.getElementsByTagName(Components.getTextTag()).item(0).getTextContent();

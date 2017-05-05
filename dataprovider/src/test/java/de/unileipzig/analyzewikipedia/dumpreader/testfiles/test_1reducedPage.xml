@@ -1,0 +1,68 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="de">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <dbname>dewiki</dbname>
+    <base>https://de.wikipedia.org/wiki/Wikipedia:Hauptseite</base>
+    <generator>MediaWiki 1.29.0-wmf.16</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Medium</namespace>
+      <namespace key="-1" case="first-letter">Spezial</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Diskussion</namespace>
+      <namespace key="2" case="first-letter">Benutzer</namespace>
+      <namespace key="3" case="first-letter">Benutzer Diskussion</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia Diskussion</namespace>
+      <namespace key="6" case="first-letter">Datei</namespace>
+      <namespace key="7" case="first-letter">Datei Diskussion</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki Diskussion</namespace>
+      <namespace key="10" case="first-letter">Vorlage</namespace>
+      <namespace key="11" case="first-letter">Vorlage Diskussion</namespace>
+      <namespace key="12" case="first-letter">Hilfe</namespace>
+      <namespace key="13" case="first-letter">Hilfe Diskussion</namespace>
+      <namespace key="14" case="first-letter">Kategorie</namespace>
+      <namespace key="15" case="first-letter">Kategorie Diskussion</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal Diskussion</namespace>
+      <namespace key="828" case="first-letter">Modul</namespace>
+      <namespace key="829" case="first-letter">Modul Diskussion</namespace>
+      <namespace key="2300" case="first-letter">Gadget</namespace>
+      <namespace key="2301" case="first-letter">Gadget Diskussion</namespace>
+      <namespace key="2302" case="case-sensitive">Gadget-Definition</namespace>
+      <namespace key="2303" case="case-sensitive">Gadget-Definition Diskussion</namespace>
+      <namespace key="2600" case="first-letter">Thema</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Alan Smithee</title>
+    <ns>0</ns>
+    <id>1</id>
+    <revision>
+      <id>157406713</id>
+      <parentid>153344835</parentid>
+      <timestamp>2016-08-26T17:01:12Z</timestamp>
+      <contributor>
+        <username>Invisigoth67</username>
+        <id>178175</id>
+      </contributor>
+      <comment>/* Referenzen */ Abschnittsnamen korrigiert</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">'''Alan Smithee''' steht als [[Pseudonym]] für einen fiktiven Regisseur, der Filme verantwortet, bei denen der eigentliche [[Regisseur]] seinen Namen nicht mit dem Werk in Verbindung gebracht haben möchte. Von 1968 bis 2000 wurde es von der [[Directors Guild of America]] (DGA) für solche Situationen empfohlen, seither ist es '''Thomas Lee'''.&lt;ref&gt;[[Los Angeles Times|latimes]].com: , zuletzt geprüft am 2. April 2011&lt;/ref&gt; ''Alan Smithee'' ist jedoch weiterhin in Gebrauch.
+
+Alternative Schreibweisen sind unter anderem die Ursprungsvariante ''Al&lt;u&gt;len&lt;/u&gt; Smithee'' sowie ''Alan Sm&lt;u&gt;y&lt;/u&gt;thee'' und ''A&lt;u&gt;dam&lt;/u&gt; Smithee''. Auch zwei teilweise asiatisch anmutende Schreibweisen ''Alan Smi Thee'' und ''Sumishii Aran'' gehören – so die [[Internet Movie Database]] – dazu.&lt;ref name=&quot;IMDb&quot;&gt;&lt;/ref&gt;
+
+== Geschichte ==
+=== Entstehung ===
+Das Pseudonym entstand 1968 infolge der Arbeiten am Western-Film ''Death of a Gunfighter'' (deutscher Titel ''[[Frank Patch – Deine Stunden sind gezählt]]''). Regisseur [[Robert Totten]] und Hauptdarsteller [[Richard Widmark]] gerieten in einen Streit, woraufhin [[Don Siegel]] als neuer Regisseur eingesetzt wurde.
+
+Der Film trug nach Abschluss der Arbeiten noch deutlich Tottens [[Manier (Stil)|Handschrift]], der auch mehr Drehtage als Siegel daran gearbeitet hatte, weshalb dieser die Nennung seines Namens als Regisseur ablehnte. Totten selbst lehnte aber ebenfalls ab. Als Lösung wurde  ''Allen Smithee'' als ein möglichst einzigartiger Name gewählt (bei der späteren Variante ''Alan Smithee'' war das [[Anagramm]] ''The Alias Men'' vermutlich kein Entstehungsgrund).&lt;ref&gt; in der Internet Movie Database&lt;/ref&gt;
+
+In den zeitgenössischen Kritiken wurde der Regisseur u.&amp;nbsp;a. von [[Roger Ebert]] mit den Worten gelobt: 
+</text>
+      <sha1>9i928nk20i9bbmd6ktangrkxcfho0tf</sha1>
+    </revision>
+  </page>
+</mediawiki>

@@ -43,7 +43,7 @@ public class ThreadController {
         for (int i = 0; i < Components.getCores(); i++){
 
             SEEKERS[i] = new Thread(new SeekerThread());
-            TRANSMS[i] = new Thread(new TransmitorThread());
+            TRANSMS[i] = new Thread(new TransmitorThread(i));
 
         }
                 

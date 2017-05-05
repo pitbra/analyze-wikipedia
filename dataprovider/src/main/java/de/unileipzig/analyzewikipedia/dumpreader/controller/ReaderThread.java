@@ -38,6 +38,7 @@ import org.xml.sax.SAXException;
  */
 public class ReaderThread implements Runnable {
     
+    private static String file_name = "";
     private static long file_length = 0;
     private static long read_length = 0;
     
@@ -59,8 +60,6 @@ public class ReaderThread implements Runnable {
     public void run() {
         
         getFiles(ThreadController.getArguments());
-        
-        time = System.currentTimeMillis();
         
         // convert each file to documents
         while (!ThreadController.fileIsEmpty()){
@@ -174,52 +173,60 @@ public class ReaderThread implements Runnable {
             String page_text = "";
             String currentLine = br.readLine();
             
+            file_name = file.getName();
             file_length = file.length();
             read_length = 0;
             
-            addTimeHandler();
+            time = System.currentTimeMillis();
             
-            while (currentLine != null){
+            // check first line of mediawiki tag
+            if(currentLine.contains("<mediawiki")) {
+                
+                addTimeHandler();
+            
+                while (currentLine != null){
 
-                // check start of page
-                if(currentLine.contains("<" + Components.getPageTag() + ">")) {
-                    
-                    // remember read input length
-                    read_length += page_text.length();
-                    
-                    // clear page text
-                    page_text = "";
-                    
+                    // check start of page
+                    if(currentLine.contains("<" + Components.getPageTag() + ">")) {
+
+                        // remember read input length
+                        read_length += page_text.length();
+
+                        // clear page text
+                        page_text = "";
+
+                    }
+
+                    // concat line to pagetext
+                    page_text = page_text + currentLine + "\n";
+
+                    // check end of page
+                    if(currentLine.contains("</" + Components.getPageTag() + ">")) {
+
+                        Document doc = stringToDocument(page_text);
+
+                        ThreadController.addDocument(doc);
+
+                        // TEST out the page text
+    //                    System.out.println(page_text);
+
+                    }
+
+                    // read next line
+                    currentLine = br.readLine();
+
                 }
-                    
-                // concat line to pagetext
-                page_text = page_text + currentLine + "\n";
                 
-                // check end of page
-                if(currentLine.contains("</" + Components.getPageTag() + ">")) {
-                    
-                    Document doc = stringToDocument(page_text);
-                                        
-                    ThreadController.addDocument(doc);
-                    
-                    // TEST out the page text
-//                    System.out.println(page_text);
-                    
-                }
-                
-                // read next line
-                currentLine = br.readLine();
-                                
             }
-            
+
             br.close();
-            
+
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+                    
     }
     
     /**
@@ -269,7 +276,8 @@ public class ReaderThread implements Runnable {
                 // TEST out the read position in percent for reader task
                 System.out.println("INFO: Readertask read " + 
                         (int)((double)((double)100/file_length)*read_length) + 
-                        " % of the file. The reader still needs " + fTime + " seconds to finish. [STACK F:" + ThreadController.getFileStackSize() + " D:" +
+                        " % of the file: " + file_name + ".\n      The reader still needs " + fTime + 
+                        " seconds to finish.\n      [STACK F:" + ThreadController.getFileStackSize() + " D:" +
                         ThreadController.getDocStackSize() + " P:" + ThreadController.getPageStackSize() + "]");
                 
             };

@@ -11,7 +11,6 @@ public class SubArticleObject implements INodeObject {
 	private NodeType _type = NodeType.SubArticle;
 	private Map<String, Object> _annotations = new HashMap<>();
 	private UUID _uid;
-        private boolean status;
 
 	public SubArticleObject() {
 		_uid = UUID.randomUUID();
@@ -42,14 +41,6 @@ public class SubArticleObject implements INodeObject {
 		
 		return sub;
 	}
-        
-        public void setStatus(){
-            status = true;
-        }
-        
-        public boolean getStatus(){
-            return status;
-        }
         
 	@Override
 	public UUID GetUUID() {
