@@ -1,6 +1,7 @@
 package de.unileipzig.analyzewikipedia.dumpreader.constants;
 
 import de.unileipzig.analyzewikipedia.dumpreader.controller.Starter;
+
 import java.io.File;
 
 /**
@@ -26,8 +27,7 @@ public class Components {
     private final static String TITLE_TAG = "title";
     private final static String TEXT_TAG = "text";
     
-    private final static String NEO4J_LINK = "bolt://localhost";
-    private final static Integer NEO4J_PORT = 7687;
+    private final static String NEO4J_LINK = "bolt://localhost:7687/";
     private final static String NEO4J_USER = "neo4j";
     private final static String NEO4J_PASS = "tgZHyAtvhlWDav5CXD0F";
     
@@ -177,17 +177,6 @@ public class Components {
     public static final String getNeo4jLink(){
         
         return NEO4J_LINK;
-        
-    }
-    
-    /**
-     * GETTER: return neo4j port
-     * 
-     * @return link as integer
-     */
-    public static final Integer getNeo4jPort(){
-        
-        return NEO4J_PORT;
         
     }
     

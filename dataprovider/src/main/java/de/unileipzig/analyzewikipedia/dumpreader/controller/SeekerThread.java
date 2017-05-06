@@ -211,6 +211,11 @@ public class SeekerThread implements Runnable {
             
             // add the link if it isn't categorie or other
             String link = temp[0];
+            String name = null;
+            
+            // if link has special name, safe it
+            if (temp.length > 1) name = temp[1];;
+            
             if(link.contains(":") == false) {
                     
                 link = link.replace(" ", "_");
@@ -221,7 +226,7 @@ public class SeekerThread implements Runnable {
                     
                     // add link to page
                     if (Components.getTricker(2)){
-                        article.addSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                        article.addWikiSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
                     }
                     
                     // TEST out the subcategorie
@@ -231,7 +236,7 @@ public class SeekerThread implements Runnable {
                 
                     // add link to page
                     if (Components.getTricker(1)){
-                        article.addWikiLink(link);
+                        article.addWikiLink(link, name);
                     }
 
                     // TEST out the link

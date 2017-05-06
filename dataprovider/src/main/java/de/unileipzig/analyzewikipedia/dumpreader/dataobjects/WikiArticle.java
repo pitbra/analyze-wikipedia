@@ -14,7 +14,7 @@ public class WikiArticle {
     
     private final String articlename;
     
-    private final List<String> wiki_articlelinks;
+    private final List<String[]> wiki_articlelinks;
     private final List<String[]> wiki_sublinks;
     private final List<String> externlinks;
     private final Map<String, List<String>> categories;
@@ -49,10 +49,11 @@ public class WikiArticle {
      * METHOD: add wiki link to list
      * 
      * @param link as string
+     * @param name as string
      */
-    public final void addWikiLink(String link){
+    public final void addWikiLink(String link, String name){
         
-        this.wiki_articlelinks.add(link);
+        this.wiki_articlelinks.add(new String[]{link, name});
         
     }
     
@@ -62,7 +63,7 @@ public class WikiArticle {
      * @param title as string
      * @param sub as string
      */
-    public final void addSubLink(String title, String sub){
+    public final void addWikiSubLink(String title, String sub){
         
         this.wiki_sublinks.add(new String[]{title, sub});
         
@@ -117,7 +118,7 @@ public class WikiArticle {
      * 
      * @return wiki intern link list
      */
-    public final List<String> getWikiLinks(){
+    public final List<String[]> getWikiLinks(){
         
         return this.wiki_articlelinks;
         
@@ -128,7 +129,7 @@ public class WikiArticle {
      * 
      * @return wiki sub link list
      */
-    public final List<String[]> getSubLinks(){
+    public final List<String[]> getWikiSubLinks(){
         
         return this.wiki_sublinks;
         
