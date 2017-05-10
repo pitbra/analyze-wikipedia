@@ -8,40 +8,49 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
+import org.neo4j.driver.v1.types.Node;
 
 public class ExternObject implements INodeObject {
 
-	private final NodeType _type = NodeType.ExternSource;
-	private Map<String, Object> _annotations = new HashMap<>();
-	
-	private UUID _uid;
-	
-	private ExternObject() {
-	}
-	
-	public NodeType GetType() {
-		return _type;
-	}
+    private final NodeType _type = NodeType.ExternSource;
+    private final Map<String, Object> _annotations;
 
-	public Map<String, Object> GetAnnotations() {
-		return _annotations;
-	}
+    private String _uid;
 
-	public void AddAnnotation(String key, Object value) {
-		_annotations.put(key, value);
-	}
-	
-	public static ExternObject CreateExternObject() {
-		ExternObject ext = new ExternObject();
-		
-		ext._uid = UUID.randomUUID();
-		ext.AddAnnotation(AnnotationKeys.UID, ext._uid.toString());
-		
-		return ext;
-	}
-	
-	@Override
-	public UUID GetUUID() {
-		return _uid;
-	}
+    private ExternObject() {
+        this._annotations = new HashMap<>();
+    }
+
+    @Override
+    public NodeType GetType() {
+        return _type;
+    }
+
+    @Override
+    public Map<String, Object> GetAnnotations() {
+        return _annotations;
+    }
+
+    @Override
+    public void AddAnnotation(String key, Object value) {
+        _annotations.put(key, value);
+    }
+
+    public static ExternObject CreateExternObject() {
+        ExternObject ext = new ExternObject();
+
+        ext._uid = UUID.randomUUID().toString();
+        ext.AddAnnotation(AnnotationKeys.UID, ext._uid);
+
+        return ext;
+    }
+
+    @Override
+    public String GetUUID() {
+        return _uid;
+    }
+
+    static INodeObject FromNode(Node node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

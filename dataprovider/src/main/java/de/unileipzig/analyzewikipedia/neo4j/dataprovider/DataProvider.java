@@ -73,6 +73,10 @@ public class DataProvider {
 		
 		return success;
 	}
+        
+        public INodeObject FindByTitle(String title) {
+            return _databaseWrapper.FindByAnnotation("title", title);
+        }
 
 	/**
 	 * Insert into database.

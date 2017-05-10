@@ -3,6 +3,7 @@ package de.unileipzig.analyzewikipedia.neo4j.helper;
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
+import java.util.HashMap;
 
 public class StatementHelper {
 
@@ -34,10 +35,22 @@ public class StatementHelper {
 				, type.GetType()) ;
 		return stmt;	
 	}
-
-	public static String MatchStatementForTitle(String title)
-	{
-		return String.format("MATCH (n) "
-				+ "WHERE n.title = '%s'", title);
-	}
+        
+        public static String MatchStatementForAnnotations(HashMap<String, String> searchParams)
+        {
+            String stmt = "MATCH (a) WHERE ";
+            
+            for(String key : searchParams.keySet()) {
+                stmt += String.format("a.%s = '%s' ", key, searchParams.get(key));
+                
+                if( searchParams.keySet().toArray()[searchParams.size()-1] != key) {
+                    stmt += "AND ";
+                }
+            }
+            
+            stmt += "RETURN (a)";
+            
+            return stmt;
+        }
+        
 }
