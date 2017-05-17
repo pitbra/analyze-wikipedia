@@ -35,7 +35,7 @@ public class ThreadController {
     private static final Queue<Document> DOCS = new ConcurrentLinkedQueue();
     private static final Queue<WikiPage> PAGES = new ConcurrentLinkedQueue();
     
-    protected static void initThreads(String[] args){
+    protected static void initThreads(String[] args) throws Exception{
         
         arguments = checkArguments(args);
                 

@@ -32,12 +32,12 @@ public class TransmitorThread implements Runnable {
     /**
      * KONSTRUCTOR: default
      * 
+     * @throws java.lang.Exception
      */
-    public TransmitorThread(){
+    public TransmitorThread() throws Exception{
         
         // create neo4j provider for network access
-        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass());
-                
+        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass());                
     }
         
     /**
