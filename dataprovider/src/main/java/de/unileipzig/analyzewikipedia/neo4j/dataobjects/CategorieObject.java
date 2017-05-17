@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
+import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
+import jdk.nashorn.internal.objects.DataPropertyDescriptor;
 import org.neo4j.driver.v1.types.Node;
 
 /**
@@ -20,6 +22,7 @@ public class CategorieObject implements INodeObject {
     private final Map<String, Object> _annotations;
 
     private String _uid;
+    private String _title;
 
     private CategorieObject() {
         this._annotations = new HashMap<>();
@@ -56,5 +59,21 @@ public class CategorieObject implements INodeObject {
     
     static INodeObject FromNode(Node node) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String GetTitle() {
+        return _title;
+    }
+
+    @Override
+    public void SetTitle(String title) {
+        _title = title;
+        AddAnnotation(AnnotationKeys.TITLE, title);
+    }
+
+    @Override
+    public INodeObject FindSubNode(String subNode) throws Exception {
+        return INodeObject.FindSubNode(this, subNode);
     }
 }

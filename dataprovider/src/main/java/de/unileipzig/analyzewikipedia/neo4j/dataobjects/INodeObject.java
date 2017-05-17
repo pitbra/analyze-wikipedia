@@ -10,6 +10,7 @@ import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import de.unileipzig.analyzewikipedia.neo4j.constants.NodeTypeConstants;
+import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
 
 /**
  * @author Pit.Braunsdorf
@@ -32,6 +33,18 @@ public interface INodeObject {
     public Map<String, Object> GetAnnotations();
 
     /**
+     *
+     * @return
+     */
+    public String GetTitle();
+    
+    /**
+     *
+     * @param title
+     */
+    public void SetTitle(String title);
+    
+    /**
      * Adds the annotation.
      *
      * @param key the key
@@ -46,6 +59,11 @@ public interface INodeObject {
      */
     public String GetUUID();
 
+    /**
+     *
+     * @param record
+     * @return
+     */
     public static INodeObject FromRecord(Record record) {
         List<Value> values = record.values();
 
@@ -78,5 +96,14 @@ public interface INodeObject {
         }
 
         return null;
+    }
+    
+    public INodeObject FindSubNode(String subNode ) throws Exception;
+    
+    public static INodeObject FindSubNode(INodeObject node, String subNode) throws Exception
+    {        
+        DataProvider prov = new DataProvider();
+        
+        return prov.FindSubNode(node, subNode);
     }
 }

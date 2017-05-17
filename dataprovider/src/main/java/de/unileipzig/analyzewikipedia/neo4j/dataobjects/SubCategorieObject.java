@@ -10,8 +10,9 @@ import org.neo4j.driver.v1.types.Node;
 public class SubCategorieObject implements INodeObject {
 
     private final NodeType _type = NodeType.SubCategorie;
-    private Map<String, Object> _annotations;
+    private final Map<String, Object> _annotations;
     private String _uid;
+    private String _title;
 
     private SubCategorieObject() {
         _annotations = new HashMap<>();
@@ -48,5 +49,25 @@ public class SubCategorieObject implements INodeObject {
 
     static INodeObject FromNode(Node node) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String GetTitle() {
+        return _title;
+    }
+
+    /**
+     *
+     * @param title
+     */
+    @Override
+    public void SetTitle(String title) {
+        _title = title;
+        AddAnnotation(AnnotationKeys.TITLE, title);
+    }
+
+    @Override
+    public INodeObject FindSubNode(String subNode) throws Exception {
+        return INodeObject.FindSubNode(this, subNode);
     }
 }

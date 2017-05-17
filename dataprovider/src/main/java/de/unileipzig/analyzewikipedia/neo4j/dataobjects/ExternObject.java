@@ -16,6 +16,7 @@ public class ExternObject implements INodeObject {
     private final Map<String, Object> _annotations;
 
     private String _uid;
+    private String _title;
 
     private ExternObject() {
         this._annotations = new HashMap<>();
@@ -52,5 +53,21 @@ public class ExternObject implements INodeObject {
 
     static INodeObject FromNode(Node node) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String GetTitle() {
+        return _title;
+    }
+
+    @Override
+    public void SetTitle(String title) {
+        _title = title;
+        AddAnnotation(AnnotationKeys.TITLE, title);
+    }
+
+    @Override
+    public INodeObject FindSubNode(String subNode) throws Exception {
+        return INodeObject.FindSubNode(this, subNode);
     }
 }
