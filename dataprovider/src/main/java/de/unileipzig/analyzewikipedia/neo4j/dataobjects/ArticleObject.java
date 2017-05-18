@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
-import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.neo4j.driver.v1.types.Node;
 
 public class ArticleObject implements INodeObject {
@@ -89,5 +86,10 @@ public class ArticleObject implements INodeObject {
     @Override
     public INodeObject FindSubNode(String subNode) throws Exception {
         return INodeObject.FindSubNode(this, subNode);
+    }
+
+    @Override
+    public void SetIsActive(boolean isActive) throws Exception {
+        INodeObject.SetIsActive(this, isActive);
     }
 }

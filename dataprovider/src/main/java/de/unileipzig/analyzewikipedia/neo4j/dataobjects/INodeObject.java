@@ -5,7 +5,6 @@ package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
@@ -98,12 +97,44 @@ public interface INodeObject {
         return null;
     }
     
+    /**
+     *
+     * @param subNode
+     * @return
+     * @throws Exception
+     */
     public INodeObject FindSubNode(String subNode ) throws Exception;
     
+    /**
+     *
+     * @param node
+     * @param subNode
+     * @return
+     * @throws Exception
+     */
     public static INodeObject FindSubNode(INodeObject node, String subNode) throws Exception
     {        
         DataProvider prov = new DataProvider();
         
         return prov.FindSubNode(node, subNode);
+    }
+    
+    /**
+     *
+     * @param isActive
+     * @throws java.lang.Exception
+     */
+    public void SetIsActive(boolean isActive) throws Exception;
+
+    /**
+     *
+     * @param node
+     * @param isActive
+     * @throws Exception
+     */
+    public static void SetIsActive(INodeObject node, boolean isActive) throws Exception{
+        DataProvider prov = new DataProvider();
+        
+        prov.SetNodeIsActive(node, isActive);
     }
 }

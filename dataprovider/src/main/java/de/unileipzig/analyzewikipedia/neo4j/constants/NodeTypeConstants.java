@@ -16,6 +16,7 @@ public class NodeTypeConstants {
     public static final String SUB_EXTERN = "Subextern";
     public static final String CATEGORY = "Category";
     public static final String SUB_CATEGORY = "Subcategory";
+    public static final String CUSTOM = "Custom";
 
     public NodeTypeConstants() {
     }

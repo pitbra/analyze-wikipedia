@@ -76,4 +76,9 @@ public class CategorieObject implements INodeObject {
     public INodeObject FindSubNode(String subNode) throws Exception {
         return INodeObject.FindSubNode(this, subNode);
     }
+
+    @Override
+    public void SetIsActive(boolean isActive) throws Exception {
+        INodeObject.SetIsActive(this, isActive);
+    }
 }

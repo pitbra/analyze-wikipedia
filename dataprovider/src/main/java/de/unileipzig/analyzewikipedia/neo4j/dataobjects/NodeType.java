@@ -11,7 +11,8 @@ public enum NodeType {
     ExternSource(NodeTypeConstants.EXTERN), 
     SubExternSource(NodeTypeConstants.SUB_EXTERN), 
     Categorie(NodeTypeConstants.CATEGORY), 
-    SubCategorie(NodeTypeConstants.SUB_CATEGORY);
+    SubCategorie(NodeTypeConstants.SUB_CATEGORY),
+    Custom(NodeTypeConstants.CUSTOM);
     
     private final String _type;
 

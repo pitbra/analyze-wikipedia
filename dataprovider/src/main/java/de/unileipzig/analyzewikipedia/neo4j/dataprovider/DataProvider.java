@@ -6,16 +6,14 @@ package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CustomNodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.IDatabaseObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -24,16 +22,25 @@ import java.util.logging.Logger;
 public class DataProvider {
 
     DatabaseWrapper _databaseWrapper;
+    private CustomNodeObject statusNode;
 
     /**
      * Instantiates a new data provider.
      *
      * @param connectionString the connection string
+     * @param username
+     * @param password
+     * @param useStatusNode
+     * @throws java.lang.Exception
      */
-    public DataProvider(String connectionString, String username, String password) throws Exception {
+    public DataProvider(String connectionString, String username, String password, boolean useStatusNode) throws Exception {
         // Create ConnectionOptions
         ConnectionOptions.GetInstance(connectionString, username, password);
         _databaseWrapper = new DatabaseWrapper();
+
+        if (useStatusNode) {
+            CreateStatusNode();
+        }
     }
 
     public DataProvider() throws Exception {
@@ -41,8 +48,8 @@ public class DataProvider {
             if (ConnectionOptions.GetInstance().GetConnectionString() == null) {
                 throw new Exception();
             }
-            
-            if(_databaseWrapper == null) {
+
+            if (_databaseWrapper == null) {
                 _databaseWrapper = new DatabaseWrapper();
             }
         } catch (Exception ex) {
@@ -149,5 +156,16 @@ public class DataProvider {
 
     public INodeObject FindSubNode(INodeObject node, String subNode) {
         return _databaseWrapper.FindSubNode(node, subNode);
+    }
+
+    private void CreateStatusNode() {
+        if (statusNode == null) {
+            statusNode = new CustomNodeObject();
+           _databaseWrapper.CreateNode(statusNode);
+        }
+    }
+
+    public void SetNodeIsActive(INodeObject node, boolean active) {
+        _databaseWrapper.CreateRelationsship(RelationshipType.IS_ACTIVE, node, statusNode);
     }
 }
