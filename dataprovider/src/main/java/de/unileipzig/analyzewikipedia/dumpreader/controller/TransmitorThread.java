@@ -34,10 +34,11 @@ public class TransmitorThread implements Runnable {
      * 
      * @throws java.lang.Exception
      */
-    public TransmitorThread() throws Exception{
-        
+    public TransmitorThread() throws Exception {
+       
         // create neo4j provider for network access
-        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass());                
+        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass(), true);
+                      
     }
         
     /**
@@ -54,13 +55,13 @@ public class TransmitorThread implements Runnable {
             page = ThreadController.removePage();
 
             if (page != null){
-
+                
                 sendPageContent(page);
 
             }
             
         } while(ThreadController.getReaderIsAlive() || ThreadController.getSeekersAreAlive() || (!ThreadController.getSeekersAreAlive() && !ThreadController.pageIsEmpty()) );
-        
+
     }
     
     /**
@@ -69,14 +70,13 @@ public class TransmitorThread implements Runnable {
      * @param name as string
      * @return article as object
      */
-    private INodeObject searchNodeInDB(String type, Object obj, String name){
+    private INodeObject searchNodeInDB(String type, INodeObject obj, String name){
         
         INodeObject node = null;
         
         switch(type){
             case "article":
-//// ####
-////                node = (ArticleObject) ...;
+                ArticleObject test = (ArticleObject) prov.FindByTitle(name);
                 break;
             case "subarticle":
                 ArticleObject article = (ArticleObject) obj;
@@ -84,8 +84,7 @@ public class TransmitorThread implements Runnable {
 ////                node = (SubArticleObject) ...;
                 break;
             case "extern":
-//// ####
-////                node = (ExternObject) ...;
+                prov.FindByTitle(name);
                 break;
             case "subextern":
                 ExternObject extern = (ExternObject) obj;
@@ -93,8 +92,7 @@ public class TransmitorThread implements Runnable {
 ////                node = (SubExternObject) ...;
                 break;
             case "categorie":
-//// ####
-////                node = (CategorieObject) ...;
+                prov.FindByTitle(name);
                 break;
             case "subcategorie":
                 CategorieObject categorie = (CategorieObject) obj;
@@ -113,11 +111,12 @@ public class TransmitorThread implements Runnable {
      * @param name as string
      * @return article as object
      */
-    private INodeObject createNodeInDB(String type, Object obj, String name){
+    private INodeObject createNodeInDB(String type, INodeObject obj, String name){
         
         INodeObject node = searchNodeInDB(type, obj, name);
                 
         if (node == null){
+            
             switch(type){
                 case "article":
                     node = ArticleObject.CreateArticleObject();
@@ -166,6 +165,9 @@ public class TransmitorThread implements Runnable {
                 }
             } while (created == false);
             
+            // set has relation if it is subnode
+            if (obj != null) prov.CreateRelationship(RelationshipType.HAS, obj, node);
+            
         }
         
         return node;
@@ -178,7 +180,7 @@ public class TransmitorThread implements Runnable {
      * @param url
      * @return string arraywith top level domain and suffix
      */
-    private static String[] splitUrl(String url){
+    public static String[] splitUrl(String url){
         
         URL t_url;
         try {
@@ -218,8 +220,9 @@ public class TransmitorThread implements Runnable {
         
         // create artikel
         INodeObject article = createNodeInDB("article", null, page.getName());
-//// ####
-////        article.setStatus();
+        try {
+            INodeObject.SetIsActive(article, true);
+        } catch (Exception ex) {}
         
         // travers each article
         for (WikiArticle s_art : page.getArticles()){
@@ -230,7 +233,6 @@ public class TransmitorThread implements Runnable {
                 subarticle = article;
             } else {
                 subarticle = createNodeInDB("subarticle", article, s_art.getName());
-                prov.CreateRelationship(RelationshipType.HAS, article, subarticle);
             }
             
             // wiki title links
@@ -241,15 +243,18 @@ public class TransmitorThread implements Runnable {
             });
                                     
             // wiki article links
-            s_art.getWikiSubLinks().stream().map((sub) -> createNodeInDB("subarticle", searchNodeInDB("subarticle", null, sub[0]), sub[1])).forEachOrdered((linkArticle) -> {
+            s_art.getWikiSubLinks().stream().map((sub) -> createNodeInDB("subarticle", searchNodeInDB("article", null, sub[0]), sub[0] + "#" + sub[1])).forEachOrdered((linkArticle) -> {
                 prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
             });
                         
             // extern links
             for (String ext : s_art.getExternLinks()){
-                INodeObject suffix = createNodeInDB("subextern", null, splitUrl(ext)[1]);
-                prov.CreateRelationship(RelationshipType.HAS, createNodeInDB("extern", null, splitUrl(ext)[0]), suffix);
-                prov.CreateRelationship(RelationshipType.LINK, subarticle, suffix);
+                String[] urlSplit = splitUrl(ext);
+                if (urlSplit != null && !urlSplit[1].isEmpty() ){
+                    INodeObject domain = searchNodeInDB("extern", null, urlSplit[0]);
+                    INodeObject suffix = createNodeInDB("subextern", domain, urlSplit[1]);
+                    prov.CreateRelationship(RelationshipType.LINK, subarticle, suffix);
+                }
             }
 
             // categories
@@ -257,7 +262,6 @@ public class TransmitorThread implements Runnable {
                 INodeObject categorie = createNodeInDB("categorie", null, cat.getKey());
                 
                 cat.getValue().stream().map((list_element) -> createNodeInDB("subcategorie", categorie, list_element)).forEachOrdered((subcategorie) -> {
-                    prov.CreateRelationship(RelationshipType.HAS, categorie, subcategorie);
                     prov.CreateRelationship(RelationshipType.LINK, article, subcategorie);
                 });
             });

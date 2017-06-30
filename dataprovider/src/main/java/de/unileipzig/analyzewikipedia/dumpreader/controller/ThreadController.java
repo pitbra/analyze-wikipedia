@@ -2,6 +2,7 @@ package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
+import de.unileipzig.analyzewikipedia.dumpreader.windows.FileExplorer;
 
 import java.io.File;
 
@@ -35,13 +36,35 @@ public class ThreadController {
     private static final Queue<Document> DOCS = new ConcurrentLinkedQueue();
     private static final Queue<WikiPage> PAGES = new ConcurrentLinkedQueue();
     
-    protected static void initThreads(String[] args) throws Exception{
+    /**
+     * METHOD: initial the application
+     * 
+     * @param args as stringarray
+     * @throws java.lang.Exception
+     */
+    protected static void initApplication(String[] args)throws Exception{
         
         arguments = checkArguments(args);
-                
+        
+        if (arguments.length == 0){
+            FileExplorer file_explorer = new FileExplorer();
+            file_explorer.setVisible(true);
+        } else {
+            initThreads();
+        }
+        
+    }
+    
+    /**
+     * METHOD: initial the threads
+     * 
+     * @throws java.lang.Exception
+     */
+    public static void initThreads() throws Exception{
+        
         // initial seeker and transmitor thread
         for (int i = 0; i < Components.getCores(); i++){
-
+            
             SEEKERS[i] = new Thread(new SeekerThread());
             TRANSMS[i] = new Thread(new TransmitorThread());
 
@@ -84,7 +107,8 @@ public class ThreadController {
             } catch (InterruptedException e) {}
 
         }
-                
+        
+        System.exit(0);
     }
     
     /**
@@ -162,9 +186,7 @@ public class ThreadController {
                 Components.setTricker(i, true);
             }
         }
-        
-        //for(boolean tr : Components.getTricker(Integer.SIZE))
-        
+
         return newArg.toArray(new String[newArg.size()]);
         
     }
@@ -368,6 +390,17 @@ public class ThreadController {
     protected static Integer getPageStackSize(){
         
         return PAGES.size();
+        
+    }
+    
+    /**
+     * SETTER: set arguments
+     * 
+     * @param argus as string array
+     */
+    public static void setArguments(String[] argus){
+    
+        arguments = argus;
         
     }
     

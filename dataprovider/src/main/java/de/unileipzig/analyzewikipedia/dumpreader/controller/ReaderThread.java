@@ -2,10 +2,6 @@ package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.Timer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -42,14 +39,16 @@ public class ReaderThread implements Runnable {
     private static long file_length = 0;
     private static long read_length = 0;
     
-    private static long time;
+    private static long start_time;
+    
+    private Timer infoTimer;
     
     /**
      * KONSTRUCTOR: default
      * 
      */
     public ReaderThread(){
-                
+        
     }
             
     /**
@@ -175,22 +174,28 @@ public class ReaderThread implements Runnable {
             
             file_name = file.getName();
             file_length = file.length();
-            read_length = 0;
             
-            time = System.currentTimeMillis();
+            start_time = System.currentTimeMillis();
             
             // check first line of mediawiki tag
-            if(currentLine.contains("<mediawiki")) {
+            if(currentLine.contains("<" + Components.getMediaTag())) {
                 
-                addTimeHandler();
-            
+                //addTimeHandler();
+                infoTimer = new Timer(true);
+                infoTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        generateFilePositionInfo();
+                    }
+                }, 0, Components.getTimerSleepTime());
+                
                 while (currentLine != null){
-
+                    
+                    // remember text length
+                    read_length += currentLine.length();
+                    
                     // check start of page
                     if(currentLine.contains("<" + Components.getPageTag() + ">")) {
-
-                        // remember read input length
-                        read_length += page_text.length();
 
                         // clear page text
                         page_text = "";
@@ -226,7 +231,7 @@ public class ReaderThread implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-                    
+        
     }
     
     /**
@@ -259,37 +264,19 @@ public class ReaderThread implements Runnable {
     }
     
     /**
-     * METHOD: add handler to show information about reading the file
+     * METHOD: generate the information of current position in file
      * 
      */
-    protected void addTimeHandler(){
+    protected void generateFilePositionInfo(){
         
-        // add handler to event queue
-        EventQueue.invokeLater(() -> {
-            
-            // initial action handler
-            ActionListener actionListener = (ActionEvent actionEvent) -> {
-                
-                long fTime = (System.currentTimeMillis()-time)/1000;
-                fTime = (file_length+1)/(read_length+1)*fTime;
-                
-                // TEST out the read position in percent for reader task
-                System.out.println("INFO: Readertask read " + 
-                        (int)((double)((double)100/file_length)*read_length) + 
-                        " % of the file: " + file_name + ".\n      The reader still needs " + fTime + 
-                        " seconds to finish.\n      [STACK F:" + ThreadController.getFileStackSize() + " D:" +
-                        ThreadController.getDocStackSize() + " P:" + ThreadController.getPageStackSize() + "]");
-                
-            };
-            
-            // set timeer repeat and time to 5 seconds for information
-            Timer timer = new Timer(Components.getTimerSleepTime(), actionListener);
-            timer.setRepeats(true);
-            
-            // start timer
-            timer.start();
-            
-        });
+        long current_time = (System.currentTimeMillis()-start_time)/1000;
+        current_time = (file_length+1)/(read_length+1)*current_time;
+
+        // TEST out the read position in percent for reader task
+        System.out.println("INFO: Readertask read " + 
+                (int)((double)((double)100/file_length)*read_length) + 
+                " % of the file: " + file_name + ".\n      The reader still needs " + current_time + 
+                " seconds to finish.");
         
     }
     

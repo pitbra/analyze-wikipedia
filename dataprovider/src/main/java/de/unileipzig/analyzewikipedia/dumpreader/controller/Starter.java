@@ -1,8 +1,5 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * @author Danilo
  * 
@@ -19,10 +16,8 @@ public class Starter {
         
         try {
             // load the threads and start work
-            ThreadController.initThreads(args);
-        } catch (Exception ex) {
-            Logger.getLogger(Starter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            ThreadController.initApplication(args);
+        } catch (Exception ex) {}
                      
     }
     

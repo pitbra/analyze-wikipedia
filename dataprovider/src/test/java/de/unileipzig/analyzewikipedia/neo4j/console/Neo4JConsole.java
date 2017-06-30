@@ -17,7 +17,7 @@ public class Neo4JConsole {
     public static void main(String[] args) {
         
         try {
-            DataProvider prov = new DataProvider("bolt://localhost:7687/", "neo4j", "tgZHyAtvhlWDav5CXD0F");  
+            DataProvider prov = new DataProvider("bolt://localhost:7687/", "neo4j", "tgZHyAtvhlWDav5CXD0F", true);  
             prov.FindByTitle("Alan_Smithee");
         } catch (Exception ex) {
             Logger.getLogger(Neo4JConsole.class.getName()).log(Level.SEVERE, null, ex);

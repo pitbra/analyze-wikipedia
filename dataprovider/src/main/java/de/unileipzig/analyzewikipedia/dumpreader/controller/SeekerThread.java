@@ -34,7 +34,7 @@ public class SeekerThread implements Runnable {
      * 
      */
     public SeekerThread(){
-                
+        
     }
     
     /**
@@ -51,7 +51,7 @@ public class SeekerThread implements Runnable {
             doc = ThreadController.removeDocument();
 
             if (doc != null){
-
+                
                 readPage(doc);
 
             }

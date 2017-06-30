@@ -8,9 +8,10 @@ import java.io.File;
  * @author Danilo Morgado
  * 
  * components of this application
- * 
  */
 public class Components {
+    
+    private static final String APPLICATIONNAME = "WikiDumpReader";
     
     private static final boolean [] TRICKER = {false, false, false, false, false};       //0=null   //1=TITLE-LINK   //2=ARTICLE-LINK    //3=EXTERN-LINK   //4=CATEGORIE
     
@@ -23,6 +24,7 @@ public class Components {
     //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_3pages.xml";
     private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_1reducedPage.xml";
     
+    private final static String MEDIA_TAG = "mediawiki";
     private final static String PAGE_TAG = "page";
     private final static String TITLE_TAG = "title";
     private final static String TEXT_TAG = "text";
@@ -40,22 +42,27 @@ public class Components {
     // TIME in MILLISECONDS
     private final static Integer STACK_BREAK_TIME = 5;
     private final static Integer THREAD_SLEEPTIME = 100;
-    private final static Integer TIMER_SLEEPTIME = 5000;
+    private final static Integer TIMER_SLEEPTIME = 10000;
     private final static Integer READER_LEADTIME = 2000;
     
     // STACK SIZES
     private final static Integer DOC_STACK_LIMIT = 1000;
     private final static Integer PAGE_STACK_LIMIT = 500;
     
-    static String[] TEXT = {/* 0*/  "WikiDumpReader",
+    private final static String[] TEXT = {/* 0*/  APPLICATIONNAME,
                             /* 1*/  "Information",
                             /* 2*/  "file"};
     
-    static String[] INFORMATION = { /*0*/   "Show this information.",
-                                    /*1*/   "Search for wiki internal title links.",
-                                    /*2*/   "Search for wiki internal article links.",
-                                    /*3*/   "Search for external links.",
-                                    /*4*/   "Search for categories."};
+    private final static String[] INF_SHORT = {   /*0*/   "Artikel-Links",
+                                                  /*1*/   "Subartikel-Links",
+                                                  /*2*/   "Externe-Links",
+                                                  /*3*/   "Kategorien"};
+    
+    private final static String[] INFORMATION = {   /*0*/   "Zeigt diese Information.",
+                                                    /*1*/   "Suche nach Wiki-" + INF_SHORT[0] + ".",
+                                                    /*2*/   "Suche nach Wiki-" + INF_SHORT[1] + ".",
+                                                    /*3*/   "Suche nach " + INF_SHORT[2] + ".",
+                                                    /*4*/   "Suche nach Wiki-" + INF_SHORT[3] + "."};
     
     /**
      * METHOD: generate the helpdialog
@@ -77,6 +84,17 @@ public class Components {
         for (int i = 0; i < ARGUMENT.length; i++){
             System.out.println(ARGUMENT[i][0] + ", " + ARGUMENT[i][1] + "\t\t" + INFORMATION[i]);
         }
+    }
+    
+    /**
+     * GETTER: return name of application
+     * 
+     * @return name
+     */
+    public static final String getApplicationName(){
+        
+        return APPLICATIONNAME;
+        
     }
     
     /**
@@ -133,6 +151,17 @@ public class Components {
     public static final String getTestFile(){
         
         return TEST_FILE;
+        
+    }
+    
+    /**
+     * GETTER: return media tag
+     * 
+     * @return tag as string
+     */
+    public static final String getMediaTag(){
+        
+        return MEDIA_TAG;
         
     }
     
@@ -291,6 +320,17 @@ public class Components {
     }
     
     /**
+     * GETTER: get trickernames as array
+     * 
+     * @return string as array
+     */
+    public static final String[] getTrickerNames(){
+        
+        return INF_SHORT;
+        
+    }
+    
+    /**
      * SETTER: set status of tricker
      * 
      * @param num as integer
@@ -301,6 +341,6 @@ public class Components {
         
         return TRICKER[num] = bol;
         
-    }
+    }    
     
 }
