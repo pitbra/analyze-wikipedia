@@ -9,7 +9,6 @@ import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import de.unileipzig.analyzewikipedia.neo4j.constants.NodeTypeConstants;
-import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
 
 /**
  * @author Pit.Braunsdorf
@@ -70,12 +69,6 @@ public interface INodeObject {
             Node node = val.asNode();
             for (String label : node.labels()) {
                 switch (label) {
-                    case NodeTypeConstants.ARTICLE: {
-                        return ArticleObject.FromNode(node);
-                    }
-                    case NodeTypeConstants.SUB_ARTICLE: {
-                        return SubArticleObject.FromNode(node);
-                    }
                     case NodeTypeConstants.CATEGORY: {
                         return CategorieObject.FromNode(node);
                     }
@@ -113,10 +106,8 @@ public interface INodeObject {
      * @throws Exception
      */
     public static INodeObject FindSubNode(INodeObject node, String subNode) throws Exception
-    {        
-        DataProvider prov = new DataProvider();
-        
-        return prov.FindSubNode(node, subNode);
+    {      
+        return null;
     }
     
     /**
@@ -133,8 +124,6 @@ public interface INodeObject {
      * @throws Exception
      */
     public static void SetIsActive(INodeObject node, boolean isActive) throws Exception{
-        DataProvider prov = new DataProvider();
         
-        prov.SetNodeIsActive(node, isActive);
     }
 }

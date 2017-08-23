@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.unileipzig.analyzewikipedia.neo4j.dataprovider;
+package de.unileipzig.analyzewikipedia.neo4j.service;
+
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 
 /**
  *
  * @author Pit.Braunsdorf
  */
-public class DataProvider {
+public interface ArticleService extends Service<ArticleObject>{
     
 }
