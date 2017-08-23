@@ -13,6 +13,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
  *
  * @author Pit.Braunsdorf
  */
-@RelationshipEntity(type="LINKTO")
+@RelationshipEntity(type="LINK_TO")
 public class ArticleLinkToExtern extends LinkToRelationship<ArticleObject, ExternObject>{
 }
