@@ -9,76 +9,55 @@ import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
+import java.util.ArrayList;
+import java.util.List;
 import jdk.nashorn.internal.objects.DataPropertyDescriptor;
 import org.neo4j.driver.v1.types.Node;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Property;
+import org.neo4j.ogm.annotation.Relationship;
 
 /**
  *
  * @author Pit.Braunsdorf
  */
-public class CategorieObject implements INodeObject {
+@NodeEntity(label="Category")
+public class CategorieObject extends Entity {
 
-    private final NodeType _type = NodeType.Categorie;
-    private final Map<String, Object> _annotations;
+    @Property(name="title")
+    private String title;
 
-    private String _uid;
-    private String _title;
-
-    private CategorieObject() {
-        this._annotations = new HashMap<>();
+    @Relationship(type="HAS")
+    List<SubCategorieObject> subArticles;
+    
+    public CategorieObject() {
+        this.title="";
+        this.subArticles = new ArrayList<>();
     }
 
-    @Override
-    public NodeType GetType() {
-        return _type;
-    }
-
-    @Override
-    public Map<String, Object> GetAnnotations() {
-        return _annotations;
-    }
-
-    @Override
-    public void AddAnnotation(String key, Object value) {
-        _annotations.put(key, value);
-    }
-
-    public static CategorieObject CreateCategorieObject() {
-        CategorieObject cat = new CategorieObject();
-
-        cat._uid = UUID.randomUUID().toString();
-        cat.AddAnnotation(AnnotationKeys.UID, cat._uid);
-
-        return cat;
-    }
-
-    @Override
-    public String GetUUID() {
-        return _uid;
+    public void setTitle(String title) {
+        this.title = title;
     }
     
-    static INodeObject FromNode(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getTitle() {
+        return title;
     }
 
-    @Override
-    public String GetTitle() {
-        return _title;
+    public CategorieObject(String title, List<SubCategorieObject> subArticles) {
+        this.title = title;
+        this.subArticles = subArticles;
     }
-
-    @Override
-    public void SetTitle(String title) {
-        _title = title;
-        AddAnnotation(AnnotationKeys.TITLE, title);
+    
+    public void addSubArticle(SubCategorieObject subArticle){
+        subArticles.add(subArticle);
     }
-
+    
     @Override
-    public INodeObject FindSubNode(String subNode) throws Exception {
-        return INodeObject.FindSubNode(this, subNode);
-    }
-
-    @Override
-    public void SetIsActive(boolean isActive) throws Exception {
-        INodeObject.SetIsActive(this, isActive);
+    public String toString() {
+        return "Article{" +
+                "id=" + getId() +
+                ", title='" + title + '\'' +
+                ", subarticles=" + subArticles.size() +
+                "}";
     }
 }

@@ -20,6 +20,11 @@ public class Neo4JConsole {
         ArticleObject article = new ArticleObject();
         article.setTitle("Titel");
         
+        SubArticleObject subArticle = new SubArticleObject();
+        subArticle.setTitle("SubArticle");
+        
+        article.addSubArticle(subArticle);
+        
         ArticleServiceImpl service = new ArticleServiceImpl();
         service.createOrUpdate(article);
     }

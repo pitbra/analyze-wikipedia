@@ -5,70 +5,48 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
+import java.util.List;
 import org.neo4j.driver.v1.types.Node;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Property;
+import org.neo4j.ogm.annotation.Relationship;
 
-public class SubExternObject implements INodeObject {
+@NodeEntity(label = "SubExtern")
+public class SubExternObject extends Entity {
 
-    private final NodeType _type = NodeType.SubExternSource;
-    private final Map<String, Object> _annotations;
-    private String _uid;
-    private String _title;
+    @Property(name = "title")
+    private String title;
+    
+    @Relationship(type = "HAS", direction = Relationship.INCOMING)
+    ExternObject parentExtern;
+    
+    @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
+    List<ArticleObject> articles;
+    
+    @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
+    List<SubArticleObject> subArticles;
 
-    private SubExternObject() {
-        this._annotations = new HashMap<>();
+    public String getTitle() {
+        return title;
     }
 
-    @Override
-    public NodeType GetType() {
-        return _type;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    @Override
-    public Map<String, Object> GetAnnotations() {
-        return _annotations;
+    public ExternObject getParentExtern() {
+        return parentExtern;
     }
 
-    @Override
-    public void AddAnnotation(String key, Object value) {
-        _annotations.put(key, value);
+    public void setParentExtern(ExternObject parentExtern) {
+        this.parentExtern = parentExtern;
+    }
+    
+    public SubExternObject() {
     }
 
-    public static SubExternObject CreateSubExternObject() {
-        SubExternObject ext = new SubExternObject();
-
-        ext._uid = UUID.randomUUID().toString();
-        ext.AddAnnotation(AnnotationKeys.UID, ext._uid);
-
-        return ext;
-    }
-
-    @Override
-    public String GetUUID() {
-        return _uid;
-    }
-
-    static INodeObject FromNode(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String GetTitle() {
-        return _title;
-    }
-
-    @Override
-    public void SetTitle(String title) {
-        _title = title;
-        AddAnnotation(AnnotationKeys.TITLE, title);
-    }
-
-    @Override
-    public INodeObject FindSubNode(String subNode) throws Exception {
-        return INodeObject.FindSubNode(this, subNode);
-    }
-
-    @Override
-    public void SetIsActive(boolean isActive) throws Exception {
-        INodeObject.SetIsActive(this, isActive);
+    public SubExternObject(String title, ExternObject parentExtern) {
+        this.title = title;
+        this.parentExtern = parentExtern;
     }
 }

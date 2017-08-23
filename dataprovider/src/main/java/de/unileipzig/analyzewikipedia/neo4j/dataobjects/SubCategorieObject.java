@@ -6,73 +6,41 @@ import java.util.UUID;
 
 import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import org.neo4j.driver.v1.types.Node;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Property;
+import org.neo4j.ogm.annotation.Relationship;
 
-public class SubCategorieObject implements INodeObject {
+@NodeEntity(label = "SubCategory")
+public class SubCategorieObject extends Entity {
+    @Property(name = "title")
+    private String title;
+    
+    @Relationship(type = "HAS", direction = Relationship.INCOMING)
+    CategorieObject parentCategorie;
 
-    private final NodeType _type = NodeType.SubCategorie;
-    private final Map<String, Object> _annotations;
-    private String _uid;
-    private String _title;
-
-    private SubCategorieObject() {
-        _annotations = new HashMap<>();
+    public SubCategorieObject() {
+        this.title = "";
+        this.parentCategorie = null;
     }
 
-    @Override
-    public NodeType GetType() {
-        return _type;
+    public SubCategorieObject(String title, CategorieObject parentCategorie) {
+        this.title = title;
+        this.parentCategorie = parentCategorie;
     }
 
-    @Override
-    public Map<String, Object> GetAnnotations() {
-        return _annotations;
+    public CategorieObject getParentCategorie() {
+        return parentCategorie;
     }
 
-    @Override
-    public void AddAnnotation(String key, Object value) {
-        _annotations.put(key, value);
+    public void setParentCategorie(CategorieObject parentCategorie) {
+        this.parentCategorie = parentCategorie;
     }
 
-    public static SubCategorieObject CreateSubCategorieObject() {
-        SubCategorieObject sub = new SubCategorieObject();
-
-        sub._uid = UUID.randomUUID().toString();
-        sub.AddAnnotation(AnnotationKeys.UID, sub._uid);
-
-        return sub;
+    public String getTitle() {
+        return title;
     }
 
-    @Override
-    public String GetUUID() {
-        return _uid;
-    }
-
-    static INodeObject FromNode(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String GetTitle() {
-        return _title;
-    }
-
-    /**
-     *
-     * @param title
-     */
-    @Override
-    public void SetTitle(String title) {
-        _title = title;
-        AddAnnotation(AnnotationKeys.TITLE, title);
-    }
-
-    @Override
-    public INodeObject FindSubNode(String subNode) throws Exception {
-        return INodeObject.FindSubNode(this, subNode);
-    }
-
-    @Override
-    public void SetIsActive(boolean isActive) throws Exception {
-        INodeObject.SetIsActive(this, isActive);
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
