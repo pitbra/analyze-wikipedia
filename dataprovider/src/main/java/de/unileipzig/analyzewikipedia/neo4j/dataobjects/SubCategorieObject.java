@@ -1,11 +1,5 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
-import org.neo4j.driver.v1.types.Node;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -13,18 +7,18 @@ import org.neo4j.ogm.annotation.Relationship;
 @NodeEntity(label = "SubCategory")
 public class SubCategorieObject extends Entity {
     @Property(name = "title")
-    private String title;
+    private String _title;
     
     @Relationship(type = "HAS", direction = Relationship.INCOMING)
     CategorieObject parentCategorie;
 
     public SubCategorieObject() {
-        this.title = "";
+        this._title = "";
         this.parentCategorie = null;
     }
 
     public SubCategorieObject(String title, CategorieObject parentCategorie) {
-        this.title = title;
+        this._title = title;
         this.parentCategorie = parentCategorie;
     }
 
@@ -36,11 +30,12 @@ public class SubCategorieObject extends Entity {
         this.parentCategorie = parentCategorie;
     }
 
+    @Override
     public String getTitle() {
-        return title;
+        return _title;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this._title = title;
     }
 }

@@ -3,17 +3,24 @@ package de.unileipzig.analyzewikipedia.dumpreader.controller;
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.INodeObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.RelationshipType;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
+
+import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.ExternServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.SubExternServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.CategorieServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.SubCategorieServiceImpl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +36,15 @@ public class TransmitorThread implements Runnable {
     
     private final DataProvider prov;
     
+    private ArticleServiceImpl articleService;
+    private SubArticleServiceImpl subArticleService;
+    private ExternServiceImpl externService;
+    private SubExternServiceImpl subExternService;
+    private CategorieServiceImpl categorieService;
+    private SubCategorieServiceImpl subCategorieService;
+    
+    private ActiveNode activeNode;
+    
     /**
      * KONSTRUCTOR: default
      * 
@@ -37,8 +53,17 @@ public class TransmitorThread implements Runnable {
     public TransmitorThread() throws Exception {
        
         // create neo4j provider for network access
-        prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass(), true);
-                      
+        //prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass(), true);
+        
+        prov = null;
+        
+        //create article Service for article operations
+        articleService = new ArticleServiceImpl();
+        subArticleService = new SubArticleServiceImpl();
+        externService = new ExternServiceImpl();
+        subExternService = new SubExternServiceImpl();
+        categorieService = new CategorieServiceImpl();
+        subCategorieService = new SubCategorieServiceImpl();
     }
         
     /**
@@ -70,13 +95,13 @@ public class TransmitorThread implements Runnable {
      * @param name as string
      * @return article as object
      */
-    private INodeObject searchNodeInDB(String type, INodeObject obj, String name){
+    private Entity searchNodeInDB(String type, Entity obj, String name){
         
-        INodeObject node = null;
+        Entity node = null;
         
         switch(type){
             case "article":
-                ArticleObject test = (ArticleObject) prov.FindByTitle(name);
+                ArticleObject test = articleService.findByTitle(name);
                 break;
             case "subarticle":
                 ArticleObject article = (ArticleObject) obj;
@@ -84,7 +109,7 @@ public class TransmitorThread implements Runnable {
 ////                node = (SubArticleObject) ...;
                 break;
             case "extern":
-                prov.FindByTitle(name);
+                externService.findByTitle(name);
                 break;
             case "subextern":
                 ExternObject extern = (ExternObject) obj;
@@ -92,7 +117,7 @@ public class TransmitorThread implements Runnable {
 ////                node = (SubExternObject) ...;
                 break;
             case "categorie":
-                prov.FindByTitle(name);
+                categorieService.findByTitle(name);
                 break;
             case "subcategorie":
                 CategorieObject categorie = (CategorieObject) obj;
@@ -111,67 +136,69 @@ public class TransmitorThread implements Runnable {
      * @param name as string
      * @return article as object
      */
-    private INodeObject createNodeInDB(String type, INodeObject obj, String name){
+    private Entity createNodeInDB(String type, Entity obj/*, String name der Name wird vorher direkt gesetzt*/){
         
-        INodeObject node = searchNodeInDB(type, obj, name);
+        Entity node = searchNodeInDB(type, obj, obj.getTitle());
                 
         if (node == null){
             
             switch(type){
                 case "article":
-                    node = ArticleObject.CreateArticleObject();
+                    node = articleService.createOrUpdate((ArticleObject) obj);
                     break;
                 case "subarticle":
-                    node = SubArticleObject.CreateSubArticleObject();
+                    node = subArticleService.createOrUpdate((SubArticleObject) obj);
                     break;
                 case "extern":
-                    node = ExternObject.CreateExternObject();
+                    node = externService.createOrUpdate((ExternObject) obj);
                     break;
                 case "subextern":
-                    node = SubExternObject.CreateSubExternObject();
+                    node = subExternService.createOrUpdate((SubExternObject) obj);
                     break;
                 case "categorie":
-                    node = CategorieObject.CreateCategorieObject();
+                    node = categorieService.createOrUpdate((CategorieObject) obj);
                     break;
                 case "subcategorie":
-                    node = SubCategorieObject.CreateSubCategorieObject();
+                    node = subCategorieService.createOrUpdate((SubCategorieObject) obj);
                     break;
             }
             
-            if (node != null) node.AddAnnotation("title", name);
+            //if (node != null) node.AddAnnotation("title", name);
 
             // break thread for a fix time, if areticle could'n be created
-            boolean created = false;
-            do{
-                switch(type){
-                    case "article":
-                        created = prov.CreateArticle((ArticleObject) node);
-                        break;
-                    case "subarticle":
-                        created = prov.CreateSubArticle((SubArticleObject) node);
-                        break;
-                    case "extern":
-                        created = prov.CreateExtern((ExternObject) node);
-                        break;
-                    case "subextern":
-                        created = prov.CreateSubExtern((SubExternObject) node);
-                        break;
-                    case "categorie":
-                        created = prov.CreateCategorie((CategorieObject) node);
-                        break;
-                    case "subcategorie":
-                        created = prov.CreateSubCategorie((SubCategorieObject) node);
-                        break;
-                }
-            } while (created == false);
+//  dürfte nicht mehr notwendig sein
+            
+//            boolean created = false;
+//            do{
+//                switch(type){
+//                    case "article":
+//                        created = prov.CreateArticle((ArticleObject) node);
+//                        break;
+//                    case "subarticle":
+//                        created = prov.CreateSubArticle((SubArticleObject) node);
+//                        break;
+//                    case "extern":
+//                        created = prov.CreateExtern((ExternObject) node);
+//                        break;
+//                  case "subextern":
+//                        created = prov.CreateSubExtern((SubExternObject) node);
+//                        break;
+//                    case "categorie":
+//                        created = prov.CreateCategorie((CategorieObject) node);
+//                        break;
+//                    case "subcategorie":
+//                        created = prov.CreateSubCategorie((SubCategorieObject) node);
+//                        break;
+//                }
+//            } while (created == false);
             
             // set has relation if it is subnode
-            if (obj != null) prov.CreateRelationship(RelationshipType.HAS, obj, node);
             
-        }
+            //if (obj != null) prov.CreateRelationship(RelationshipType.HAS, obj, node); Können direkt gesetzt werden
+            
+//        }
         
-        return node;
-                
+        return node;                
     }
         
     /**
@@ -210,6 +237,7 @@ public class TransmitorThread implements Runnable {
      */
     private void sendPageContent(WikiPage page){
         
+        //PB: Erzeuge einen vollständigen Artikel einschließlich aller Relationships und rufe dann articleService.createOrUpdate auf
         // TEST out the page title
         String title = page.getName();
         if (title.length() > 50) title = title.substring(0, 50);
@@ -219,24 +247,27 @@ public class TransmitorThread implements Runnable {
         int s_lin = 0, s_sub = 0, s_ext = 0, s_cat = 0;
         
         // create artikel
-        INodeObject article = createNodeInDB("article", null, page.getName());
+        ArticleObject article = new ArticleObject();//createNodeInDB("article", null, page.getName());
+        article.setTitle(page.getName());
         try {
-            INodeObject.SetIsActive(article, true);
+            article.SetActive(activeNode);
         } catch (Exception ex) {}
         
         // travers each article
         for (WikiArticle s_art : page.getArticles()){
             
-            INodeObject subarticle;
+            SubArticleObject subarticle;
             
             if (s_art.getName().equals(page.getName())){
-                subarticle = article;
+                //subarticle = article;
             } else {
                 subarticle = createNodeInDB("subarticle", article, s_art.getName());
             }
             
+            
             // wiki title links
-            s_art.getWikiLinks().stream().map((link) -> createNodeInDB("article", null, link[0])).forEach((linkArticle) -> {
+            //PB: Für Relationsships gibt es jetzt auf jedem Entity Objekt .addSubArticle(SubArticle), .addExtern(Extern) usw.;
+            s_art.getWikiLinks().stream().map((link) -> /*createNodeInDB("article", null, link[0]))*/.forEach((linkArticle) -> {
                 prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
 //// ####                
 ////                if (link[1] != null) setLinkdDescription(link[1]);
@@ -251,15 +282,15 @@ public class TransmitorThread implements Runnable {
             for (String ext : s_art.getExternLinks()){
                 String[] urlSplit = splitUrl(ext);
                 if (urlSplit != null && !urlSplit[1].isEmpty() ){
-                    INodeObject domain = searchNodeInDB("extern", null, urlSplit[0]);
-                    INodeObject suffix = createNodeInDB("subextern", domain, urlSplit[1]);
+                    Entity domain = searchNodeInDB("extern", null, urlSplit[0]);
+                    Entity suffix = createNodeInDB("subextern", domain, urlSplit[1]);
                     prov.CreateRelationship(RelationshipType.LINK, subarticle, suffix);
                 }
             }
 
             // categories
             s_art.getCategories().entrySet().forEach((cat) -> {
-                INodeObject categorie = createNodeInDB("categorie", null, cat.getKey());
+                Entity categorie = createNodeInDB("categorie", null, cat.getKey());
                 
                 cat.getValue().stream().map((list_element) -> createNodeInDB("subcategorie", categorie, list_element)).forEachOrdered((subcategorie) -> {
                     prov.CreateRelationship(RelationshipType.LINK, article, subcategorie);

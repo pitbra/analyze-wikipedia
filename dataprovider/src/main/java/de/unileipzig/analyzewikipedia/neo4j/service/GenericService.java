@@ -7,6 +7,9 @@ package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.helper.Neo4jSessionFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.neo4j.ogm.session.Session;
 
 /**
@@ -40,5 +43,26 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         return find(entity.getId());
     }
     
+    @Override
+    public T findByTitle(String id) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", id);
+        
+        String query = QueryHelper.FindByTitle();
+        
+        return session.queryForObject(getEntityType(), query, params);
+    }
+    
     abstract Class<T> getEntityType();
+
+    private static class QueryHelper {
+
+        private static String FindByTitle() {
+            return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1"; 
+        }
+
+        public QueryHelper() {
+        }
+        
+    }
 }

@@ -39,6 +39,7 @@ public class CategorieObject extends Entity {
         this.title = title;
     }
     
+    @Override
     public String getTitle() {
         return title;
     }

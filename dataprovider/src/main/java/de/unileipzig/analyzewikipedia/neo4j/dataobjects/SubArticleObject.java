@@ -69,5 +69,10 @@ public class SubArticleObject extends Entity{
     public void addLinkToSubArticle(SubArticleObject subArticle) {
         subArticles.add(subArticle);
     }    
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
     
 }

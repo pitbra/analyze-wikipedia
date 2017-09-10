@@ -6,6 +6,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
+import java.util.List;
 
 /**
  *
@@ -22,4 +23,6 @@ public interface Service<T extends Entity> {
     //void delete(String title);
     
     T createOrUpdate(T object);
+    
+    T findByTitle(String title);
 }

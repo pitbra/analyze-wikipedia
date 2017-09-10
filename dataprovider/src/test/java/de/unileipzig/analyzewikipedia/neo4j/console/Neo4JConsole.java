@@ -20,7 +20,7 @@ import de.unileipzig.analyzewikipedia.neo4j.service.SubExternServiceImpl;
  *
  * @author Pit.Braunsdorf
  */
-public class Main {
+public class Neo4JConsole {
 
     public static void main(String[] args) {
 

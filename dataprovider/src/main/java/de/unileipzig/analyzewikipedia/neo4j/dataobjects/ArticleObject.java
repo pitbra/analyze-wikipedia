@@ -78,6 +78,7 @@ public class ArticleObject extends Entity {
         this.title = title;
     }
 
+    @Override
     public String getTitle() {
         return title;
     }

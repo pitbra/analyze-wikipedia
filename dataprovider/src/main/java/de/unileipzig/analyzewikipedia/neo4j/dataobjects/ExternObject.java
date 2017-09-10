@@ -39,6 +39,7 @@ public class ExternObject extends Entity {
         subExterns.add(subExtern);
     }
 
+    @Override
     public String getTitle() {
         return title;
     }

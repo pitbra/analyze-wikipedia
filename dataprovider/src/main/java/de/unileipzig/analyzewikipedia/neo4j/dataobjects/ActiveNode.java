@@ -23,6 +23,7 @@ public final class ActiveNode extends Entity{
     @Property(name = "title")
     private String title = "Active";
     
+    @Override
     public String getTitle() {
         return title;
     }

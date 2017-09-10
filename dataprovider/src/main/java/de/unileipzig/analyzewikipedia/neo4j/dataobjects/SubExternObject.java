@@ -26,6 +26,7 @@ public class SubExternObject extends Entity {
     @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
     List<SubArticleObject> subArticles;
 
+    @Override
     public String getTitle() {
         return title;
     }

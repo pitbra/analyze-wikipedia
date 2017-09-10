@@ -6,6 +6,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.Property;
 
 
 /**
@@ -14,11 +15,13 @@ import org.neo4j.ogm.annotation.GraphId;
  */
 public abstract class Entity {
     @GraphId private Long _id;
-
+    
     public Entity() {
     }
         
     public Long getId() {
         return _id;
     }
+    
+    public abstract String getTitle();
 }
