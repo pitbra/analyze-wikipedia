@@ -24,4 +24,7 @@ public abstract class Entity {
     }
     
     public abstract String getTitle();
+    
+    public abstract void setPage(PageObject page);
+    public abstract PageObject getPage();
 }

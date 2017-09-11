@@ -39,6 +39,9 @@ public class CategorieObject extends Entity {
         this.title = title;
     }
     
+    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
+    PageObject page;
+    
     @Override
     public String getTitle() {
         return title;
@@ -60,5 +63,15 @@ public class CategorieObject extends Entity {
                 ", title='" + title + '\'' +
                 ", subarticles=" + subArticles.size() +
                 "}";
+    }
+    
+    @Override
+    public void setPage(PageObject page) {
+        this.page = page;
+    }
+    
+    @Override
+    public PageObject getPage() {
+        return this.page;
     }
 }

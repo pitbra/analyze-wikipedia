@@ -25,6 +25,9 @@ public class SubExternObject extends Entity {
     
     @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
     List<SubArticleObject> subArticles;
+    
+    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
+    PageObject page;
 
     @Override
     public String getTitle() {
@@ -49,5 +52,13 @@ public class SubExternObject extends Entity {
     public SubExternObject(String title, ExternObject parentExtern) {
         this.title = title;
         this.parentExtern = parentExtern;
+    }
+    
+    public void setPage(PageObject page) {
+        this.page = page;
+    }
+    
+    public PageObject getPage() {
+        return this.page;
     }
 }

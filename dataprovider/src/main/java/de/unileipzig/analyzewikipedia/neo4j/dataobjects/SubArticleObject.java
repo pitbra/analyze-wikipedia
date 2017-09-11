@@ -20,6 +20,10 @@ public class SubArticleObject extends Entity{
     @Relationship(type = "has", direction = "INCOMING")
     ArticleObject parentArticle;
     
+    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
+    PageObject page;
+
+    
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<ExternObject> externs;
     
@@ -73,6 +77,16 @@ public class SubArticleObject extends Entity{
     @Override
     public String getTitle() {
         return title;
+    }
+    
+    @Override
+    public void setPage(PageObject page) {
+        this.page = page;
+    }
+    
+    @Override
+    public PageObject getPage() {
+        return this.page;
     }
     
 }

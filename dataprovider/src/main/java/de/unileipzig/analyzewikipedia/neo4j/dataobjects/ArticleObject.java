@@ -30,6 +30,9 @@ public class ArticleObject extends Entity {
     
     @Relationship(type = "CONTAINS", direction = Relationship.INCOMING)
     List<CategorieObject> categories;
+    
+    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
+    PageObject page;
 
 
     public ArticleObject() {
@@ -110,5 +113,15 @@ public class ArticleObject extends Entity {
 
     public void SetActive(ActiveNode active) {
         this.active = active;
+    }    
+    
+    @Override
+    public void setPage(PageObject page) {
+        this.page = page;
+    }
+    
+    @Override
+    public PageObject getPage() {
+        return this.page;
     }
 }

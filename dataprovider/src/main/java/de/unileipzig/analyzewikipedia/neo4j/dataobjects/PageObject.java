@@ -32,12 +32,17 @@ public final class PageObject extends Entity{
         return title;
     }
     
-    @Relationship(type = "contains", direction = Relationship.INCOMING)
+    @Relationship(type = "PAGE_OF", direction = Relationship.OUTGOING)
     List<Entity> entities;
 
     public PageObject() {
         this.title = "Active";
     }
     
+    @Override
+    public void setPage(PageObject page) { }
+    
+    @Override
+    public PageObject getPage() { return null; }
 }
 

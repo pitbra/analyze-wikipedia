@@ -34,6 +34,12 @@ public final class ActiveNode extends Entity{
     public ActiveNode() {
         this.title = "Active";
     }
+
+    @Override
+    public void setPage(PageObject page) {}
+
+    @Override
+    public PageObject getPage() { return null; }
     
 }
 
