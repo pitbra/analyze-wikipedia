@@ -44,5 +44,13 @@ public final class PageObject extends Entity{
     
     @Override
     public PageObject getPage() { return null; }
+    
+    public void addEntityAsPartOf(Entity entity) {
+        entities.add(entity);
+    }
+    
+    public List<Entity> getEntities() {
+        return entities;
+    }
 }
 
