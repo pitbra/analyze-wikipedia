@@ -1,19 +1,15 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
-import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.PageObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
-
-import de.unileipzig.analyzewikipedia.neo4j.dataprovider.DataProvider;
 
 import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
@@ -26,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Danilo Morgado
@@ -34,16 +32,14 @@ import java.util.Arrays;
  */
 public class TransmitorThread implements Runnable {
     
-    private final DataProvider prov;
+    private final  ArticleServiceImpl articleService;
+    private final  SubArticleServiceImpl subArticleService;
+    private final  ExternServiceImpl externService;
+    private final  SubExternServiceImpl subExternService;
+    private final  CategorieServiceImpl categorieService;
+    private final  SubCategorieServiceImpl subCategorieService;
     
-    private ArticleServiceImpl articleService;
-    private SubArticleServiceImpl subArticleService;
-    private ExternServiceImpl externService;
-    private SubExternServiceImpl subExternService;
-    private CategorieServiceImpl categorieService;
-    private SubCategorieServiceImpl subCategorieService;
-    
-    private ActiveNode activeNode;
+    private ActiveNode activeNode = new ActiveNode();;
     
     /**
      * KONSTRUCTOR: default
@@ -51,19 +47,15 @@ public class TransmitorThread implements Runnable {
      * @throws java.lang.Exception
      */
     public TransmitorThread() throws Exception {
-       
-        // create neo4j provider for network access
-        //prov = new DataProvider(Components.getNeo4jLink(), Components.getNeo4jUser(), Components.getNeo4jPass(), true);
         
-        prov = null;
-        
-        //create article Service for article operations
+        // create article Service for article operations
         articleService = new ArticleServiceImpl();
         subArticleService = new SubArticleServiceImpl();
         externService = new ExternServiceImpl();
         subExternService = new SubExternServiceImpl();
         categorieService = new CategorieServiceImpl();
         subCategorieService = new SubCategorieServiceImpl();
+        
     }
         
     /**
@@ -89,118 +81,6 @@ public class TransmitorThread implements Runnable {
 
     }
     
-    /**
-     * METHOD: search typed node in neo4j graphDB, return null if not exist
-     * 
-     * @param name as string
-     * @return article as object
-     */
-    private Entity searchNodeInDB(String type, Entity obj, String name){
-        
-        Entity node = null;
-        
-        switch(type){
-            case "article":
-                ArticleObject test = articleService.findByTitle(name);
-                break;
-            case "subarticle":
-                ArticleObject article = (ArticleObject) obj;
-//// ####
-////                node = (SubArticleObject) ...;
-                break;
-            case "extern":
-                externService.findByTitle(name);
-                break;
-            case "subextern":
-                ExternObject extern = (ExternObject) obj;
-//// ####
-////                node = (SubExternObject) ...;
-                break;
-            case "categorie":
-                categorieService.findByTitle(name);
-                break;
-            case "subcategorie":
-                CategorieObject categorie = (CategorieObject) obj;
-//// ####
-////                node = (SubCategorieObject) ...;
-                break;
-        }
-        
-        return node;
-        
-    }
-    
-    /**
-     * METHOD: create specific node in neo4j database and return it
-     * 
-     * @param name as string
-     * @return article as object
-     */
-    private Entity createNodeInDB(String type, Entity obj/*, String name der Name wird vorher direkt gesetzt*/){
-        
-        Entity node = searchNodeInDB(type, obj, obj.getTitle());
-                
-        if (node == null){
-            
-            switch(type){
-                case "article":
-                    node = articleService.createOrUpdate((ArticleObject) obj);
-                    break;
-                case "subarticle":
-                    node = subArticleService.createOrUpdate((SubArticleObject) obj);
-                    break;
-                case "extern":
-                    node = externService.createOrUpdate((ExternObject) obj);
-                    break;
-                case "subextern":
-                    node = subExternService.createOrUpdate((SubExternObject) obj);
-                    break;
-                case "categorie":
-                    node = categorieService.createOrUpdate((CategorieObject) obj);
-                    break;
-                case "subcategorie":
-                    node = subCategorieService.createOrUpdate((SubCategorieObject) obj);
-                    break;
-            }
-            
-            //if (node != null) node.AddAnnotation("title", name);
-
-            // break thread for a fix time, if areticle could'n be created
-//  dürfte nicht mehr notwendig sein
-            
-//            boolean created = false;
-//            do{
-//                switch(type){
-//                    case "article":
-//                        created = prov.CreateArticle((ArticleObject) node);
-//                        break;
-//                    case "subarticle":
-//                        created = prov.CreateSubArticle((SubArticleObject) node);
-//                        break;
-//                    case "extern":
-//                        created = prov.CreateExtern((ExternObject) node);
-//                        break;
-//                  case "subextern":
-//                        created = prov.CreateSubExtern((SubExternObject) node);
-//                        break;
-//                    case "categorie":
-//                        created = prov.CreateCategorie((CategorieObject) node);
-//                        break;
-//                    case "subcategorie":
-//                        created = prov.CreateSubCategorie((SubCategorieObject) node);
-//                        break;
-//                }
-//            } while (created == false);
-            
-            // set has relation if it is subnode
-            
-            //if (obj != null) prov.CreateRelationship(RelationshipType.HAS, obj, node); Können direkt gesetzt werden
-            
-//        }
-        
-        return node;                
-    }
-        
     /**
      * METHODE: get domain and the suffix of url
      * 
@@ -235,75 +115,91 @@ public class TransmitorThread implements Runnable {
      * 
      * @param page as object
      */
-    private void sendPageContent(WikiPage page){
-        
-        //PB: Erzeuge einen vollständigen Artikel einschließlich aller Relationships und rufe dann articleService.createOrUpdate auf
-        // TEST out the page title
-        String title = page.getName();
-        if (title.length() > 50) title = title.substring(0, 50);
-        System.out.println("PAGE   : " + String.format("%-50s", title));
+    private void sendPageContent(WikiPage dump_page){
         
         // TEST stack sizes for output
         int s_lin = 0, s_sub = 0, s_ext = 0, s_cat = 0;
         
-        // create artikel
-        ArticleObject article = new ArticleObject();//createNodeInDB("article", null, page.getName());
-        article.setTitle(page.getName());
-        try {
-            article.SetActive(activeNode);
-        } catch (Exception ex) {}
+        // create page
+        PageObject page = new PageObject();
+        page.setTitle(dump_page.getName());
         
         // travers each article
-        for (WikiArticle s_art : page.getArticles()){
-            
-            SubArticleObject subarticle;
-            
-            if (s_art.getName().equals(page.getName())){
-                //subarticle = article;
-            } else {
-                subarticle = createNodeInDB("subarticle", article, s_art.getName());
-            }
-            
-            
-            // wiki title links
-            //PB: Für Relationsships gibt es jetzt auf jedem Entity Objekt .addSubArticle(SubArticle), .addExtern(Extern) usw.;
-            s_art.getWikiLinks().stream().map((link) -> /*createNodeInDB("article", null, link[0]))*/.forEach((linkArticle) -> {
-                prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
-//// ####                
-////                if (link[1] != null) setLinkdDescription(link[1]);
-            });
-                                    
-            // wiki article links
-            s_art.getWikiSubLinks().stream().map((sub) -> createNodeInDB("subarticle", searchNodeInDB("article", null, sub[0]), sub[0] + "#" + sub[1])).forEachOrdered((linkArticle) -> {
-                prov.CreateRelationship(RelationshipType.LINK, subarticle, linkArticle);
-            });
-                        
-            // extern links
-            for (String ext : s_art.getExternLinks()){
-                String[] urlSplit = splitUrl(ext);
-                if (urlSplit != null && !urlSplit[1].isEmpty() ){
-                    Entity domain = searchNodeInDB("extern", null, urlSplit[0]);
-                    Entity suffix = createNodeInDB("subextern", domain, urlSplit[1]);
-                    prov.CreateRelationship(RelationshipType.LINK, subarticle, suffix);
-                }
-            }
-
-            // categories
-            s_art.getCategories().entrySet().forEach((cat) -> {
-                Entity categorie = createNodeInDB("categorie", null, cat.getKey());
-                
-                cat.getValue().stream().map((list_element) -> createNodeInDB("subcategorie", categorie, list_element)).forEachOrdered((subcategorie) -> {
-                    prov.CreateRelationship(RelationshipType.LINK, article, subcategorie);
-                });
-            });
+        for (WikiArticle dump_article : dump_page.getArticles()){
             
             // TEST count the link sizes
-            s_lin += s_art.getWikiLinks().size();
-            s_sub += s_art.getWikiSubLinks().size();
-            s_ext += s_art.getExternLinks().size();
-            s_cat += s_art.getCategories().size();
+            s_lin += dump_article.getWikiLinks().size();
+            s_sub += dump_article.getWikiSubLinks().size();
+            s_ext += dump_article.getExternLinks().size();
+            s_cat += dump_article.getCategories().size();
+            
+            // add article to page
+            ArticleObject article = new ArticleObject();
+            article.setTitle(dump_article.getName());
+            article.setPage(page);
+            
+            article.SetActive(activeNode);
+            
+            // travers each link to article
+            for (String[] linkToArticle:dump_article.getWikiLinks()){
+                ArticleObject article_s = new ArticleObject();
+                article_s.setTitle(linkToArticle[0]);
+                
+                article.addLinkToArticle(article_s);
+                
+                articleService.createOrUpdate(article_s);
+            }
+            
+            // travers each link to subarticle
+            for (String[] linkToSubArticle:dump_article.getWikiSubLinks()){
+                SubArticleObject subArticle = new SubArticleObject();
+                subArticle.setTitle(linkToSubArticle[0]);
+                
+                article.addLinkToSubArticle(subArticle);
+                
+                subArticleService.createOrUpdate(subArticle);
+            }
+            
+            // travers each link to extern
+            for (String linkToExtern:dump_article.getExternLinks()){
+                ExternObject extern = new ExternObject();
+                extern.setTitle(linkToExtern);
+                
+                article.addLinkToExtern(extern);
+                
+                externService.createOrUpdate(extern);
+            }
+            
+            // travers each link to categorie
+            for (Map.Entry<String, List<String>> cat_entry : dump_article.getCategories().entrySet()) {
 
+                CategorieObject cat = new CategorieObject();
+                cat.setTitle(cat_entry.getKey());
+                
+                categorieService.createOrUpdate(cat);
+                
+                // travers each link to subcategorie
+                for (String sub:cat_entry.getValue()){
+                    SubCategorieObject sub_cat = new SubCategorieObject();
+                    sub_cat.setTitle(sub);
+                    
+                    article.addLinkToCategorie(sub_cat);
+                    sub_cat.setParentCategorie(cat);
+                    
+                    subCategorieService.createOrUpdate(sub_cat);
+                }
+                        
+            }
+            
+            // update in DB
+            articleService.createOrUpdate(article);
+            
         }
+        
+        // TEST out the page title
+        String title = dump_page.getName();
+        if (title.length() > 50) title = title.substring(0, 50);
+        System.out.println("PAGE   : " + String.format("%-50s", title));
         
         // TEST out the page link stacks
         System.out.println("STACK -> L-S-E-C: " + 
@@ -313,7 +209,7 @@ public class TransmitorThread implements Runnable {
                                         String.format("%02d", s_cat) + "\t");
         
         //TEST
-        for (WikiArticle o_article : page.getArticles()){
+        for (WikiArticle o_article : dump_page.getArticles()){
             System.out.println("Article: " + o_article.getName());
             o_article.getWikiLinks().forEach((t_lin) ->     { System.out.println("Link   : " + Arrays.toString(t_lin));             });
             o_article.getWikiSubLinks().forEach((t_sub) ->      { System.out.println("Sub    : " + t_sub[0] + " :#: " + t_sub[1]);  });

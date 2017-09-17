@@ -35,7 +35,7 @@ public class Components {
     
     private final static String URL_WIKI = "https://de.wikipedia.org/wiki/";
     
-    private final static int CORES = Runtime.getRuntime().availableProcessors();
+    private final static int CORES = 1;//Runtime.getRuntime().availableProcessors();
     
     private final static String[] FILE_EXTENSION = {"xml"};
     

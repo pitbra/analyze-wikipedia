@@ -10,6 +10,7 @@ import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.ExternServiceImpl;
@@ -29,6 +30,11 @@ public class Neo4JConsole {
         CategorieObject cat = new CategorieObject();
         cat.setTitle("Category");
         
+        SubCategorieObject subcat = new SubCategorieObject();
+        subcat.setTitle("SubCategory");
+        
+        subcat.setParentCategorie(cat);
+        
         ArticleObject article = new ArticleObject();
         article.setTitle("Article");
         article.SetActive(active);
@@ -36,7 +42,7 @@ public class Neo4JConsole {
         SubArticleObject subArticle = new SubArticleObject();
         subArticle.setTitle("SubArticle");
 
-        article.addSubArticle(subArticle);
+        article.addLinkToSubArticle(subArticle);
         
         ArticleServiceImpl artService = new ArticleServiceImpl();
         artService.createOrUpdate(article);
@@ -50,7 +56,7 @@ public class Neo4JConsole {
 
         article.addLinkToExtern(extern);
         article.addLinkToSubExtern(subExtern);
-        article.addCategorie(cat);
+        article.addLinkToCategorie(subcat);
         artService.createOrUpdate(article);
 
         ExternServiceImpl extService = new ExternServiceImpl();

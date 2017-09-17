@@ -29,7 +29,7 @@ public class ArticleObject extends Entity {
     List<ArticleObject> articles;
     
     @Relationship(type = "CONTAINS", direction = Relationship.INCOMING)
-    List<CategorieObject> categories;
+    List<SubCategorieObject> categories;
     
     @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
     PageObject page;
@@ -49,14 +49,14 @@ public class ArticleObject extends Entity {
         articles.add(article);
     }
     
-    public void addCategorie(CategorieObject category)  {
+    public void addLinkToCategorie(SubCategorieObject category)  {
         categories.add(category);
     }
     
-    public List<CategorieObject> getCategorie() {
+    public List<SubCategorieObject> getCategorie() {
         return categories;
     }
-
+    
     public List<SubArticleObject> getSubArticles() {
         return subArticles;
     }
@@ -94,7 +94,7 @@ public class ArticleObject extends Entity {
         this.subExterns = subExterns;
     }
 
-    public void addSubArticle(SubArticleObject subArticle) {
+    public void addLinkToSubArticle(SubArticleObject subArticle) {
         subArticles.add(subArticle);
     }
 
