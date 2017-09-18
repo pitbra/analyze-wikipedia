@@ -15,6 +15,9 @@ public class ArticleObject extends Entity {
     @Relationship(type = "ACTIVE", direction = Relationship.OUTGOING)
     ActiveNode active;
 
+    @Relationship(type = "HAS", direction = Relationship.OUTGOING)
+    List<SubArticleObject> ownSubArticles;
+    
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<ExternObject> externs;
     
@@ -31,13 +34,18 @@ public class ArticleObject extends Entity {
     List<SubCategorieObject> categories;
     
     public ArticleObject() {
-        this.title = "";
+        this("");
+    }
+    
+    public ArticleObject(String title) {
+        this.title = title;
         this.subArticles = new ArrayList<>();
         this.active = null;
         this.subExterns = new ArrayList<>();
         this.externs = new ArrayList<>();
         this.categories = new ArrayList<>();
         this.articles = new ArrayList<>();
+        this.ownSubArticles = new ArrayList<>();
     }
     
     public void addLinkToArticle(ArticleObject article) {
@@ -54,6 +62,10 @@ public class ArticleObject extends Entity {
     
     public List<SubArticleObject> getSubArticles() {
         return subArticles;
+    }
+    
+    public List<SubArticleObject> getOwnSubArticles() {
+        return ownSubArticles;
     }
     
     public List<SubExternObject> getSubExterns() {
@@ -81,16 +93,21 @@ public class ArticleObject extends Entity {
         return title;
     }
 
-    public ArticleObject(String title, List<SubArticleObject> subArticles, ActiveNode active, List<ExternObject> externs, List<SubExternObject> subExterns) {
+    public ArticleObject(String title, List<SubArticleObject> subArticles, ActiveNode active, List<ExternObject> externs, List<SubExternObject> subExterns, List<SubArticleObject> ownSubArticles) {
         this.title = title;
         this.subArticles = subArticles;
         this.active = active;
         this.externs = externs;
         this.subExterns = subExterns;
+        this.ownSubArticles = ownSubArticles;
     }
 
     public void addLinkToSubArticle(SubArticleObject subArticle) {
         subArticles.add(subArticle);
+    }
+    
+    public void addSubArticle(SubArticleObject subArticle) {
+        ownSubArticles.add(subArticle);
     }
    
     @Override
@@ -98,7 +115,8 @@ public class ArticleObject extends Entity {
         return "Article{"
                 + "id=" + getId()
                 + ", title='" + title + '\''
-                + ", subarticles=" + subArticles.size()
+                + ", active=" + (active==null)
+                + ", ownsubarticles=" + ownSubArticles.size()
                 + "}";
     }
 

@@ -21,8 +21,6 @@ public class ExternObject extends Entity {
     @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
     List<ArticleObject> articles;
     
-    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    
     public void addLinkFromArticle(ArticleObject article) {
         articles.add(article);
     }
@@ -45,13 +43,19 @@ public class ExternObject extends Entity {
     }
 
     public ExternObject() {
-        this.title = "";
+        this("");
+    }
+    
+    public ExternObject(String title) {
+        this.title = title;
         this.subExterns = new ArrayList<>();
+        this.articles = new ArrayList<>();
     }
 
     public ExternObject(String title, List<SubExternObject> subExterns) {
         this.title = title;
         this.subExterns = subExterns;
+        this.articles = new ArrayList<>();
     }
     
 }

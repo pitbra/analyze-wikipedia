@@ -11,9 +11,6 @@ public class SubArticleObject extends Entity{
     @Property(name = "title")
     String title;
     
-    @Relationship(type = "HAS", direction = "INCOMING")
-    ArticleObject parentArticle;
-    
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<ExternObject> externs;
     
@@ -25,10 +22,13 @@ public class SubArticleObject extends Entity{
     
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<SubArticleObject> subArticles;
-        
+    
     public SubArticleObject() {
-        this.title = "";
-        this.parentArticle = null;
+        this("");
+    }
+    
+    public SubArticleObject(String title) {
+        this.title = title;
         this.subArticles = new ArrayList<>();
         this.subExterns = new ArrayList<>();
         this.externs = new ArrayList<>();
@@ -39,12 +39,7 @@ public class SubArticleObject extends Entity{
     public String toString() {
         return "SubArticle{" +
                 "title='" + title+ '\'' +
-                ", parentArticle='" + parentArticle.getTitle() + '\'' +
                 '}';
-    }
-
-    public void setParentArticle(ArticleObject article) {
-        this.parentArticle = article;
     }
     
     public void setTitle(String title) {

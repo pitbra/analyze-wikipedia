@@ -57,7 +57,7 @@ Der Testlink lautet [http://www.test.com]
 == Geschichte ==
           
 Regisseur [[Robert Totten]] und Hauptdarsteller [[Richard Widmark|Mr. Richard]]
-Der Link lautet [http://www.google.de/test/page.xml Testpage]
+Der Link lautet [http://www.google.de/test/page1.xml Testpage]
 [[Kategorie:Fiktive Person|Smithee, Alan]]
 [[Kategorie:Pseudonym]]
 </text>
@@ -79,12 +79,12 @@ Der Link lautet [http://www.google.de/test/page.xml Testpage]
       <comment>/* Referenzen */ Abschnittsnamen korrigiert</comment>
       <model>wikitext</model>
       <format>text/x-wiki</format>
-      <text xml:space="preserve">'''Test''' steht als [[Test]]
+      <text xml:space="preserve">'''Test''' steht als [[Unitytest]]
           
 == HiHi ==
           
 Nein [[No]]
-Der Link lautet [http://www.google.de/test/page.xml Testpage]
+Der Link lautet [http://www.google.de/test/page2.xml Testpage]
 [[Kategorie:Tester]]
 </text>
       <sha1>9i928nk20i9bbmd6ktangrkxcfho0tf</sha1>

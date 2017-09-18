@@ -1,5 +1,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
@@ -10,9 +11,6 @@ public class SubExternObject extends Entity {
 
     @Property(name = "title")
     private String title;
-    
-    @Relationship(type = "HAS", direction = Relationship.INCOMING)
-    ExternObject parentExtern;
     
     @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
     List<ArticleObject> articles;
@@ -29,20 +27,13 @@ public class SubExternObject extends Entity {
         this.title = title;
     }
 
-    public ExternObject getParentExtern() {
-        return parentExtern;
-    }
-
-    public void setParentExtern(ExternObject parentExtern) {
-        this.parentExtern = parentExtern;
-    }
-    
     public SubExternObject() {
+        this("");
     }
 
-    public SubExternObject(String title, ExternObject parentExtern) {
+    public SubExternObject(String title) {
         this.title = title;
-        this.parentExtern = parentExtern;
+        this.subArticles = new ArrayList<>();
     }
     
 }

@@ -20,11 +20,15 @@ public class CategorieObject extends Entity {
     private String title;
 
     @Relationship(type="HAS")
-    List<SubCategorieObject> subArticles;
+    List<SubCategorieObject> ownSubCategories;
     
     public CategorieObject() {
-        this.title="";
-        this.subArticles = new ArrayList<>();
+        this("");
+    }
+    
+    public CategorieObject(String title) {
+        this.title = title;
+        this.ownSubCategories = new ArrayList<>();
     }
 
     public void setTitle(String title) {
@@ -36,13 +40,17 @@ public class CategorieObject extends Entity {
         return title;
     }
 
-    public CategorieObject(String title, List<SubCategorieObject> subArticles) {
+    public CategorieObject(String title, List<SubCategorieObject> subCategories) {
         this.title = title;
-        this.subArticles = subArticles;
+        this.ownSubCategories = subCategories;
     }
     
-    public void addSubArticle(SubCategorieObject subArticle){
-        subArticles.add(subArticle);
+    public void addSubCategorie(SubCategorieObject subCategories){
+        this.ownSubCategories.add(subCategories);
+    }
+    
+    public List<SubCategorieObject> getSubCategorie(){
+        return this.ownSubCategories;
     }
     
     @Override
@@ -50,7 +58,7 @@ public class CategorieObject extends Entity {
         return "Article{" +
                 "id=" + getId() +
                 ", title='" + title + '\'' +
-                ", subarticles=" + subArticles.size() +
+                ", subarticles=" + ownSubCategories.size() +
                 "}";
     }
     

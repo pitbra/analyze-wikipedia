@@ -6,10 +6,13 @@ import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
 
+import de.unileipzig.analyzewikipedia.neo4j.service.ActiveServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.ExternServiceImpl;
@@ -31,15 +34,18 @@ import java.util.Map;
  */
 public class TransmitorThread implements Runnable {
     
-    private final  ArticleServiceImpl articleService;
-    private final  SubArticleServiceImpl subArticleService;
-    private final  ExternServiceImpl externService;
-    private final  SubExternServiceImpl subExternService;
-    private final  CategorieServiceImpl categorieService;
-    private final  SubCategorieServiceImpl subCategorieService;
+    private final boolean debug = false;
     
-    private final ActiveNode ACTIVENODE = new ActiveNode();;
+    private final String activeTitle;
     
+    private final ActiveServiceImpl activeService;
+    private final ArticleServiceImpl articleService;
+    private final SubArticleServiceImpl subArticleService;
+    private final ExternServiceImpl externService;
+    private final SubExternServiceImpl subExternService;
+    private final CategorieServiceImpl categorieService;
+    private final SubCategorieServiceImpl subCategorieService;
+        
     /**
      * KONSTRUCTOR: default
      * 
@@ -48,12 +54,17 @@ public class TransmitorThread implements Runnable {
     public TransmitorThread() throws Exception {
         
         // create article Service for article operations
+        activeService = new ActiveServiceImpl();
         articleService = new ArticleServiceImpl();
         subArticleService = new SubArticleServiceImpl();
         externService = new ExternServiceImpl();
         subExternService = new SubExternServiceImpl();
         categorieService = new CategorieServiceImpl();
         subCategorieService = new SubCategorieServiceImpl();
+        
+        ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), "Active");
+        activeTitle = active.getTitle();
+        activeService.createOrUpdate(active);
         
     }
         
@@ -127,44 +138,47 @@ public class TransmitorThread implements Runnable {
             WikiArticle dump_article = dump_page.getArticles().get(0);
             
             // TEST count the link sizes
-            s_lin += dump_article.getWikiLinks().size();
-            s_sub += dump_article.getWikiSubLinks().size();
-            s_ext += dump_article.getExternLinks().size();
-            s_cat += dump_article.getCategories().size();
+            if (debug) {
+                s_lin += dump_article.getWikiLinks().size();
+                s_sub += dump_article.getWikiSubLinks().size();
+                s_ext += dump_article.getExternLinks().size();
+                s_cat += dump_article.getCategories().size();
+            }
             
             // TEST article name
-            System.out.println("Article   : " + dump_article.getName());
+            if (debug) System.out.println("Article : " + dump_article.getName());
             
-            main_article = new ArticleObject();
-            main_article.setTitle(dump_article.getName());
-            main_article.SetActive(ACTIVENODE);
-            articleService.createOrUpdate(main_article);
+            main_article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), dump_article.getName());
+            
+            if (!main_article.isActive()){
+                ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), "");
+                main_article.SetActive(active);
+                articleService.createOrUpdate(main_article);
+            }
             
             // travers each link to article
             for (String[] linkToArticle:dump_article.getWikiLinks()){
                 // TEST article link
-                System.out.println("A-Link : " + Arrays.toString(linkToArticle));
+                if (debug) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
                 
-                ArticleObject article = new ArticleObject();
-                article.setTitle(linkToArticle[0]);
+                ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
+                
                 main_article.addLinkToArticle(article);
                 articleService.createOrUpdate(main_article);
-                articleService.createOrUpdate(article);
             }
             
             // travers each link to subarticle
             for (String[] linkToSubArticle:dump_article.getWikiSubLinks()){
                 // TEST article link
-                System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
+                if (debug) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                 
-                ArticleObject article = new ArticleObject();
-                article.setTitle(linkToSubArticle[0]);
-                articleService.createOrUpdate(article);
-                
-                SubArticleObject subarticle = new SubArticleObject();
-                subarticle.setTitle(linkToSubArticle[1]);
-                subarticle.setParentArticle(article);
-                subArticleService.createOrUpdate(subarticle);
+                ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);                
+                SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1]);
+    
+                if (!article.getOwnSubArticles().contains(subarticle)){
+                    article.addSubArticle(subarticle);
+                    articleService.createOrUpdate(article);
+                }
                 
                 main_article.addLinkToSubArticle(subarticle);
                 articleService.createOrUpdate(main_article);
@@ -173,32 +187,46 @@ public class TransmitorThread implements Runnable {
             // travers each link to extern
             for (String linkToExtern:dump_article.getExternLinks()){
                 // TEST extern link
-                System.out.println("E-Link : " + linkToExtern); 
+                if (debug) System.out.println("E-Link : " + linkToExtern); 
                 
-                ExternObject extern = new ExternObject();
-                extern.setTitle(linkToExtern);
-                main_article.addLinkToExtern(extern);
-                articleService.createOrUpdate(main_article);
-                externService.createOrUpdate(extern);
+                String[] urlSplit = splitUrl(linkToExtern);
+                ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
+                
+                if (urlSplit[1].length() > 0) {
+                    // TEST extern link
+                    if (debug) System.out.println("sE-Link: " + urlSplit[1]);
+                        
+                    SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
+                    
+                    extern.addSubExtern(subextern);
+                    externService.createOrUpdate(extern);
+                    
+                    main_article.addLinkToSubExtern(subextern);
+                    articleService.createOrUpdate(main_article);
+                } else {
+                    main_article.addLinkToExtern(extern);
+                    articleService.createOrUpdate(main_article);
+                }
             }
             
             // travers each link to categorie
             for (Map.Entry<String, List<String>> cat_entry : dump_article.getCategories().entrySet()) {
-                CategorieObject cat = new CategorieObject();
-                cat.setTitle(cat_entry.getKey());
-                categorieService.createOrUpdate(cat);
+                CategorieObject cat = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
                 
                 // travers each link to subcategorie
                 for (String sub:cat_entry.getValue()){
                     // TEST categorie link
-                    System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
+                    if (debug) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
                     
-                    SubCategorieObject sub_cat = new SubCategorieObject();
-                    sub_cat.setTitle(sub);
-                    sub_cat.setParentCategorie(cat);
+                    SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub);
+                    
+                    if (!cat.getSubCategorie().contains(sub_cat)){
+                        cat.addSubCategorie(sub_cat);
+                        categorieService.createOrUpdate(cat);
+                    }
+                    
                     main_article.addLinkToCategorie(sub_cat);
                     articleService.createOrUpdate(main_article);
-                    subCategorieService.createOrUpdate(sub_cat);
                 }
                         
             }
@@ -212,28 +240,31 @@ public class TransmitorThread implements Runnable {
                 WikiArticle dump_subarticle = dump_page.getArticles().get(i);
 
                 // TEST count the link sizes
-                s_lin += dump_subarticle.getWikiLinks().size();
-                s_sub += dump_subarticle.getWikiSubLinks().size();
-                s_ext += dump_subarticle.getExternLinks().size();
-                s_cat += dump_subarticle.getCategories().size();
+                if (debug) {
+                    s_lin += dump_subarticle.getWikiLinks().size();
+                    s_sub += dump_subarticle.getWikiSubLinks().size();
+                    s_ext += dump_subarticle.getExternLinks().size();
+                    s_cat += dump_subarticle.getCategories().size();
+                }
 
                 // TEST article name
-                System.out.println("Subarticle: " + dump_subarticle.getName());
+                if (debug) System.out.println("Subarticle: " + dump_subarticle.getName());
                 
                 // add subarticle to article
-                SubArticleObject sub = new SubArticleObject();
-                sub.setTitle(dump_subarticle.getName());
-                sub.setParentArticle(main_article);
-                subArticleService.createOrUpdate(sub);
-
+                SubArticleObject sub = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName());
+                
+                if (!main_article.getOwnSubArticles().contains(sub)){
+                    main_article.addSubArticle(sub);
+                    articleService.createOrUpdate(main_article);
+                }
+                
                 // travers each link to article
                 for (String[] linkToArticle:dump_subarticle.getWikiLinks()){
                     // TEST article link
-                    System.out.println("A-Link : " + Arrays.toString(linkToArticle));
+                    if (debug) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
                     
-                    ArticleObject article = new ArticleObject();
-                    article.setTitle(linkToArticle[0]);
-                    articleService.createOrUpdate(article);
+                    ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
+                
                     sub.addLinkToArticle(article);
                     subArticleService.createOrUpdate(sub);
                 }
@@ -241,17 +272,16 @@ public class TransmitorThread implements Runnable {
                 // travers each link to subarticle
                 for (String[] linkToSubArticle:dump_subarticle.getWikiSubLinks()){
                     // TEST article link
-                    System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
+                    if (debug) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                     
-                    ArticleObject article = new ArticleObject();
-                    article.setTitle(linkToSubArticle[0]);
-                    articleService.createOrUpdate(article);
+                    ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);
+                    SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1]);
 
-                    SubArticleObject subarticle = new SubArticleObject();
-                    subarticle.setTitle(linkToSubArticle[1]);
-                    subarticle.setParentArticle(article);
-                    subArticleService.createOrUpdate(subarticle);
-
+                    if (!article.getOwnSubArticles().contains(subarticle)){
+                        article.addSubArticle(subarticle);
+                        articleService.createOrUpdate(article);
+                    }
+                    
                     sub.addLinkToSubArticle(subarticle);
                     subArticleService.createOrUpdate(sub);
                 }
@@ -259,32 +289,46 @@ public class TransmitorThread implements Runnable {
                 // travers each link to extern
                 for (String linkToExtern:dump_subarticle.getExternLinks()){
                     // TEST extern link
-                    System.out.println("E-Link : " + linkToExtern);
+                    if (debug) System.out.println("E-Link : " + linkToExtern);
                     
-                    ExternObject extern = new ExternObject();
-                    extern.setTitle(linkToExtern);
-                    sub.addLinkToExtern(extern);
-                    subArticleService.createOrUpdate(sub);
-                    externService.createOrUpdate(extern);
+                    String[] urlSplit = splitUrl(linkToExtern);
+                    ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
+
+                    if (urlSplit[1].length() > 0) {
+                        // TEST extern link
+                        if (debug) System.out.println("sE-Link: " + urlSplit[1]);
+                    
+                        SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
+
+                        extern.addSubExtern(subextern);
+                        externService.createOrUpdate(extern);
+
+                        sub.addLinkToSubExtern(subextern);
+                        subArticleService.createOrUpdate(sub);
+                    } else {
+                        sub.addLinkToExtern(extern);
+                        subArticleService.createOrUpdate(sub);
+                    }
                 }
 
                 // travers each link to categorie, add it to main article
                 for (Map.Entry<String, List<String>> cat_entry : dump_subarticle.getCategories().entrySet()) {
-                    CategorieObject cat = new CategorieObject();
-                    cat.setTitle(cat_entry.getKey());
-                    categorieService.createOrUpdate(cat);
-
+                    CategorieObject cat = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
+                    
                     // travers each link to subcategorie
                     for (String sc:cat_entry.getValue()){
                         // TEST categorie link
-                        System.out.println("C-Link : " + cat_entry.getKey() + " : " + sc);
+                        if (debug) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sc);
                         
-                        SubCategorieObject sub_cat = new SubCategorieObject();
-                        sub_cat.setTitle(sc);
-                        sub_cat.setParentCategorie(cat);
+                        SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc);
+                        
+                        if (!cat.getSubCategorie().contains(sub_cat)){
+                            cat.addSubCategorie(sub_cat);
+                            categorieService.createOrUpdate(cat);
+                        }
+                        
                         main_article.addLinkToCategorie(sub_cat);
                         articleService.createOrUpdate(main_article);
-                        subCategorieService.createOrUpdate(sub_cat);
                     }
 
                 }
@@ -294,12 +338,70 @@ public class TransmitorThread implements Runnable {
         }
         
         // TEST out the page link stacks
-        System.out.println("STACK -> L-S-E-C: " + 
+        if (debug) {
+            System.out.println("STACK -> L-S-E-C: " + 
                                         String.format("%04d", s_lin) + "-" + 
                                         String.format("%02d", s_sub) + "-" + 
                                         String.format("%03d", s_ext) + "-" + 
                                         String.format("%02d", s_cat) + "\t");
+        }
               
+    }
+    
+    private Entity searchOrCreateEntity(Entity node, String title){
+        Entity search = null;
+        
+        if (node instanceof ActiveNode){
+            search = activeService.findByTitle(activeTitle);
+            if (search == null) {
+                search = new ActiveNode();
+                activeService.createOrUpdate((ActiveNode)search);
+            }
+        }
+        else if (node instanceof ArticleObject){
+            search = articleService.findByTitle(title);
+            if (search == null) {
+                search = new ArticleObject(title);
+                articleService.createOrUpdate((ArticleObject)search);
+            }
+        }
+        else if (node instanceof SubArticleObject){
+            search = subArticleService.findByTitle(title);
+            if (search == null) {
+                search = new SubArticleObject(title);
+                subArticleService.createOrUpdate((SubArticleObject)search);
+            }
+        }
+        else if (node instanceof ExternObject){
+            search = externService.findByTitle(title);
+            if (search == null) {
+                search = new ExternObject(title);
+                externService.createOrUpdate((ExternObject)search);
+            }
+        }
+        else if (node instanceof SubExternObject){
+            search = subExternService.findByTitle(title);
+            if (search == null) {
+                search = new SubExternObject(title);
+                subExternService.createOrUpdate((SubExternObject)search);
+            }
+        }
+        else if (node instanceof CategorieObject){
+            search = categorieService.findByTitle(title);
+            if (search == null) {
+                search = new CategorieObject(title);
+                categorieService.createOrUpdate((CategorieObject)search);
+            }
+        }
+        else if (node instanceof SubCategorieObject){
+            search = subCategorieService.findByTitle(title);
+            if (search == null) {
+                search = new SubCategorieObject(title);
+                subCategorieService.createOrUpdate((SubCategorieObject)search);
+            }
+        }
+                
+        return search;
     }
     
 }

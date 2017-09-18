@@ -33,7 +33,7 @@ public class Neo4JConsole {
         SubCategorieObject subcat = new SubCategorieObject();
         subcat.setTitle("SubCategory");
         
-        subcat.setParentCategorie(cat);
+        cat.addSubCategorie(subcat);
         
         ArticleObject article = new ArticleObject();
         article.setTitle("Article");
@@ -49,8 +49,8 @@ public class Neo4JConsole {
         ExternObject extern = new ExternObject();
         extern.setTitle("Extern");
 
-        SubExternObject subExtern = new SubExternObject("SubExtern", extern);
-
+        SubExternObject subExtern = new SubExternObject("SubExtern");
+        extern.addSubExtern(subExtern);
         extern.addSubExtern(subExtern);
 
 
@@ -65,7 +65,7 @@ public class Neo4JConsole {
         ExternObject extern2 = new ExternObject();
         extern2.setTitle("Extern 2");
         subExtern.setTitle("SubExtern 2");
-        subExtern.setParentExtern(extern2);
+        extern2.addSubExtern(subExtern);
 
         SubExternServiceImpl subExtService = new SubExternServiceImpl();
         subExtService.createOrUpdate(subExtern);
