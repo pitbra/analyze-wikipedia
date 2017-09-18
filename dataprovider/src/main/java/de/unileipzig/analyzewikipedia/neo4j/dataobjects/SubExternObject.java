@@ -1,12 +1,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import java.util.List;
-import org.neo4j.driver.v1.types.Node;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -25,9 +19,6 @@ public class SubExternObject extends Entity {
     
     @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
     List<SubArticleObject> subArticles;
-    
-    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    PageObject page;
 
     @Override
     public String getTitle() {
@@ -54,11 +45,4 @@ public class SubExternObject extends Entity {
         this.parentExtern = parentExtern;
     }
     
-    public void setPage(PageObject page) {
-        this.page = page;
-    }
-    
-    public PageObject getPage() {
-        return this.page;
-    }
 }

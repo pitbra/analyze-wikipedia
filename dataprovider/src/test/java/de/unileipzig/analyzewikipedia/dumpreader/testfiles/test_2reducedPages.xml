@@ -51,13 +51,41 @@
       <model>wikitext</model>
       <format>text/x-wiki</format>
       <text xml:space="preserve">'''Alan Smithee''' steht als [[Regisseur]]
-          
+Der Sublink lautet [[Lebensrechtsbewegung#Gewalt]]
+Der Testlink lautet [http://www.test.com]
+[[Kategorie:HaHa]]       
 == Geschichte ==
           
 Regisseur [[Robert Totten]] und Hauptdarsteller [[Richard Widmark|Mr. Richard]]
 Der Link lautet [http://www.google.de/test/page.xml Testpage]
 [[Kategorie:Fiktive Person|Smithee, Alan]]
 [[Kategorie:Pseudonym]]
+</text>
+      <sha1>9i928nk20i9bbmd6ktangrkxcfho0tf</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Test</title>
+    <ns>0</ns>
+    <id>1</id>
+    <revision>
+      <id>157406713</id>
+      <parentid>153344835</parentid>
+      <timestamp>2016-08-26T17:01:12Z</timestamp>
+      <contributor>
+        <username>Invisigoth67</username>
+        <id>178175</id>
+      </contributor>
+      <comment>/* Referenzen */ Abschnittsnamen korrigiert</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">'''Test''' steht als [[Test]]
+          
+== HiHi ==
+          
+Nein [[No]]
+Der Link lautet [http://www.google.de/test/page.xml Testpage]
+[[Kategorie:Tester]]
 </text>
       <sha1>9i928nk20i9bbmd6ktangrkxcfho0tf</sha1>
     </revision>

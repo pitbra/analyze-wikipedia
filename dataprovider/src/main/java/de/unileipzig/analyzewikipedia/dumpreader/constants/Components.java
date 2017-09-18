@@ -22,7 +22,7 @@ public class Components {
                                                     /*4*/   {"-c","/c"}};   //CATEGORIE
     
     //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_3pages.xml";
-    private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_1reducedPage.xml";
+    private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_2reducedPages.xml";
     
     private final static String MEDIA_TAG = "mediawiki";
     private final static String PAGE_TAG = "page";
@@ -35,7 +35,7 @@ public class Components {
     
     private final static String URL_WIKI = "https://de.wikipedia.org/wiki/";
     
-    private final static int CORES = 1;//Runtime.getRuntime().availableProcessors();
+    private final static int CORES = Runtime.getRuntime().availableProcessors();
     
     private final static String[] FILE_EXTENSION = {"xml"};
     

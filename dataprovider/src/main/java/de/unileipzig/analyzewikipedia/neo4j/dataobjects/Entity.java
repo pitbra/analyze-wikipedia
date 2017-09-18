@@ -6,8 +6,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.Property;
-
 
 /**
  *
@@ -25,6 +23,4 @@ public abstract class Entity {
     
     public abstract String getTitle();
     
-    public abstract void setPage(PageObject page);
-    public abstract PageObject getPage();
 }

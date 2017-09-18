@@ -3,14 +3,8 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import java.util.ArrayList;
 import java.util.List;
-import org.neo4j.driver.v1.types.Node;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -28,7 +22,6 @@ public class ExternObject extends Entity {
     List<ArticleObject> articles;
     
     @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    PageObject page;
     
     public void addLinkFromArticle(ArticleObject article) {
         articles.add(article);
@@ -61,14 +54,4 @@ public class ExternObject extends Entity {
         this.subExterns = subExterns;
     }
     
-    @Override
-    public void setPage(PageObject page) {
-        this.page = page;
-    }
-    
-    @Override
-    public PageObject getPage() {
-        return this.page;
-    }
-
 }

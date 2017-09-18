@@ -12,9 +12,6 @@ public class SubCategorieObject extends Entity {
     @Relationship(type = "HAS", direction = Relationship.INCOMING)
     CategorieObject parentCategorie;
 
-    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    PageObject page;
-    
     public SubCategorieObject() {
         this._title = "";
         this.parentCategorie = null;
@@ -42,13 +39,4 @@ public class SubCategorieObject extends Entity {
         this._title = title;
     }
     
-    @Override
-    public void setPage(PageObject page) {
-        this.page = page;
-    }
-    
-    @Override
-    public PageObject getPage() {
-        return this.page;
-    }
 }

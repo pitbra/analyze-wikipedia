@@ -5,10 +5,7 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -34,12 +31,6 @@ public final class ActiveNode extends Entity{
     public ActiveNode() {
         this.title = "Active";
     }
-
-    @Override
-    public void setPage(PageObject page) {}
-
-    @Override
-    public PageObject getPage() { return null; }
     
 }
 

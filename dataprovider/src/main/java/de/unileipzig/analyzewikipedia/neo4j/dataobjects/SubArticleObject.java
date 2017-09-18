@@ -1,13 +1,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import de.unileipzig.analyzewikipedia.neo4j.constants.AnnotationKeys;
+import java.util.ArrayList;
 import java.util.List;
-import org.neo4j.driver.v1.types.Node;
-import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -17,12 +11,8 @@ public class SubArticleObject extends Entity{
     @Property(name = "title")
     String title;
     
-    @Relationship(type = "has", direction = "INCOMING")
+    @Relationship(type = "HAS", direction = "INCOMING")
     ArticleObject parentArticle;
-    
-    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    PageObject page;
-
     
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<ExternObject> externs;
@@ -39,11 +29,10 @@ public class SubArticleObject extends Entity{
     public SubArticleObject() {
         this.title = "";
         this.parentArticle = null;
-    }
-
-    public SubArticleObject(String title, ArticleObject parentArticle) {
-        this.title = title;
-        this.parentArticle = parentArticle;
+        this.subArticles = new ArrayList<>();
+        this.subExterns = new ArrayList<>();
+        this.externs = new ArrayList<>();
+        this.articles = new ArrayList<>();
     }
     
     @Override
@@ -54,6 +43,10 @@ public class SubArticleObject extends Entity{
                 '}';
     }
 
+    public void setParentArticle(ArticleObject article) {
+        this.parentArticle = article;
+    }
+    
     public void setTitle(String title) {
         this.title = title;
     }
@@ -77,16 +70,6 @@ public class SubArticleObject extends Entity{
     @Override
     public String getTitle() {
         return title;
-    }
-    
-    @Override
-    public void setPage(PageObject page) {
-        this.page = page;
-    }
-    
-    @Override
-    public PageObject getPage() {
-        return this.page;
     }
     
 }

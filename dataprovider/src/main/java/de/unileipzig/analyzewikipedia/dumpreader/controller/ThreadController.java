@@ -186,7 +186,7 @@ public class ThreadController {
                 Components.setTricker(i, true);
             }
         }
-
+        
         return newArg.toArray(new String[newArg.size()]);
         
     }

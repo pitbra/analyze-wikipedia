@@ -2,7 +2,6 @@ package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -13,9 +12,6 @@ public class ArticleObject extends Entity {
     @Property(name = "title")
     private String title;
 
-    @Relationship(type = "HAS", direction = Relationship.OUTGOING)
-    List<SubArticleObject> subArticles;
-
     @Relationship(type = "ACTIVE", direction = Relationship.OUTGOING)
     ActiveNode active;
 
@@ -25,16 +21,15 @@ public class ArticleObject extends Entity {
     @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
     List<SubExternObject> subExterns;
     
+    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
+    List<SubArticleObject> subArticles;
+    
     @Relationship(type = "LINK_TO")
     List<ArticleObject> articles;
     
     @Relationship(type = "CONTAINS", direction = Relationship.INCOMING)
     List<SubCategorieObject> categories;
     
-    @Relationship(type = "PAGE_OF", direction = Relationship.INCOMING)
-    PageObject page;
-
-
     public ArticleObject() {
         this.title = "";
         this.subArticles = new ArrayList<>();
@@ -60,7 +55,7 @@ public class ArticleObject extends Entity {
     public List<SubArticleObject> getSubArticles() {
         return subArticles;
     }
-
+    
     public List<SubExternObject> getSubExterns() {
         return subExterns;
     }
@@ -97,7 +92,7 @@ public class ArticleObject extends Entity {
     public void addLinkToSubArticle(SubArticleObject subArticle) {
         subArticles.add(subArticle);
     }
-
+   
     @Override
     public String toString() {
         return "Article{"
@@ -115,13 +110,4 @@ public class ArticleObject extends Entity {
         this.active = active;
     }    
     
-    @Override
-    public void setPage(PageObject page) {
-        this.page = page;
-    }
-    
-    @Override
-    public PageObject getPage() {
-        return this.page;
-    }
 }

@@ -8,12 +8,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
+import java.net.URLEncoder;
+        
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,10 +178,7 @@ public class SeekerThread implements Runnable {
             sectionlist.add(new String[]{currentArticlename, lineStore});
             
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ReaderThread.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (IOException ex) {}
         
         return new LinkedList(sectionlist);
     }
@@ -214,7 +212,7 @@ public class SeekerThread implements Runnable {
             String name = null;
             
             // if link has special name, safe it
-            if (temp.length > 1) name = temp[1];;
+            if (temp.length > 1) name = temp[1];
             
             if(link.contains(":") == false) {
                     
@@ -226,7 +224,11 @@ public class SeekerThread implements Runnable {
                     
                     // add link to page
                     if (Components.getTricker(2)){
-                        article.addWikiSubLink(link.substring(0, sub), link.substring(sub+1, link.length()));
+                        String l = link.substring(0, sub);
+                        String n = link.substring(sub+1, link.length());
+                        try { l = URLEncoder.encode(l, "UTF-8"); } catch (UnsupportedEncodingException ex){}
+                        try { n = URLEncoder.encode(n, "UTF-8"); } catch (UnsupportedEncodingException ex){}
+                        article.addWikiSubLink(l, n);
                     }
                     
                     // TEST out the subcategorie
@@ -236,6 +238,7 @@ public class SeekerThread implements Runnable {
                 
                     // add link to page
                     if (Components.getTricker(1)){
+                        try { link = URLEncoder.encode(link, "UTF-8"); } catch (UnsupportedEncodingException ex){}
                         article.addWikiLink(link, name);
                     }
 
