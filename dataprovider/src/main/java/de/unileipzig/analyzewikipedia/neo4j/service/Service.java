@@ -35,4 +35,43 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getAllLinkedNodes(String title);
+    
+    /**
+     * Gibt Anzahl der Knoten zurück
+     * 
+     * @return 
+     */
+    Integer getNodeCounter();
+    
+    /**
+     * Gibt Anzahl alle Knoten des bestimmten Types zurück
+     * 
+     * @param label Label der Knoten
+     * @return 
+     */
+    Iterable<Entity> getNodesWithLabel(String label);
+    
+    /**
+     * Gibt alle Knoten ohne Verbindung zu anderen Knoten zurück
+     * 
+     * @return 
+     */
+    Iterable<Entity> getAllNodesWithoutConnection();
+    
+    /**
+     * Gibt alle Knoten mit angegebenner Verbindung zurück
+     * 
+     * @param type Typ der Relation
+     * @return 
+     */
+    Iterable<Entity> getAllNodesWithConnection(String type);
+    
+    /**
+     * Gibt alle Knoten mit angegebenner Typ und suchvariable für den Title zurück
+     * 
+     * @param sequence Label der Knoten
+     * @param type Typ der Relation
+     * @return 
+     */
+    Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence);
 }

@@ -142,7 +142,7 @@ public class TransmitorThread implements Runnable {
             main_article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), dump_article.getName());
             
             if (!main_article.isActive()){
-                ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), "");
+                ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), null);
                 main_article.SetActive(active);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
             }
@@ -343,7 +343,9 @@ public class TransmitorThread implements Runnable {
         Entity search = null;
         
         if (node instanceof ActiveNode){
-            search = ACTIVE_SERVICE.findByTitle(activeTitle);
+            String active = title;
+            if (active == null) active = activeTitle;
+            search = ACTIVE_SERVICE.findByTitle(active);
             if (search == null) {
                 search = new ActiveNode();
                 ACTIVE_SERVICE.createOrUpdate((ActiveNode)search);

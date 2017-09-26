@@ -92,7 +92,7 @@ public class SeekerThread implements Runnable {
                 
                 // select element by title
                 String title = eElement.getElementsByTagName(Components.getTitleTag()).item(0).getTextContent();
-                WikiPage page = new WikiPage(title.replace(" ", "_"));
+                WikiPage page = new WikiPage(replaceText(title));
                 
                 // select element by text
                 String text = eElement.getElementsByTagName(Components.getTextTag()).item(0).getTextContent();
@@ -216,7 +216,7 @@ public class SeekerThread implements Runnable {
             
             if(link.contains(":") == false) {
                     
-                link = link.replace(" ", "_");
+                link = replaceText(link);
                 
                 // check if article links on a subarticle
                 int sub = link.indexOf("#");
@@ -333,6 +333,17 @@ public class SeekerThread implements Runnable {
                         
         }
         
+    }
+    
+    /**
+     * METHOD: replace the special character in a title 
+     *
+     * @param text as string
+     * @return replaced text
+     */
+    public static String replaceText(String text){
+        String replaced = text.replace(" ", "_");
+        return replaced;
     }
     
 }

@@ -5,10 +5,10 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
+import de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.helper.Neo4jSessionFactory;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.neo4j.ogm.session.Session;
 
@@ -45,9 +45,9 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
 
     @Override
-    public T findByTitle(String id) {
+    public T findByTitle(String title) {
         Map<String, Object> params = new HashMap<>();
-        params.put("title", id);
+        params.put("title", SeekerThread.replaceText(title));
 
         String query = QueryHelper.FindByTitle();
 
@@ -71,17 +71,91 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     @Override
     public Iterable<Entity> getAllLinkedNodes(String title) {
         Map<String, Object> params = new HashMap<>();
-        params.put("title", title);
+        params.put("title", SeekerThread.replaceText(title));
 
         String query = QueryHelper.FindLinkedTo();
         
         return session.query(Entity.class, query, params);
     }
+    
+    @Override
+    public Integer getNodeCounter() {
+        Map<String, Object> params = new HashMap<>();
+        //params.put("title", SeekerThread.replaceText(title));
 
+        String query = QueryHelper.countAllNodes();
+        org.neo4j.ogm.model.Result result = session.query(query, params);
+        java.util.Iterator<Map<String, Object>> erg = result.iterator();
+        while (erg.hasNext()){
+            Map<String, Object> tmp = erg.next();
+            if (tmp.containsKey("COUNT(n)")){
+                return Integer.parseInt(tmp.get("COUNT(n)").toString());
+            }
+        }
+        
+        return -1;
+    }
+
+    @Override
+    public Iterable<Entity> getNodesWithLabel(String label) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllNodesWithLabel(label);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getAllNodesWithoutConnection() {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllNodesWithoutConnection();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getAllNodesWithConnection(String type) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllNodesWithConnection(type);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllNodesByLabelAndTitle(label, sequence);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
     abstract Class<T> getEntityType();
 
     private static class QueryHelper {
 
+        private static String findAllNodesByLabelAndTitle(String label, String sequence){
+            return "MATCH (n) WHERE '" + label + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
+        }
+        
+        private static String findAllNodesWithConnection(String type){
+            return "MATCH (o)<-[:`" + type + "`]-(f) return o";
+        }
+        
+        private static String findAllNodesWithoutConnection(){
+            return "MATCH (n) WHERE NOT (n)-[]-() RETURN n";
+        }
+        
+        private static String findAllNodesWithLabel(String label) {
+            return "MATCH (a:" + label + ") RETURN a";
+        }
+        
+        private static String countAllNodes() {
+            return "START n = node(*) RETURN COUNT(n)";
+        }
+        
         private static String FindByTitle() {
             return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
         }
