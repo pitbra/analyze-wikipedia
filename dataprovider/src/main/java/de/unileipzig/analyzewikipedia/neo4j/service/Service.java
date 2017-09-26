@@ -6,7 +6,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
-import java.util.List;
 
 /**
  *
@@ -69,8 +68,8 @@ public interface Service<T extends Entity> {
     /**
      * Gibt alle Knoten mit angegebenner Typ und suchvariable für den Title zurück
      * 
-     * @param sequence Label der Knoten
-     * @param type Typ der Relation
+     * @param label Label der Knoten
+     * @param sequence Suchstring für den Title
      * @return 
      */
     Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence);
