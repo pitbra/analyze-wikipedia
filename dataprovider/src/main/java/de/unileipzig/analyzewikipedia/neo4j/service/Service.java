@@ -28,5 +28,11 @@ public interface Service<T extends Entity> {
     
     Iterable<Entity> shortestPathTo(String sourceTitle, String destinationType, String destinationTitle);
     
+    /**
+     * Gibt alle Knoten zurück, auf die dieser verlinkt.
+     * 
+     * @param title Titel des Knotens
+     * @return 
+     */
     Iterable<Entity> getAllLinkedNodes(String title);
 }
