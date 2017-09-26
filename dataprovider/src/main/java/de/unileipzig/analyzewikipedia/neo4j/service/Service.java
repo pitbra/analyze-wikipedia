@@ -25,4 +25,8 @@ public interface Service<T extends Entity> {
     T createOrUpdate(T object);
     
     T findByTitle(String title);
+    
+    Iterable<Entity> shortestPathTo(String sourceTitle, String destinationType, String destinationTitle);
+    
+    Iterable<Entity> getAllLinkedNodes(String title);
 }

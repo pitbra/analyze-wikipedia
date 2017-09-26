@@ -8,6 +8,7 @@ package de.unileipzig.analyzewikipedia.neo4j.console;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
@@ -24,50 +25,10 @@ import de.unileipzig.analyzewikipedia.neo4j.service.SubExternServiceImpl;
 public class Neo4JConsole {
 
     public static void main(String[] args) {
-
-        ActiveNode active = new ActiveNode();
-
-        CategorieObject cat = new CategorieObject();
-        cat.setTitle("Category");
+        ArticleServiceImpl service = new ArticleServiceImpl();
         
-        SubCategorieObject subcat = new SubCategorieObject();
-        subcat.setTitle("SubCategory");
+        Iterable<Entity> result = service.getAllLinkedNodes("Terrorismus");
         
-        cat.addSubCategorie(subcat);
-        
-        ArticleObject article = new ArticleObject();
-        article.setTitle("Article");
-        article.SetActive(active);
-        
-        SubArticleObject subArticle = new SubArticleObject();
-        subArticle.setTitle("SubArticle");
-
-        article.addLinkToSubArticle(subArticle);
-        
-        ArticleServiceImpl artService = new ArticleServiceImpl();
-        artService.createOrUpdate(article);
-        ExternObject extern = new ExternObject();
-        extern.setTitle("Extern");
-
-        SubExternObject subExtern = new SubExternObject("SubExtern");
-        extern.addSubExtern(subExtern);
-        extern.addSubExtern(subExtern);
-
-
-        article.addLinkToExtern(extern);
-        article.addLinkToSubExtern(subExtern);
-        article.addLinkToCategorie(subcat);
-        artService.createOrUpdate(article);
-
-        ExternServiceImpl extService = new ExternServiceImpl();
-        extService.createOrUpdate(extern);
-        
-        ExternObject extern2 = new ExternObject();
-        extern2.setTitle("Extern 2");
-        subExtern.setTitle("SubExtern 2");
-        extern2.addSubExtern(subExtern);
-
-        SubExternServiceImpl subExtService = new SubExternServiceImpl();
-        subExtService.createOrUpdate(subExtern);
+        int t = 1;
     }
 }
