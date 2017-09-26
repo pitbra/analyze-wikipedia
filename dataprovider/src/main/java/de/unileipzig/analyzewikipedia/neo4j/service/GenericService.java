@@ -160,16 +160,43 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         return session.query(Entity.class, query, params);
     }
     
+    @Override
+    public Iterable<Entity> getAllNodesWithOnlyActiveConnection() {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllNodesWithOnlyActiveConnection();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getAllActiveNodes() {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findAllActiveNodes();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getSubNodesWithConnection() {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findSubNodesWithConnection();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
     abstract Class<T> getEntityType();
 
     private static class QueryHelper {
 
         private static String findLabeledNodesWithIncomeConnection(String label, String type){
-            return "MATCH (o)<-[:`" + type + "`]-(f) WHERE (o:" + label + ") return o";
+            return "MATCH (n:" + label + ")<-[:" + type + "]-(f) return n";
         }
         
         private static String findLabeledAllNodesWithOutgoingConnection(String label, String type){
-            return "MATCH (f)-[:`" + type + "`]->(d) WHERE (d:" + label + ") return d";
+            return "MATCH (f)-[:" + type + "]->(n:" + label + ") return n";
         }
         
         private static String findAllNodesByLabelAndTitle(String label, String sequence){
@@ -177,11 +204,24 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
         
         private static String findAllNodesWithIncomeConnection(String type){
-            return "MATCH (o)<-[:`" + type + "`]-(f) return o";
+            return "MATCH (o)<-[:" + type + "]-(f) return o";
         }
         
         private static String findAllNodesWithOutgoingConnection(String type){
-            return "MATCH (f)-[:`" + type + "`]->(d) return d";
+            return "MATCH (f)-[:" + type + "]->(d) return d";
+        }
+        
+        private static String findAllActiveNodes(){
+            return "MATCH (n)-[:ACTIVE]->(f) RETURN n";
+        }
+        
+        // #### IN BEARBEITUNG
+        private static String findAllNodesWithOnlyActiveConnection(){
+            return "MATCH (n)-[r:ACTIVE]->(f) RETURN n";
+        }
+        
+        private static String findSubNodesWithConnection(){
+            return "MATCH (n)-[r1:HAS]->(s)-[r2:LINK_TO]->(d) RETURN s";
         }
         
         private static String findAllNodesWithoutConnection(){

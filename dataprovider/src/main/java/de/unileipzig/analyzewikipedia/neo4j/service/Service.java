@@ -59,6 +59,20 @@ public interface Service<T extends Entity> {
     Iterable<Entity> getAllNodesWithoutConnection();
     
     /**
+     * Gibt alle Knoten ohne Verbindung zu anderen Knoten zurück, ausser dem Activen Knoten
+     * 
+     * @return 
+     */
+    Iterable<Entity> getAllNodesWithOnlyActiveConnection();
+    
+    /**
+     * Gibt alle aktiven Knoten zurück
+     * 
+     * @return 
+     */
+    Iterable<Entity> getAllActiveNodes();
+    
+    /**
      * Gibt alle Knoten mit angegebenner Verbindung zurück
      * 
      * @param type Typ der Relation
@@ -85,4 +99,11 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction);
+    
+    /**
+     * Gibt alle Knoten zurück die von einem Subknoten verlinkt sind
+     * 
+     * @return 
+     */
+    Iterable<Entity> getSubNodesWithConnection();
 }

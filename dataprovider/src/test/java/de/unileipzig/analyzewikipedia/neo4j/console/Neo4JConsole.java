@@ -77,5 +77,23 @@ public class Neo4JConsole {
             System.out.println(ent.getTitle());
         }
         
+        result = service.getAllNodesWithOnlyActiveConnection();
+        System.out.println("=== Console 9  ===" + "   Nodes with only the active connection");
+        for (Entity ent : result){
+            System.out.println(ent.getTitle());
+        }
+        
+        result = service.getAllActiveNodes();
+        System.out.println("=== Console 10 ===" + "   All active nodes");
+        for (Entity ent : result){
+            System.out.println(ent.getTitle());
+        }
+        
+        result = service.getSubNodesWithConnection();
+        System.out.println("=== Console 11 ===" + "   All linked nodes from subnodes");
+        for (Entity ent : result){
+            System.out.println(ent.getTitle());
+        }
+        
     }
 }
