@@ -10,6 +10,7 @@ import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.helper.Neo4jSessionFactory;
 import java.util.HashMap;
 import java.util.Map;
+import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.session.Session;
 
 /**
@@ -115,10 +116,37 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
-    public Iterable<Entity> getAllNodesWithConnection(String type) {
+    public Iterable<Entity> getAllNodesWithConnection(String type, String direction) {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findAllNodesWithConnection(type);
+        String query;
+        switch (direction){
+            case Relationship.INCOMING:
+                query = QueryHelper.findAllNodesWithIncomeConnection(type);
+                break;
+            case Relationship.OUTGOING:
+            default:
+                query = QueryHelper.findAllNodesWithOutgoingConnection(type);
+                break;
+        }
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query;
+        switch (direction){
+            case Relationship.INCOMING:
+                query = QueryHelper.findLabeledNodesWithIncomeConnection(label, type);
+                break;
+            case Relationship.OUTGOING:
+            default:
+                query = QueryHelper.findLabeledAllNodesWithOutgoingConnection(label, type);
+                break;
+        }
         
         return session.query(Entity.class, query, params);
     }
@@ -136,12 +164,24 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
 
     private static class QueryHelper {
 
+        private static String findLabeledNodesWithIncomeConnection(String label, String type){
+            return "MATCH (o)<-[:`" + type + "`]-(f) WHERE (o:" + label + ") return o";
+        }
+        
+        private static String findLabeledAllNodesWithOutgoingConnection(String label, String type){
+            return "MATCH (f)-[:`" + type + "`]->(d) WHERE (d:" + label + ") return d";
+        }
+        
         private static String findAllNodesByLabelAndTitle(String label, String sequence){
             return "MATCH (n) WHERE '" + label + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
         }
         
-        private static String findAllNodesWithConnection(String type){
+        private static String findAllNodesWithIncomeConnection(String type){
             return "MATCH (o)<-[:`" + type + "`]-(f) return o";
+        }
+        
+        private static String findAllNodesWithOutgoingConnection(String type){
+            return "MATCH (f)-[:`" + type + "`]->(d) return d";
         }
         
         private static String findAllNodesWithoutConnection(){

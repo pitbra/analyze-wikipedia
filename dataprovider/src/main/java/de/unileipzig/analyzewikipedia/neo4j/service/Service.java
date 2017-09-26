@@ -6,6 +6,7 @@
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
+import org.neo4j.ogm.annotation.Relationship;
 
 /**
  *
@@ -61,9 +62,10 @@ public interface Service<T extends Entity> {
      * Gibt alle Knoten mit angegebenner Verbindung zurück
      * 
      * @param type Typ der Relation
+     * @param direction to or from node
      * @return 
      */
-    Iterable<Entity> getAllNodesWithConnection(String type);
+    Iterable<Entity> getAllNodesWithConnection(String type, String direction);
     
     /**
      * Gibt alle Knoten mit angegebenner Typ und suchvariable für den Title zurück
@@ -73,4 +75,14 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence);
+    
+    /**
+     * Gibt alle Knoten mit angegebenner Verbindung zurück
+     * 
+     * @param label Label of node
+     * @param type Typ der Relation
+     * @param direction to or from node
+     * @return 
+     */
+    Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction);
 }
