@@ -255,7 +255,7 @@ public class SeekerThread implements Runnable {
                     String[] categorie_split = link.split(":");
 
                     // add categorie to page
-                    if (categorie_split.length > 1) article.addCategorieName(categorie_split[0], categorie_split[1]);
+                    if (categorie_split.length > 1) article.addCategorieName(replaceText(categorie_split[0]), replaceText(categorie_split[1]));
 
                     // TEST out categories
 //                    System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);

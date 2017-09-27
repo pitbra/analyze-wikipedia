@@ -19,80 +19,115 @@ public class Neo4JConsole {
         ArticleServiceImpl service = new ArticleServiceImpl();
         
         Iterable<Entity> result = service.getAllLinkedNodes("Alan Smithee");
-        System.out.println("=== Console 1  ===" + "   Linked nodes to 'Alan Smithee'");
+        System.out.println("=== Console 1   ===" + "   Linked nodes to 'Alan Smithee'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
         Integer count = service.getNodeCounter();
-        System.out.println("=== Console 2  ===" + "   Count all nodes");
+        System.out.println("=== Console 2   ===" + "   Count all nodes");
         System.out.println(count);
         
         result = service.getNodesWithLabel("Article");
-        System.out.println("=== Console 3  ===" + "   Nodes with label 'Article'");
+        System.out.println("=== Console 3   ===" + "   Nodes with label 'Article'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesWithoutConnection();
+        result = service.getNodesWithoutConnection();
         // in oure graph, all nodes are connected, so it ist just an test of failure
-        System.out.println("=== Console 4  ===" + "   Nodes without connection");
+        System.out.println("=== Console 4   ===" + "   Nodes without connection");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesWithConnection("HAS", Relationship.INCOMING);
-        System.out.println("=== Console 5a ===" + "   Nodes with incoming relationship 'HAS'");
+        result = service.getNodesWithConnection("HAS", Relationship.INCOMING);
+        System.out.println("=== Console 5a  ===" + "   Nodes with incoming relationship 'HAS'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesWithConnection("LINK_TO", Relationship.OUTGOING);
-        System.out.println("=== Console 5b ===" + "   Nodes with outgoing relationship 'LINK_TO'");
+        result = service.getNodesWithConnection("LINK_TO", Relationship.OUTGOING);
+        System.out.println("=== Console 5b  ===" + "   Nodes with outgoing relationship 'LINK_TO'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesByLabelAndSequence("Article", "^A.*");
-        System.out.println("=== Console 6  ===" + "   Nodes with label 'Article' and starting letter 'A'");
+        result = service.getNodesByLabelAndTitlesequence("Article", "^A.*");
+        System.out.println("=== Console 6   ===" + "   Nodes with label 'Article' and starting letter 'A'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesByLabelAndSequence("Article", "(?i)^a.*");
-        System.out.println("=== Console 7  ===" + "   Nodes with label 'Article' and starting letter 'a' case sensitive");
+        result = service.getNodesByLabelAndTitlesequence("Article", "(?i)^a.*");
+        System.out.println("=== Console 7   ===" + "   Nodes with label 'Article' and starting letter 'a' case sensitive");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
         result = service.getLabeledNodesWithConnection("SubArticle", "HAS", Relationship.INCOMING);
-        System.out.println("=== Console 8a ===" + "   SubArticle with incoming relationship 'HAS'");
+        System.out.println("=== Console 8a  ===" + "   SubArticle with incoming relationship 'HAS'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
         result = service.getLabeledNodesWithConnection("Article", "LINK_TO", Relationship.OUTGOING);
-        System.out.println("=== Console 8b ===" + "   Article with outgoing relationship 'LINK_TO'");
+        System.out.println("=== Console 8b  ===" + "   Article with outgoing relationship 'LINK_TO'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllNodesWithOnlyActiveConnection();
-        System.out.println("=== Console 9  ===" + "   Nodes with only the active connection");
+        result = service.getNodesWithOnlyActiveConnection();
+        System.out.println("=== Console 9   ===" + "   Nodes with only the active connection");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
-        result = service.getAllActiveNodes();
-        System.out.println("=== Console 10 ===" + "   All active nodes");
+        result = service.getActiveNodes();
+        System.out.println("=== Console 10  ===" + "   All active nodes");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
         
         result = service.getSubNodesWithConnection();
-        System.out.println("=== Console 11 ===" + "   All linked nodes from subnodes");
+        System.out.println("=== Console 11  ===" + "   All linked nodes from subnodes");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
+        }
+        
+        result = service.getShortestPath("Test", "Regisseur");
+        System.out.println("=== Console 12a ===" + "   Shortest path from 'Test' to 'Regisseur'");
+        for (Entity ent : result){
+            System.out.println(ent.getTitle());
+        }
+        
+        result = service.getShortestPath("Test", "Regisseur");
+        System.out.println("=== Console 12a ===" + "   Shortest path from 'Test' to 'Regisseur'");
+        int i = 0;
+        for (Entity ent : result){
+            System.out.println("Node " + (++i) + ". " + ent.getTitle());
+        }
+        
+        result = service.getShortestPath("Tester", "No");
+        System.out.println("=== Console 12b ===" + "   Shortest path from 'Tester' to 'No'");
+        i = 0;
+        for (Entity ent : result){
+            System.out.println("Node " + (++i) + ". " + ent.getTitle());
+        }
+        
+        // should not by possible, because ther is a 'HAS' between
+        result = service.getShortestPath("Test", "No", "LINK_TO");
+        System.out.println("=== Console 12c ===" + "   Shortest path from 'Test' to 'No' by 'LINK_TO'");
+        i = 0;
+        for (Entity ent : result){
+            System.out.println("Node " + (++i) + ". " + ent.getTitle());
+        }
+        
+        result = service.getShortestPath("Test", "Gewalt", "LINK_TO");
+        System.out.println("=== Console 12d ===" + "   Shortest path from 'Test' to 'Gewalt' by 'LINK_TO'");
+        i = 0;
+        for (Entity ent : result){
+            System.out.println("Node " + (++i) + ". " + ent.getTitle());
         }
         
     }

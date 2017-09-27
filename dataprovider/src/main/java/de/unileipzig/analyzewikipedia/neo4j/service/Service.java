@@ -6,7 +6,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
-import org.neo4j.ogm.annotation.Relationship;
 
 /**
  *
@@ -56,21 +55,21 @@ public interface Service<T extends Entity> {
      * 
      * @return 
      */
-    Iterable<Entity> getAllNodesWithoutConnection();
+    Iterable<Entity> getNodesWithoutConnection();
     
     /**
      * Gibt alle Knoten ohne Verbindung zu anderen Knoten zurück, ausser dem Activen Knoten
      * 
      * @return 
      */
-    Iterable<Entity> getAllNodesWithOnlyActiveConnection();
+    Iterable<Entity> getNodesWithOnlyActiveConnection();
     
     /**
      * Gibt alle aktiven Knoten zurück
      * 
      * @return 
      */
-    Iterable<Entity> getAllActiveNodes();
+    Iterable<Entity> getActiveNodes();
     
     /**
      * Gibt alle Knoten mit angegebenner Verbindung zurück
@@ -79,7 +78,7 @@ public interface Service<T extends Entity> {
      * @param direction to or from node
      * @return 
      */
-    Iterable<Entity> getAllNodesWithConnection(String type, String direction);
+    Iterable<Entity> getNodesWithConnection(String type, String direction);
     
     /**
      * Gibt alle Knoten mit angegebenner Typ und suchvariable für den Title zurück
@@ -88,14 +87,14 @@ public interface Service<T extends Entity> {
      * @param sequence Suchstring für den Title
      * @return 
      */
-    Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence);
+    Iterable<Entity> getNodesByLabelAndTitlesequence(String label, String sequence);
     
     /**
      * Gibt alle Knoten mit angegebenner Verbindung zurück
      * 
-     * @param label Label of node
+     * @param label Label der Knoten
      * @param type Typ der Relation
-     * @param direction to or from node
+     * @param direction Zu oder vom Knoten
      * @return 
      */
     Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction);
@@ -106,4 +105,23 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getSubNodesWithConnection();
+    
+    /**
+     * Gibt kürzesten Weg zwischen zwei Knoten zurück
+     * 
+     * @param start Titel des Startknotens
+     * @param end Titel des Endknotens
+     * @return 
+     */
+    Iterable<Entity> getShortestPath(String start, String end);
+    
+    /**
+     * Gibt kürzesten Weg zwischen zwei Knoten zurück, nur mit bestimmter Relation
+     * 
+     * @param start Titel des Startknotens
+     * @param end Titel des Endknotens
+     * @param type Relationstyp
+     * @return 
+     */
+    Iterable<Entity> getShortestPath(String start, String end, String type);
 }

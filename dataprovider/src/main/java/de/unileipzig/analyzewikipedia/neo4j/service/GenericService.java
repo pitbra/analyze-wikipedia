@@ -84,7 +84,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         Map<String, Object> params = new HashMap<>();
         //params.put("title", SeekerThread.replaceText(title));
 
-        String query = QueryHelper.countAllNodes();
+        String query = QueryHelper.countNodes();
         org.neo4j.ogm.model.Result result = session.query(query, params);
         java.util.Iterator<Map<String, Object>> erg = result.iterator();
         while (erg.hasNext()){
@@ -107,7 +107,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
-    public Iterable<Entity> getAllNodesWithoutConnection() {
+    public Iterable<Entity> getNodesWithoutConnection() {
         Map<String, Object> params = new HashMap<>();
         
         String query = QueryHelper.findAllNodesWithoutConnection();
@@ -116,20 +116,11 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
-    public Iterable<Entity> getAllNodesWithConnection(String type, String direction) {
+    public Iterable<Entity> getNodesWithConnection(String type, String direction) {
         Map<String, Object> params = new HashMap<>();
         
-        String query;
-        switch (direction){
-            case Relationship.INCOMING:
-                query = QueryHelper.findAllNodesWithIncomeConnection(type);
-                break;
-            case Relationship.OUTGOING:
-            default:
-                query = QueryHelper.findAllNodesWithOutgoingConnection(type);
-                break;
-        }
-        
+        String query = QueryHelper.findNodesWithConnection(type, direction);
+                
         return session.query(Entity.class, query, params);
     }
     
@@ -137,43 +128,52 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     public Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction) {
         Map<String, Object> params = new HashMap<>();
         
-        String query;
-        switch (direction){
-            case Relationship.INCOMING:
-                query = QueryHelper.findLabeledNodesWithIncomeConnection(label, type);
-                break;
-            case Relationship.OUTGOING:
-            default:
-                query = QueryHelper.findLabeledAllNodesWithOutgoingConnection(label, type);
-                break;
-        }
+        String query = QueryHelper.findLabeledNodesWithConnection(type, direction, label);
         
         return session.query(Entity.class, query, params);
     }
     
     @Override
-    public Iterable<Entity> getAllNodesByLabelAndSequence(String label, String sequence) {
+    public Iterable<Entity> getNodesByLabelAndTitlesequence(String label, String sequence) {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findAllNodesByLabelAndTitle(label, sequence);
+        String query = QueryHelper.findNodesByLabelAndTitlesequence(label, sequence);
         
         return session.query(Entity.class, query, params);
     }
     
     @Override
-    public Iterable<Entity> getAllNodesWithOnlyActiveConnection() {
+    public Iterable<Entity> getNodesWithOnlyActiveConnection() {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findAllNodesWithOnlyActiveConnection();
+        String query = QueryHelper.findNodesWithOnlyActiveConnection();
         
         return session.query(Entity.class, query, params);
     }
     
     @Override
-    public Iterable<Entity> getAllActiveNodes() {
+    public Iterable<Entity> getActiveNodes() {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findAllActiveNodes();
+        String query = QueryHelper.findActiveNodes();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getShortestPath(String start, String end){
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findShortestPath(SeekerThread.replaceText(start), SeekerThread.replaceText(end));
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getShortestPath(String start, String end, String type){
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findShortestPath(SeekerThread.replaceText(start), SeekerThread.replaceText(end), type);
         
         return session.query(Entity.class, query, params);
     }
@@ -191,33 +191,46 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
 
     private static class QueryHelper {
 
-        private static String findLabeledNodesWithIncomeConnection(String label, String type){
-            return "MATCH (n:" + label + ")<-[:" + type + "]-(f) return n";
-        }
-        
-        private static String findLabeledAllNodesWithOutgoingConnection(String label, String type){
-            return "MATCH (f)-[:" + type + "]->(n:" + label + ") return n";
-        }
-        
-        private static String findAllNodesByLabelAndTitle(String label, String sequence){
-            return "MATCH (n) WHERE '" + label + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
-        }
-        
-        private static String findAllNodesWithIncomeConnection(String type){
-            return "MATCH (o)<-[:" + type + "]-(f) return o";
-        }
-        
-        private static String findAllNodesWithOutgoingConnection(String type){
-            return "MATCH (f)-[:" + type + "]->(d) return d";
-        }
-        
-        private static String findAllActiveNodes(){
-            return "MATCH (n)-[:ACTIVE]->(f) RETURN n";
+        private static String findShortestPath(String start, String end){
+            return "MATCH (s { title: '" + start + "' }),(d { title: '" + end + "' }), p = shortestPath((s)-[*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
         
         // #### IN BEARBEITUNG
-        private static String findAllNodesWithOnlyActiveConnection(){
-            return "MATCH (n)-[r:ACTIVE]->(f) RETURN n";
+        private static String findShortestPath(String start, String end, String type){
+            return  "MATCH (s)-[r:" + type + "]-(d) WITH s,r,d MATCH (a { title: '" + start + "' }), (b { title: '" + end + "' }), p = shortestPath((a)-[*]-(b)) WITH p WHERE length(p) > 1 RETURN p";
+        }
+        
+        private static String findNodesWithConnection(String type, String direction){
+            switch (direction){
+                case Relationship.INCOMING:
+                    return "MATCH (f)-[:" + type + "]->(d) return d";
+                case Relationship.OUTGOING:
+                default:
+                    return "MATCH (s)-[:" + type + "]->(f) return s";
+                    
+            }
+        }
+        
+        private static String findLabeledNodesWithConnection(String type, String direction, String label){
+            switch (direction){
+                case Relationship.INCOMING:
+                    return "MATCH (n:" + label + ")<-[:" + type + "]-(f) return n";
+                case Relationship.OUTGOING:
+                default:
+                    return "MATCH (n:" + label + ")-[:" + type + "]->(f) return n";
+            }
+        }
+                
+        private static String findNodesByLabelAndTitlesequence(String label, String sequence){
+            return "MATCH (n) WHERE '" + label + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
+        }
+        
+        private static String findActiveNodes(){
+            return "MATCH (n)-[:ACTIVE]->(f) RETURN n";
+        }
+        
+        private static String findNodesWithOnlyActiveConnection(){
+            return "MATCH (n)-[:ACTIVE]->(a) WITH n, SIZE( (n)-[]->() ) as likes WHERE likes = 1 RETURN n";
         }
         
         private static String findSubNodesWithConnection(){
@@ -232,9 +245,15 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
             return "MATCH (a:" + label + ") RETURN a";
         }
         
-        private static String countAllNodes() {
+        private static String countNodes() {
             return "START n = node(*) RETURN COUNT(n)";
         }
+        
+        
+        
+        
+        
+        
         
         private static String FindByTitle() {
             return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
