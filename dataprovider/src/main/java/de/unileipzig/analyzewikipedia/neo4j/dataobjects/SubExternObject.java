@@ -7,16 +7,10 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "SubExtern")
-public class SubExternObject extends Entity {
+public class SubExternObject extends Entity implements ToLinkedEntities{
 
     @Property(name = "title")
     private String title;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
-    List<ArticleObject> articles;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
-    List<SubArticleObject> subArticles;
 
     @Override
     public String getTitle() {
@@ -33,7 +27,6 @@ public class SubExternObject extends Entity {
 
     public SubExternObject(String title) {
         this.title = title;
-        this.subArticles = new ArrayList<>();
     }
     
 }

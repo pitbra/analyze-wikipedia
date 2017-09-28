@@ -1,5 +1,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.relationships.LinkToRelationship;
 import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -7,7 +8,7 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "Article")
-public class ArticleObject extends Entity {
+public class ArticleObject extends Entity implements FromLinkedEntities, ToLinkedEntities, ToContainsEntity{
 
     @Property(name = "title")
     private String title;
@@ -18,70 +19,37 @@ public class ArticleObject extends Entity {
     @Relationship(type = "HAS", direction = Relationship.OUTGOING)
     List<SubArticleObject> ownSubArticles;
     
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<ExternObject> externs;
+    List<HasRelationship> hasRelationships;
     
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<SubExternObject> subExterns;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<SubArticleObject> subArticles;
-    
-    @Relationship(type = "LINK_TO")
-    List<ArticleObject> articles;
-    
-    @Relationship(type = "CONTAINS", direction = Relationship.INCOMING)
-    List<SubCategorieObject> categories;
-    
+    List<LinkToReleationship> links;
+        
     public ArticleObject() {
         this("");
     }
     
     public ArticleObject(String title) {
         this.title = title;
-        this.subArticles = new ArrayList<>();
         this.active = null;
-        this.subExterns = new ArrayList<>();
-        this.externs = new ArrayList<>();
-        this.categories = new ArrayList<>();
-        this.articles = new ArrayList<>();
         this.ownSubArticles = new ArrayList<>();
+        this.hasRelationships = new ArrayList<>();
+        this.links = new ArrayList<>();
     }
     
-    public void addLinkToArticle(ArticleObject article) {
-        articles.add(article);
+    public void addLinkToArticle(ArticleObject article, String title) {
+        addLink(article, title);
     }
     
-    public void addLinkToCategorie(SubCategorieObject category)  {
-        categories.add(category);
-    }
-    
-    public List<SubCategorieObject> getCategorie() {
-        return categories;
-    }
-    
-    public List<SubArticleObject> getSubArticles() {
-        return subArticles;
-    }
-    
+      
     public List<SubArticleObject> getOwnSubArticles() {
         return ownSubArticles;
     }
-    
-    public List<SubExternObject> getSubExterns() {
-        return subExterns;
+
+    public void addLinkToExtern(ExternObject extern, String title) {
+        addLink(extern, title);
     }
 
-    public void addLinkToExtern(ExternObject extern) {
-        externs.add(extern);
-    }
-
-    public void addLinkToSubExtern(SubExternObject subExtern) {
-        subExterns.add(subExtern);
-    }
-
-    public List<ExternObject> getExterns() {
-        return externs;
+    public void addLinkToSubExtern(SubExternObject subExtern, String title) {
+        addLink(subExtern, title);
     }
 
     public void setTitle(String title) {
@@ -93,21 +61,23 @@ public class ArticleObject extends Entity {
         return title;
     }
 
-    public ArticleObject(String title, List<SubArticleObject> subArticles, ActiveNode active, List<ExternObject> externs, List<SubExternObject> subExterns, List<SubArticleObject> ownSubArticles) {
+    public ArticleObject(String title, List<LinkToReleationship> links, ActiveNode active, List<SubArticleObject> ownSubArticles) {
         this.title = title;
-        this.subArticles = subArticles;
         this.active = active;
-        this.externs = externs;
-        this.subExterns = subExterns;
         this.ownSubArticles = ownSubArticles;
+        this.links = links;
     }
 
-    public void addLinkToSubArticle(SubArticleObject subArticle) {
-        subArticles.add(subArticle);
+    public void addLinkToSubArticle(SubArticleObject subArticle, String title) {
+        addLink(subArticle, title);
     }
     
     public void addSubArticle(SubArticleObject subArticle) {
-        ownSubArticles.add(subArticle);
+        HasRelationship has = new HasRelationship();
+        has.setTitle("");
+        has.setFrom(this);
+        has.setTo(subArticle);
+        hasRelationships.add(has);
     }
    
     @Override
@@ -127,5 +97,13 @@ public class ArticleObject extends Entity {
     public void SetActive(ActiveNode active) {
         this.active = active;
     }    
+
+    private void addLink(ToLinkedEntities entity, String title) {
+        LinkToReleationship link = new LinkToReleationship();
+        link.setTitle("");
+        link.setFrom(this);
+        link.setTo(entity);
+        links.add(link);
+    }
     
 }

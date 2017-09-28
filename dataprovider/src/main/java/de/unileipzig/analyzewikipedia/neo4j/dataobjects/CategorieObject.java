@@ -18,9 +18,16 @@ public class CategorieObject extends Entity {
 
     @Property(name="title")
     private String title;
-
-    @Relationship(type="HAS")
-    List<SubCategorieObject> ownSubCategories;
+    
+    private List<HasRelationship> hasRelationships;
+    
+    public void addSubCategorie(SubCategorieObject subExtern, String title) {
+        HasRelationship has = new HasRelationship();
+        has.setFrom(this);
+        has.setTo(subExtern);
+        has.setTitle(title);
+        hasRelationships.add(has);
+    }
     
     public CategorieObject() {
         this("");
@@ -28,7 +35,7 @@ public class CategorieObject extends Entity {
     
     public CategorieObject(String title) {
         this.title = title;
-        this.ownSubCategories = new ArrayList<>();
+        this.hasRelationships = new ArrayList<>();
     }
 
     public void setTitle(String title) {
@@ -40,17 +47,9 @@ public class CategorieObject extends Entity {
         return title;
     }
 
-    public CategorieObject(String title, List<SubCategorieObject> subCategories) {
+    public CategorieObject(String title, List<HasRelationship> hasRelaionships) {
         this.title = title;
-        this.ownSubCategories = subCategories;
-    }
-    
-    public void addSubCategorie(SubCategorieObject subCategories){
-        this.ownSubCategories.add(subCategories);
-    }
-    
-    public List<SubCategorieObject> getSubCategorie(){
-        return this.ownSubCategories;
+        this.hasRelationships = hasRelaionships;
     }
     
     @Override
@@ -58,8 +57,17 @@ public class CategorieObject extends Entity {
         return "Article{" +
                 "id=" + getId() +
                 ", title='" + title + '\'' +
-                ", subarticles=" + ownSubCategories.size() +
+                ", subarticles=" + hasRelationships.size() +
                 "}";
+    }
+
+    public boolean contains(SubCategorieObject sub_cat) {
+        for(int i = 0; i < hasRelationships.size(); ++i) {
+            if(hasRelationships.get(i).getTo() == sub_cat){
+                return true;
+            }
+        }
+        return false;
     }
     
 }

@@ -7,21 +7,11 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "SubArticle")
-public class SubArticleObject extends Entity{    
+public class SubArticleObject extends Entity implements FromLinkedEntities, ToLinkedEntities{    
     @Property(name = "title")
     String title;
     
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<ExternObject> externs;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<SubExternObject> subExterns;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<ArticleObject> articles;
-    
-    @Relationship(type = "LINK_TO", direction = Relationship.OUTGOING)
-    List<SubArticleObject> subArticles;
+    List<LinkToReleationship> links;
     
     public SubArticleObject() {
         this("");
@@ -29,10 +19,7 @@ public class SubArticleObject extends Entity{
     
     public SubArticleObject(String title) {
         this.title = title;
-        this.subArticles = new ArrayList<>();
-        this.subExterns = new ArrayList<>();
-        this.externs = new ArrayList<>();
-        this.articles = new ArrayList<>();
+        this.links = new ArrayList<>();
     }
     
     @Override
@@ -46,25 +33,33 @@ public class SubArticleObject extends Entity{
         this.title = title;
     }
     
-    public void addLinkToExtern(ExternObject extern) {
-        externs.add(extern);
+    public void addLinkToExtern(ExternObject extern, String title) {
+        addLink(extern, title);
     }    
     
-    public void addLinkToSubExtern(SubExternObject subExtern) {
-        subExterns.add(subExtern);
+    public void addLinkToSubExtern(SubExternObject subExtern, String title) {
+        addLink(subExtern, title);
     }    
     
-    public void addLinkToArticle(ArticleObject article) {
-        articles.add(article);
+    public void addLinkToArticle(ArticleObject article, String title) {
+        addLink(article, title);
     }    
     
-    public void addLinkToSubArticle(SubArticleObject subArticle) {
-        subArticles.add(subArticle);
+    public void addLinkToSubArticle(SubArticleObject subArticle, String title) {
+        addLink(subArticle, title);
     }    
 
     @Override
     public String getTitle() {
         return title;
+    }
+
+    private void addLink(ToLinkedEntities entity, String title) {
+        LinkToReleationship link = new LinkToReleationship();
+        link.setTitle("");
+        link.setFrom(this);
+        link.setTo(entity);
+        links.add(link);
     }
     
 }

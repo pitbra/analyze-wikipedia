@@ -234,7 +234,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
         
         private static String findSubNodesWithConnection(){
-            return "MATCH (n)-[r1:HAS]->(s)-[r2:LINK_TO]->(d) RETURN s";
+            return "MATCH (n)-[r1:HAS_RELATIONSHIPS]->(s)-[r2:LINKS]->(d) RETURN s";
         }
         
         private static String findAllNodesWithoutConnection(){
@@ -249,12 +249,6 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
             return "START n = node(*) RETURN COUNT(n)";
         }
         
-        
-        
-        
-        
-        
-        
         private static String FindByTitle() {
             return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
         }
@@ -268,7 +262,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
 
         private static String FindLinkedTo() {
-            return "MATCH (n)-[rel:LINK_TO]->(b) "
+            return "MATCH (n)-[rel:LINKS    ]->(b) "
                     + "WHERE n.title = {title} "
                     + "RETURN b";
         }

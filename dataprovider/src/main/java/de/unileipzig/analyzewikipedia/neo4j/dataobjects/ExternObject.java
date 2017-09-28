@@ -10,27 +10,19 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "Extern")
-public class ExternObject extends Entity {
+public class ExternObject extends Entity implements ToLinkedEntities{
 
     @Property(name = "title")
     private String title;
-
-    @Relationship(type = "HAS", direction = Relationship.OUTGOING)
-    private List<SubExternObject> subExterns;
     
-    @Relationship(type = "LINK_TO", direction = Relationship.INCOMING)
-    List<ArticleObject> articles;
+    private List<HasRelationship> hasRelaionships;
     
-    public void addLinkFromArticle(ArticleObject article) {
-        articles.add(article);
-    }
-
-    public List<ArticleObject> getArticle() {
-        return articles;
-    }
-
-    public void addSubExtern(SubExternObject subExtern) {
-        subExterns.add(subExtern);
+    public void addSubExtern(SubExternObject subExtern, String title) {
+        HasRelationship has = new HasRelationship();
+        has.setFrom(this);
+        has.setTo(subExtern);
+        has.setTitle(title);
+        hasRelaionships.add(has);
     }
 
     @Override
@@ -48,14 +40,6 @@ public class ExternObject extends Entity {
     
     public ExternObject(String title) {
         this.title = title;
-        this.subExterns = new ArrayList<>();
-        this.articles = new ArrayList<>();
+        this.hasRelaionships = new ArrayList<>();
     }
-
-    public ExternObject(String title, List<SubExternObject> subExterns) {
-        this.title = title;
-        this.subExterns = subExterns;
-        this.articles = new ArrayList<>();
-    }
-    
 }
