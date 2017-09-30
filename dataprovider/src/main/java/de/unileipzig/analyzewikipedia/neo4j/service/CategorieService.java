@@ -5,7 +5,6 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
 
 /**

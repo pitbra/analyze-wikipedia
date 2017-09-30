@@ -212,7 +212,7 @@ public class SeekerThread implements Runnable {
             String name = null;
             
             // if link has special name, safe it
-            if (temp.length > 1) name = temp[1];
+            if (temp.length > 1) name = replaceText(temp[1]);
             
             if(link.contains(":") == false) {
                     
@@ -225,10 +225,10 @@ public class SeekerThread implements Runnable {
                     // add link to page
                     if (Components.getTricker(2)){
                         String l = link.substring(0, sub);
-                        String n = link.substring(sub+1, link.length());
+                        String s = link.substring(sub+1, link.length());
                         try { l = URLEncoder.encode(l, "UTF-8"); } catch (UnsupportedEncodingException ex){}
-                        try { n = URLEncoder.encode(n, "UTF-8"); } catch (UnsupportedEncodingException ex){}
-                        article.addWikiSubLink(l, n);
+                        try { s = URLEncoder.encode(s, "UTF-8"); } catch (UnsupportedEncodingException ex){}
+                        article.addWikiSubLink(l, s, name);
                     }
                     
                     // TEST out the subcategorie
@@ -298,6 +298,10 @@ public class SeekerThread implements Runnable {
             
             // add the link if it isn't categorie or other
             String link = temp[0];
+            String filetype = null;
+            
+            // if link has special name, safe it
+            if (temp.length > 1) filetype = replaceText(temp[1]);
             
             int pos = link.indexOf(" ");
             String linkurl = "";
@@ -326,7 +330,7 @@ public class SeekerThread implements Runnable {
             }
                     
             // add link to page if it is an url
-            if (Components.getTricker(3) && ThreadController.isUrl(linkurl)) article.addExternLink(linkurl);
+            if (Components.getTricker(3) && ThreadController.isUrl(linkurl)) article.addExternLink(linkurl, filetype);
 
             // TEST out the external link
 //            System.out.println("External: " + linkurl);
@@ -342,7 +346,10 @@ public class SeekerThread implements Runnable {
      * @return replaced text
      */
     public static String replaceText(String text){
-        String replaced = text.replace(" ", "_");
+        String specialCharakter = "_";
+        String replaced = text.replace(" ", specialCharakter);
+        while (replaced.startsWith(specialCharakter)){replaced = replaced.substring(1, replaced.length());}
+        while (replaced.endsWith(specialCharakter)){replaced = replaced.substring(0, replaced.length()-1);}
         return replaced;
     }
     

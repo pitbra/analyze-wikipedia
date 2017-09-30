@@ -154,7 +154,7 @@ public class TransmitorThread implements Runnable {
                 
                 ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
                 
-                main_article.addLinkToArticle(article, "" /*TODO*/);
+                main_article.addLinkToArticle(article, linkToArticle[1]);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
             }
             
@@ -171,16 +171,16 @@ public class TransmitorThread implements Runnable {
                     ARTICLE_SERVICE.createOrUpdate(article);
                 }
                 
-                main_article.addLinkToSubArticle(subarticle, "" /*TODO*/);
+                main_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
             }
             
             // travers each link to extern
-            for (String linkToExtern:dump_article.getExternLinks()){
+            for (String[] linkToExtern:dump_article.getExternLinks()){
                 // TEST extern link
-                if (DEBUG) System.out.println("E-Link : " + linkToExtern); 
+                if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern)); 
                 
-                String[] urlSplit = splitUrl(linkToExtern);
+                String[] urlSplit = splitUrl(linkToExtern[0]);
                 ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
                 
                 if (urlSplit[1].length() > 0) {
@@ -189,13 +189,15 @@ public class TransmitorThread implements Runnable {
                         
                     SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
                     
-                    extern.addSubExtern(subextern, ""  /*TODO*/);
+                    extern.addSubExtern(subextern, linkToExtern[1]);
                     EXTERN_SERVICE.createOrUpdate(extern);
                     
-                    main_article.addLinkToSubExtern(subextern, ""  /*TODO*/);
+                    // make no sence set the linktype
+                    main_article.addLinkToSubExtern(subextern, null);
                     ARTICLE_SERVICE.createOrUpdate(main_article);
                 } else {
-                    main_article.addLinkToExtern(extern, "" /*TODO*/);
+                    
+                    main_article.addLinkToExtern(extern, linkToExtern[1]);
                     ARTICLE_SERVICE.createOrUpdate(main_article);
                 }
             }
@@ -212,11 +214,13 @@ public class TransmitorThread implements Runnable {
                     SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub);
                     
                     if (!cat.contains(sub_cat)){
-                        cat.addSubCategorie(sub_cat, "" /*TODO*/);
+                        // we can change the name to the categorie, if it makes sence
+                        cat.addSubCategorie(sub_cat, null);
                         CATEGORIE_SERVICE.createOrUpdate(cat);
                     }
                     
-                    sub_cat.AddContained(main_article, "" /*TODO*/);
+                    // we can change the name to the categorie, if it makes sence
+                    sub_cat.addContained(main_article, null);
                     ARTICLE_SERVICE.createOrUpdate(main_article);
                 }
                         
@@ -256,7 +260,7 @@ public class TransmitorThread implements Runnable {
                     
                     ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
                 
-                    sub.addLinkToArticle(article, "" /*TODO*/);
+                    sub.addLinkToArticle(article, linkToArticle[1]);
                     SUBARTICLE_SERVICE.createOrUpdate(sub);
                 }
 
@@ -273,16 +277,16 @@ public class TransmitorThread implements Runnable {
                         ARTICLE_SERVICE.createOrUpdate(article);
                     }
                     
-                    sub.addLinkToSubArticle(subarticle, "" /*TODO*/);
+                    sub.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
                     SUBARTICLE_SERVICE.createOrUpdate(sub);
                 }
 
                 // travers each link to extern
-                for (String linkToExtern:dump_subarticle.getExternLinks()){
+                for (String[] linkToExtern:dump_subarticle.getExternLinks()){
                     // TEST extern link
-                    if (DEBUG) System.out.println("E-Link : " + linkToExtern);
+                    if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern));
                     
-                    String[] urlSplit = splitUrl(linkToExtern);
+                    String[] urlSplit = splitUrl(linkToExtern[0]);
                     ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
 
                     if (urlSplit[1].length() > 0) {
@@ -291,13 +295,14 @@ public class TransmitorThread implements Runnable {
                     
                         SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
 
-                        extern.addSubExtern(subextern, "" /*TODO*/);
+                        extern.addSubExtern(subextern, linkToExtern[1]);
                         EXTERN_SERVICE.createOrUpdate(extern);
 
-                        sub.addLinkToSubExtern(subextern, "" /*TODO*/);
+                        // make no sence set the linktype
+                        sub.addLinkToSubExtern(subextern, null);
                         SUBARTICLE_SERVICE.createOrUpdate(sub);
                     } else {
-                        sub.addLinkToExtern(extern, "" /*TODO*/);
+                        sub.addLinkToExtern(extern, linkToExtern[1]);
                         SUBARTICLE_SERVICE.createOrUpdate(sub);
                     }
                 }
@@ -314,11 +319,13 @@ public class TransmitorThread implements Runnable {
                         SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc);
                         
                         if (!cat.contains(sub_cat)){
-                            cat.addSubCategorie(sub_cat, "" /*TODO*/);
+                            // we can change the name to the categorie, if it makes sence
+                            cat.addSubCategorie(sub_cat, null);
                             CATEGORIE_SERVICE.createOrUpdate(cat);
                         }
                         
-                        sub_cat.AddContained(main_article, "" /*TODO*/);
+                        // we can change the name to the categorie, if it makes sence
+                        sub_cat.addContained(main_article, null);
                         ARTICLE_SERVICE.createOrUpdate(main_article);
                     }
 

@@ -5,7 +5,6 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 
 /**

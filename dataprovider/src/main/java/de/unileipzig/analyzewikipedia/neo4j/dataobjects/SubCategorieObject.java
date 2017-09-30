@@ -6,7 +6,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 
 @NodeEntity(label = "SubCategory")
-public class SubCategorieObject extends Entity implements FromContainsEntity{
+public class SubCategorieObject extends Entity implements FromContainsEntity {
     @Property(name = "title")
     private String title;
     
@@ -34,11 +34,12 @@ public class SubCategorieObject extends Entity implements FromContainsEntity{
         this.title = title;
     }
     
-    public void AddContained(ToContainsEntity entity, String title) {
+    public void addContained(ToContainsEntity entity, String title) {
         ContainsRelationship contain = new ContainsRelationship();
         contain.setFrom(this);
         contain.setTo(entity);
         contain.setTitle(title);
+        contained.add(contain);
     }
     
 }

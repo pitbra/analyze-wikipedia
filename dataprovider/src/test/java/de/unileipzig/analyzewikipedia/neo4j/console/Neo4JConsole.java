@@ -5,11 +5,7 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.console;
 
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
 import org.neo4j.ogm.annotation.Relationship;
 
@@ -132,6 +128,12 @@ public class Neo4JConsole {
         i = 0;
         for (Entity ent : result){
             System.out.println("Node " + (++i) + ". " + ent.getTitle());
+        }
+        
+        result = service.getNodesWithTitledConnection("Regi");
+        System.out.println("=== Console 13  ===" + "   Nodes with 'Regi' as relation name");
+        for (Entity ent : result){
+            System.out.println(ent.getTitle());
         }
         
     }

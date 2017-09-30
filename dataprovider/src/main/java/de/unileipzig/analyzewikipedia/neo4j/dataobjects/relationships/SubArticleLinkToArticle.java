@@ -6,12 +6,8 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects.relationships;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
-import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
 
 /**
  *

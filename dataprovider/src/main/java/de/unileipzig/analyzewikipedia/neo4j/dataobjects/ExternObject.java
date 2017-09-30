@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "Extern")
 public class ExternObject extends Entity implements ToLinkedEntities{
@@ -15,14 +14,14 @@ public class ExternObject extends Entity implements ToLinkedEntities{
     @Property(name = "title")
     private String title;
     
-    private List<HasRelationship> hasRelaionships;
+    private List<HasRelationship> hasRelationships;
     
     public void addSubExtern(SubExternObject subExtern, String title) {
         HasRelationship has = new HasRelationship();
         has.setFrom(this);
         has.setTo(subExtern);
         has.setTitle(title);
-        hasRelaionships.add(has);
+        hasRelationships.add(has);
     }
 
     @Override
@@ -40,6 +39,6 @@ public class ExternObject extends Entity implements ToLinkedEntities{
     
     public ExternObject(String title) {
         this.title = title;
-        this.hasRelaionships = new ArrayList<>();
+        this.hasRelationships = new ArrayList<>();
     }
 }

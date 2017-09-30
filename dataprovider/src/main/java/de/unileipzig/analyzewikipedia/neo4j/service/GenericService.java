@@ -56,20 +56,6 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
 
     @Override
-    public Iterable<Entity> shortestPathTo(String sourceTitle, String destinationType, String destinationTitle) {
-        /*Map<String, Object> params = new HashMap<>();
-        params.put("startType", this.getEntityType());
-        params.put("startTitle", sourceTitle);
-        params.put("destType", destinationType);
-        params.put("destTitle", destinationType);
-                
-        String query = QueryHelper.ShortestPath();
-        
-        return session.query(Entity.class, query, params*/
-        return null;
-    }
-
-    @Override
     public Iterable<Entity> getAllLinkedNodes(String title) {
         Map<String, Object> params = new HashMap<>();
         params.put("title", SeekerThread.replaceText(title));
@@ -187,10 +173,22 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         return session.query(Entity.class, query, params);
     }
     
+    @Override
+    public Iterable<Entity> getNodesWithTitledConnection(String title) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findNodesWithTitledConnection(title);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
     abstract Class<T> getEntityType();
 
     private static class QueryHelper {
-
+        private static String findNodesWithTitledConnection(String title){
+            return "MATCH (f)-[r {title: '" + title + "'}]->(d) RETURN f";
+        }
+        
         private static String findShortestPath(String start, String end){
             return "MATCH (s { title: '" + start + "' }),(d { title: '" + end + "' }), p = shortestPath((s)-[*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
@@ -251,14 +249,6 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         
         private static String FindByTitle() {
             return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
-        }
-
-        private static String ShortestPath() {
-            return "MATCH (n), (m)\n"
-                    + "WHERE n.title = {startTitle} "
-                    + "AND m.title = {destTitle} "
-                    + "MATCH path = allShortestPaths( (n)-[*..4]-(m) )\n"
-                    + "RETURN path";
         }
 
         private static String FindLinkedTo() {

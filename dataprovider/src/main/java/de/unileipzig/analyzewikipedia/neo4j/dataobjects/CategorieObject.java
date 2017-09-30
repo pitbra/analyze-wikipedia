@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.Relationship;
 
 /**
  *

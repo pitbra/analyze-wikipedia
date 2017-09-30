@@ -6,7 +6,6 @@
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 
 
 public class CategorieServiceImpl extends GenericService<CategorieObject> implements CategorieService {

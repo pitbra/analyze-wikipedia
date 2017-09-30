@@ -25,8 +25,6 @@ public interface Service<T extends Entity> {
     
     T findByTitle(String title);
     
-    Iterable<Entity> shortestPathTo(String sourceTitle, String destinationType, String destinationTitle);
-    
     /**
      * Gibt alle Knoten zurück, auf die dieser verlinkt.
      * 
@@ -124,4 +122,12 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getShortestPath(String start, String end, String type);
+    
+    /**
+     * Gibt Knoten mit gesuchter Beschriftung zurück
+     * 
+     * @param title Titel der Kante
+     * @return 
+     */
+    Iterable<Entity> getNodesWithTitledConnection(String title);
 }

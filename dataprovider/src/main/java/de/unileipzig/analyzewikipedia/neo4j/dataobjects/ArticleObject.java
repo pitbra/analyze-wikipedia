@@ -1,6 +1,5 @@
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.relationships.LinkToRelationship;
 import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -100,7 +99,7 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
 
     private void addLink(ToLinkedEntities entity, String title) {
         LinkToReleationship link = new LinkToReleationship();
-        link.setTitle("");
+        link.setTitle(title);
         link.setFrom(this);
         link.setTo(entity);
         links.add(link);
