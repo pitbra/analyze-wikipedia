@@ -209,7 +209,7 @@ public class SeekerThread implements Runnable {
             
             // add the link if it isn't categorie or other
             String link = temp[0];
-            String name = null;
+            String name = "";
             
             // if link has special name, safe it
             if (temp.length > 1) name = replaceText(temp[1]);
@@ -298,7 +298,7 @@ public class SeekerThread implements Runnable {
             
             // add the link if it isn't categorie or other
             String link = temp[0];
-            String filetype = null;
+            String filetype = "";
             
             // if link has special name, safe it
             if (temp.length > 1) filetype = replaceText(temp[1]);

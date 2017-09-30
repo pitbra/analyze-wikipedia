@@ -221,6 +221,7 @@ public class TransmitorThread implements Runnable {
                     
                     // we can change the name to the categorie, if it makes sence
                     sub_cat.addContained(main_article, null);
+                    SUBCATEGORIE_SERVICE.createOrUpdate(sub_cat);
                     ARTICLE_SERVICE.createOrUpdate(main_article);
                 }
                         
@@ -326,6 +327,7 @@ public class TransmitorThread implements Runnable {
                         
                         // we can change the name to the categorie, if it makes sence
                         sub_cat.addContained(main_article, null);
+                        SUBCATEGORIE_SERVICE.createOrUpdate(sub_cat);
                         ARTICLE_SERVICE.createOrUpdate(main_article);
                     }
 
