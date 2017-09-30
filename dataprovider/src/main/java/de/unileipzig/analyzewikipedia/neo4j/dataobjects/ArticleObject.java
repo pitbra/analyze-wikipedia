@@ -100,7 +100,7 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
 
     private void addLink(ToLinkedEntities entity, String title) {
         LinkToReleationship link = new LinkToReleationship();
-        link.setTitle("");
+        link.setTitle(title);
         link.setFrom(this);
         link.setTo(entity);
         links.add(link);

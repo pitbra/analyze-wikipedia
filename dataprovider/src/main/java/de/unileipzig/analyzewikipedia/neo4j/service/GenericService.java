@@ -197,7 +197,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         
         // #### IN BEARBEITUNG
         private static String findShortestPath(String start, String end, String type){
-            return  "MATCH (s)-[r:" + type + "]-(d) WITH s,r,d MATCH (a { title: '" + start + "' }), (b { title: '" + end + "' }), p = shortestPath((a)-[*]-(b)) WITH p WHERE length(p) > 1 RETURN p";
+            return "MATCH (s { title: '"+ start + "' }), (d { title: '" + end + "' }) , p = shortestPath((s)-[r:" + type + "*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
         
         private static String findNodesWithConnection(String type, String direction){

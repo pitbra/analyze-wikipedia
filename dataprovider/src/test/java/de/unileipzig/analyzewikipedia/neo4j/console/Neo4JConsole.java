@@ -51,8 +51,8 @@ public class Neo4JConsole {
             System.out.println(ent.getTitle());
         }
         
-        result = service.getNodesWithConnection("LINK_TO", Relationship.OUTGOING);
-        System.out.println("=== Console 5b  ===" + "   Nodes with outgoing relationship 'LINK_TO'");
+        result = service.getNodesWithConnection("LINKS", Relationship.OUTGOING);
+        System.out.println("=== Console 5b  ===" + "   Nodes with outgoing relationship 'LINKS'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
@@ -76,7 +76,7 @@ public class Neo4JConsole {
         }
         
         result = service.getLabeledNodesWithConnection("Article", "LINK_TO", Relationship.OUTGOING);
-        System.out.println("=== Console 8b  ===" + "   Article with outgoing relationship 'LINK_TO'");
+        System.out.println("=== Console 8b  ===" + "   Article with outgoing relationship 'LINKS'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
@@ -112,23 +112,23 @@ public class Neo4JConsole {
             System.out.println("Node " + (++i) + ". " + ent.getTitle());
         }
         
-        result = service.getShortestPath("Tester", "No");
-        System.out.println("=== Console 12b ===" + "   Shortest path from 'Tester' to 'No'");
+        result = service.getShortestPath("Asien", "Geschichte");
+        System.out.println("=== Console 12b ===" + "   Shortest path from 'Asien' to 'Geschichte'");
         i = 0;
         for (Entity ent : result){
             System.out.println("Node " + (++i) + ". " + ent.getTitle());
         }
         
         // should not by possible, because ther is a 'HAS' between
-        result = service.getShortestPath("Test", "No", "LINK_TO");
-        System.out.println("=== Console 12c ===" + "   Shortest path from 'Test' to 'No' by 'LINK_TO'");
+        result = service.getShortestPath("Test", "No", "LINKS");
+        System.out.println("=== Console 12c ===" + "   Shortest path from 'Test' to 'No' by 'LINKS'");
         i = 0;
         for (Entity ent : result){
             System.out.println("Node " + (++i) + ". " + ent.getTitle());
         }
         
-        result = service.getShortestPath("Test", "Gewalt", "LINK_TO");
-        System.out.println("=== Console 12d ===" + "   Shortest path from 'Test' to 'Gewalt' by 'LINK_TO'");
+        result = service.getShortestPath("Asien", "Geschichte", "LINKS");
+        System.out.println("=== Console 12d ===" + "   Shortest path from 'Asien' to 'Geschichte' by 'LINKS'");
         i = 0;
         for (Entity ent : result){
             System.out.println("Node " + (++i) + ". " + ent.getTitle());
