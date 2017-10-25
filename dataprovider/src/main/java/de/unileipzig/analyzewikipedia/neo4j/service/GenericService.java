@@ -182,9 +182,22 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         return session.query(Entity.class, query, params);
     }
     
+    @Override
+    public Iterable<Entity> getWeblinks(String title) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findWeblinks(title);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
     abstract Class<T> getEntityType();
 
     private static class QueryHelper {
+        private static String findWeblinks(String title){
+            return "MATCH (f)-[r {title: '" + title + "'}]->(d) RETURN f";
+        }
+        
         private static String findNodesWithTitledConnection(String title){
             return "MATCH (f)-[r {title: '" + title + "'}]->(d) RETURN f";
         }
@@ -193,7 +206,6 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
             return "MATCH (s { title: '" + start + "' }),(d { title: '" + end + "' }), p = shortestPath((s)-[*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
         
-        // #### IN BEARBEITUNG
         private static String findShortestPath(String start, String end, String type){
             return "MATCH (s { title: '"+ start + "' }), (d { title: '" + end + "' }) , p = shortestPath((s)-[r:" + type + "*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }

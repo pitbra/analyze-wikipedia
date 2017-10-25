@@ -130,4 +130,12 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getNodesWithTitledConnection(String title);
+    
+    /**
+     * Gibt alle externen Links des Knotens zurück
+     * 
+     * @param title Titel der Kante
+     * @return 
+     */
+    Iterable<Entity> getWeblinks(String title);
 }
