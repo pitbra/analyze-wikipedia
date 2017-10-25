@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
@@ -24,6 +19,8 @@ public interface Service<T extends Entity> {
     T createOrUpdate(T object);
     
     T findByTitle(String title);
+    
+    T findSubTitleNode(String title, String subtitle);
     
     /**
      * Gibt alle Knoten zurück, auf die dieser verlinkt.

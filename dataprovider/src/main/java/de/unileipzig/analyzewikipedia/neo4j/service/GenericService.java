@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread;
@@ -50,8 +45,16 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         Map<String, Object> params = new HashMap<>();
         params.put("title", SeekerThread.replaceText(title));
 
-        String query = QueryHelper.FindByTitle();
+        String query = QueryHelper.findByTitle();
 
+        return session.queryForObject(getEntityType(), query, params);
+    }
+
+    @Override
+    public T findSubTitleNode(String title, String subtitle) {
+        Map<String, Object> params = new HashMap<>();
+        String query = QueryHelper.findSubArtcileByTitle(SeekerThread.replaceText(title), SeekerThread.replaceText(subtitle));
+        
         return session.queryForObject(getEntityType(), query, params);
     }
 
@@ -60,7 +63,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         Map<String, Object> params = new HashMap<>();
         params.put("title", SeekerThread.replaceText(title));
 
-        String query = QueryHelper.FindLinkedTo();
+        String query = QueryHelper.findLinkedTo();
         
         return session.query(Entity.class, query, params);
     }
@@ -186,7 +189,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     public Iterable<Entity> getWeblinks(String title) {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findWeblinks(title);
+        String query = QueryHelper.findWeblinks(SeekerThread.replaceText(title));
         
         return session.query(Entity.class, query, params);
     }
@@ -195,7 +198,8 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
 
     private static class QueryHelper {
         private static String findWeblinks(String title){
-            return "MATCH (f)-[r {title: '" + title + "'}]->(d) RETURN f";
+            return "MATCH (n)-[r:HAS_RELATIONSHIPS]->(s)-[rs:LINKS]->(f) WHERE n.title = \"" + title + "\" RETURN f "
+                   + "UNION MATCH (n)-[r:LINKS]->(f:SubExtern) WHERE n.title = \"" + title + "\" RETURN f";
         }
         
         private static String findNodesWithTitledConnection(String title){
@@ -259,11 +263,15 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
             return "START n = node(*) RETURN COUNT(n)";
         }
         
-        private static String FindByTitle() {
+        private static String findByTitle() {
             return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
         }
 
-        private static String FindLinkedTo() {
+        private static String findSubArtcileByTitle(String title, String subtitle) {
+            return "MATCH (n { title: '" + title + "'})-[r:HAS_RELATIONSHIPS]->(f { title: '" + subtitle + "'}) RETURN f";
+        }
+
+        private static String findLinkedTo() {
             return "MATCH (n)-[rel:LINKS    ]->(b) "
                     + "WHERE n.title = {title} "
                     + "RETURN b";

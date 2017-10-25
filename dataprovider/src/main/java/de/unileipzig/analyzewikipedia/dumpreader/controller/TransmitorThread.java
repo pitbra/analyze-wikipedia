@@ -164,7 +164,7 @@ public class TransmitorThread implements Runnable {
                 if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                 
                 ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);                
-                SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1]);
+                SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
     
                 if (!article.getOwnSubArticles().contains(subarticle)){
                     article.addSubArticle(subarticle);
@@ -187,7 +187,7 @@ public class TransmitorThread implements Runnable {
                     // TEST extern link
                     if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
                         
-                    SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
+                    SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
                     
                     extern.addSubExtern(subextern, linkToExtern[1]);
                     EXTERN_SERVICE.createOrUpdate(extern);
@@ -211,7 +211,7 @@ public class TransmitorThread implements Runnable {
                     // TEST categorie link
                     if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
                     
-                    SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub);
+                    SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub, cat_entry.getKey());
                     
                     if (!cat.contains(sub_cat)){
                         // we can change the name to the categorie, if it makes sence
@@ -247,7 +247,7 @@ public class TransmitorThread implements Runnable {
                 if (DEBUG) System.out.println("Subarticle: " + dump_subarticle.getName());
                 
                 // add subarticle to article
-                SubArticleObject sub = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName());
+                SubArticleObject sub = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName(), main_article.getTitle());
                 
                 if (!main_article.getOwnSubArticles().contains(sub)){
                     main_article.addSubArticle(sub);
@@ -271,7 +271,7 @@ public class TransmitorThread implements Runnable {
                     if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                     
                     ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);
-                    SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1]);
+                    SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
 
                     if (!article.getOwnSubArticles().contains(subarticle)){
                         article.addSubArticle(subarticle);
@@ -294,7 +294,7 @@ public class TransmitorThread implements Runnable {
                         // TEST extern link
                         if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
                     
-                        SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1]);
+                        SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
 
                         extern.addSubExtern(subextern, linkToExtern[1]);
                         EXTERN_SERVICE.createOrUpdate(extern);
@@ -317,7 +317,7 @@ public class TransmitorThread implements Runnable {
                         // TEST categorie link
                         if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sc);
                         
-                        SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc);
+                        SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc, cat_entry.getKey());
                         
                         if (!cat.contains(sub_cat)){
                             // we can change the name to the categorie, if it makes sence
@@ -349,8 +349,12 @@ public class TransmitorThread implements Runnable {
     }
     
     private Entity searchOrCreateEntity(Entity node, String title){
+        return searchOrCreateEntity(node, title, null);
+    }
+    
+    private Entity searchOrCreateEntity(Entity node, String title, String parent){
         Entity search = null;
-        
+        System.out.println(title + "\t" + parent);
         if (node instanceof ActiveNode){
             String active = title;
             if (active == null) active = activeTitle;
@@ -368,7 +372,7 @@ public class TransmitorThread implements Runnable {
             }
         }
         else if (node instanceof SubArticleObject){
-            search = SUBARTICLE_SERVICE.findByTitle(title);
+            if (parent == null) search = SUBARTICLE_SERVICE.findByTitle(title); else search = SUBARTICLE_SERVICE.findSubTitleNode(parent, title);
             if (search == null) {
                 search = new SubArticleObject(title);
                 SUBARTICLE_SERVICE.createOrUpdate((SubArticleObject)search);
@@ -382,7 +386,7 @@ public class TransmitorThread implements Runnable {
             }
         }
         else if (node instanceof SubExternObject){
-            search = SUBEXTERN_SERVICE.findByTitle(title);
+            if (parent == null) search = SUBEXTERN_SERVICE.findByTitle(title); else search = SUBEXTERN_SERVICE.findSubTitleNode(parent, title);
             if (search == null) {
                 search = new SubExternObject(title);
                 SUBEXTERN_SERVICE.createOrUpdate((SubExternObject)search);
@@ -396,7 +400,7 @@ public class TransmitorThread implements Runnable {
             }
         }
         else if (node instanceof SubCategorieObject){
-            search = SUBCATEGORIE_SERVICE.findByTitle(title);
+            if (parent == null) search = SUBCATEGORIE_SERVICE.findByTitle(title); else search = SUBCATEGORIE_SERVICE.findSubTitleNode(parent, title);
             if (search == null) {
                 search = new SubCategorieObject(title);
                 SUBCATEGORIE_SERVICE.createOrUpdate((SubCategorieObject)search);
