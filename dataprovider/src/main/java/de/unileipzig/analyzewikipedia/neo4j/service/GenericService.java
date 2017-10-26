@@ -198,7 +198,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
 
     private static class QueryHelper {
         private static String findWeblinks(String title){
-            return "MATCH (n)-[r:HAS_RELATIONSHIPS]->(s)-[rs:LINKS]->(f) WHERE n.title = \"" + title + "\" RETURN f "
+            return "MATCH (n)-[r:HAS]->(s)-[rs:LINKS]->(f) WHERE n.title = \"" + title + "\" RETURN f "
                    + "UNION MATCH (n)-[r:LINKS]->(f:SubExtern) WHERE n.title = \"" + title + "\" RETURN f";
         }
         
@@ -248,7 +248,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
         
         private static String findSubNodesWithConnection(){
-            return "MATCH (n)-[r1:HAS_RELATIONSHIPS]->(s)-[r2:LINKS]->(d) RETURN s";
+            return "MATCH (n)-[r1:HAS]->(s)-[r2:LINKS]->(d) RETURN s";
         }
         
         private static String findAllNodesWithoutConnection(){
@@ -268,7 +268,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
 
         private static String findSubArtcileByTitle(String title, String subtitle) {
-            return "MATCH (n { title: '" + title + "'})-[r:HAS_RELATIONSHIPS]->(f { title: '" + subtitle + "'}) RETURN f";
+            return "MATCH (n { title: '" + title + "'})-[r:HAS]->(f { title: '" + subtitle + "'}) RETURN f";
         }
 
         private static String findLinkedTo() {

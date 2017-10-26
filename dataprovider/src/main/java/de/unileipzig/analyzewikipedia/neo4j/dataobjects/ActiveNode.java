@@ -5,10 +5,8 @@
  */
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
-import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.Relationship;
 
 /**
  *
@@ -17,20 +15,23 @@ import org.neo4j.ogm.annotation.Relationship;
 @NodeEntity(label="Active")
 public final class ActiveNode extends Entity{
     
+    // <editor-fold desc=">> classvariables" defaultstate="collapsed">
     @Property(name = "title")
     private String title = "Active";
+    // </editor-fold>
     
+    // <editor-fold desc=">> constructors" defaultstate="collapsed">
+    public ActiveNode() {
+        this.title = "Active";
+    }
+    // </editor-fold>
+    
+    // <editor-fold desc=">> getters" defaultstate="collapsed">
     @Override
     public String getTitle() {
         return title;
     }
-    
-    @Relationship(type = "isActive", direction = Relationship.INCOMING)
-    List<Entity> activeEntities;
-
-    public ActiveNode() {
-        this.title = "Active";
-    }
+    // </editor-fold>
     
 }
 

@@ -8,7 +8,8 @@ import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "Article")
 public class ArticleObject extends Entity implements FromLinkedEntities, ToLinkedEntities, ToContainsEntity{
-
+    
+    // <editor-fold desc=">> classvariable" defaultstate="collapsed">
     @Property(name = "title")
     private String title;
 
@@ -16,87 +17,87 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
     ActiveNode active;
 
     @Relationship(type = "HAS", direction = Relationship.OUTGOING)
-    List<SubArticleObject> ownSubArticles;
-    
     List<HasRelationship> hasRelationships;
     
     List<LinkToReleationship> links;
-        
+    // </editor-fold>
+    
+    // <editor-fold desc=">> constructors" defaultstate="collapsed">
     public ArticleObject() {
         this("");
     }
     
     public ArticleObject(String title) {
+        this(title, new ArrayList<HasRelationship>(), new ArrayList<LinkToReleationship>());
+    }
+    
+    public ArticleObject(String title, List<HasRelationship> hasRelaionships, List<LinkToReleationship> links) {
         this.title = title;
         this.active = null;
-        this.ownSubArticles = new ArrayList<>();
-        this.hasRelationships = new ArrayList<>();
-        this.links = new ArrayList<>();
+        this.hasRelationships = hasRelaionships;
+        this.links = links;
+    }
+    // </editor-fold>
+    
+    // <editor-fold desc=">> methods" defaultstate="collapsed">
+    @Override
+    public String toString() {
+        return "Article{"
+                + "id=" + getId()
+                + ", title='" + title + '\''
+                + ", active=" + isActive()
+                + ", subarticlesize=" + hasRelationships.size()
+                + ", linksize=" + links.size()
+                + "}";
+    }
+    
+    public boolean isActive() {
+        return this.active != null;
+    }
+    
+    private boolean contains(SubArticleObject sub_art) {
+        for(int i = 0; i < hasRelationships.size(); ++i) {
+            if(hasRelationships.get(i).getTo() == sub_art){
+                return true;
+            }
+        }
+        return false;
+    }
+    // </editor-fold>
+    
+    // <editor-fold desc=">> adders" defaultstate="collapsed">
+    public void addLinkToArticle(ArticleObject article) {
+        addLink(article, "");
     }
     
     public void addLinkToArticle(ArticleObject article, String title) {
         addLink(article, title);
     }
     
-      
-    public List<SubArticleObject> getOwnSubArticles() {
-        return ownSubArticles;
+    public void addLinkToSubArticle(SubArticleObject subArticle) {
+        addLink(subArticle, "");
     }
-
-    public void addLinkToExtern(ExternObject extern, String title) {
-        addLink(extern, title);
-    }
-
-    public void addLinkToSubExtern(SubExternObject subExtern, String title) {
-        addLink(subExtern, title);
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
-    }
-
-    public ArticleObject(String title, List<LinkToReleationship> links, ActiveNode active, List<SubArticleObject> ownSubArticles) {
-        this.title = title;
-        this.active = active;
-        this.ownSubArticles = ownSubArticles;
-        this.links = links;
-    }
-
+    
     public void addLinkToSubArticle(SubArticleObject subArticle, String title) {
         addLink(subArticle, title);
     }
     
-    public void addSubArticle(SubArticleObject subArticle) {
-        HasRelationship has = new HasRelationship();
-        has.setTitle("");
-        has.setFrom(this);
-        has.setTo(subArticle);
-        hasRelationships.add(has);
+    public void addLinkToExtern(ExternObject extern) {
+        addLink(extern, "");
     }
-   
-    @Override
-    public String toString() {
-        return "Article{"
-                + "id=" + getId()
-                + ", title='" + title + '\''
-                + ", active=" + (active==null)
-                + ", ownsubarticles=" + ownSubArticles.size()
-                + "}";
+    
+    public void addLinkToExtern(ExternObject extern, String title) {
+        addLink(extern, title);
     }
 
-    public boolean isActive() {
-        return this.active != null;
+    public void addLinkToSubExtern(SubExternObject subExtern) {
+        addLink(subExtern, "");
     }
-
-    public void SetActive(ActiveNode active) {
-        this.active = active;
-    }    
-
+    
+    public void addLinkToSubExtern(SubExternObject subExtern, String title) {
+        addLink(subExtern, title);
+    }
+    
     private void addLink(ToLinkedEntities entity, String title) {
         LinkToReleationship link = new LinkToReleationship();
         link.setTitle(title);
@@ -104,5 +105,36 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
         link.setTo(entity);
         links.add(link);
     }
+    
+    public void addSubArticle(SubArticleObject subArtcile) {
+        addSubArticle(subArtcile, "");
+    }
+    
+    public void addSubArticle(SubArticleObject subArticle, String title) {
+        if (contains(subArticle)) return;
+        HasRelationship has = new HasRelationship();
+        has.setTitle(title);
+        has.setFrom(this);
+        has.setTo(subArticle);
+        hasRelationships.add(has);
+    }
+    // </editor-fold>
+    
+    // <editor-fold desc=">> getters" defaultstate="collapsed">
+    @Override
+    public String getTitle() {
+        return title;
+    }
+    // </editor-fold>
+    
+    // <editor-fold desc=">> setters" defaultstate="collapsed">
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    public void setActive(ActiveNode active) {
+        this.active = active;
+    }
+    // </editor-fold>
     
 }

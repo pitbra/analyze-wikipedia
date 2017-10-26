@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class TransmitorThread implements Runnable {
     
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     
     private static String activeTitle;
     
@@ -143,7 +143,7 @@ public class TransmitorThread implements Runnable {
             
             if (!main_article.isActive()){
                 ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), null);
-                main_article.SetActive(active);
+                main_article.setActive(active);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
             }
             
@@ -160,16 +160,14 @@ public class TransmitorThread implements Runnable {
             
             // travers each link to subarticle
             for (String[] linkToSubArticle:dump_article.getWikiSubLinks()){
-                // TEST article link
+                // TEST subarticle link
                 if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                 
                 ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);                
                 SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
     
-                if (!article.getOwnSubArticles().contains(subarticle)){
-                    article.addSubArticle(subarticle);
-                    ARTICLE_SERVICE.createOrUpdate(article);
-                }
+                article.addSubArticle(subarticle);
+                ARTICLE_SERVICE.createOrUpdate(article);
                 
                 main_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
@@ -184,7 +182,7 @@ public class TransmitorThread implements Runnable {
                 ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
                 
                 if (urlSplit[1].length() > 0) {
-                    // TEST extern link
+                    // TEST subextern link
                     if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
                         
                     SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
@@ -193,7 +191,7 @@ public class TransmitorThread implements Runnable {
                     EXTERN_SERVICE.createOrUpdate(extern);
                     
                     // make no sence set the linktype
-                    main_article.addLinkToSubExtern(subextern, null);
+                    main_article.addLinkToSubExtern(subextern);
                     ARTICLE_SERVICE.createOrUpdate(main_article);
                 } else {
                     
@@ -204,25 +202,22 @@ public class TransmitorThread implements Runnable {
             
             // travers each link to categorie
             for (Map.Entry<String, List<String>> cat_entry : dump_article.getCategories().entrySet()) {
-                CategorieObject cat = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
+                CategorieObject categorie = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
                 
                 // travers each link to subcategorie
                 for (String sub:cat_entry.getValue()){
                     // TEST categorie link
                     if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
                     
-                    SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub, cat_entry.getKey());
+                    SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub, cat_entry.getKey());
                     
-                    if (!cat.contains(sub_cat)){
-                        // we can change the name to the categorie, if it makes sence
-                        cat.addSubCategorie(sub_cat, null);
-                        CATEGORIE_SERVICE.createOrUpdate(cat);
-                    }
+//                  // we can change the name to the categorie, if it makes sence
+                    categorie.addSubCategorie(subcategorie);
+                    CATEGORIE_SERVICE.createOrUpdate(categorie);
                     
                     // we can change the name to the categorie, if it makes sence
-                    sub_cat.addContained(main_article, null);
-                    SUBCATEGORIE_SERVICE.createOrUpdate(sub_cat);
-                    ARTICLE_SERVICE.createOrUpdate(main_article);
+                    subcategorie.addContained(main_article);
+                    SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
                 }
                         
             }
@@ -243,16 +238,14 @@ public class TransmitorThread implements Runnable {
                     s_cat += dump_subarticle.getCategories().size();
                 }
 
-                // TEST article name
+                // TEST subarticle name
                 if (DEBUG) System.out.println("Subarticle: " + dump_subarticle.getName());
                 
                 // add subarticle to article
-                SubArticleObject sub = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName(), main_article.getTitle());
+                SubArticleObject main_subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName(), main_article.getTitle());
                 
-                if (!main_article.getOwnSubArticles().contains(sub)){
-                    main_article.addSubArticle(sub);
-                    ARTICLE_SERVICE.createOrUpdate(main_article);
-                }
+                main_article.addSubArticle(main_subarticle);
+                ARTICLE_SERVICE.createOrUpdate(main_article);
                 
                 // travers each link to article
                 for (String[] linkToArticle:dump_subarticle.getWikiLinks()){
@@ -261,25 +254,23 @@ public class TransmitorThread implements Runnable {
                     
                     ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
                 
-                    sub.addLinkToArticle(article, linkToArticle[1]);
-                    SUBARTICLE_SERVICE.createOrUpdate(sub);
+                    main_subarticle.addLinkToArticle(article, linkToArticle[1]);
+                    SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
                 }
 
                 // travers each link to subarticle
                 for (String[] linkToSubArticle:dump_subarticle.getWikiSubLinks()){
-                    // TEST article link
+                    // TEST subarticle link
                     if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
                     
                     ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);
                     SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
 
-                    if (!article.getOwnSubArticles().contains(subarticle)){
-                        article.addSubArticle(subarticle);
-                        ARTICLE_SERVICE.createOrUpdate(article);
-                    }
+                    article.addSubArticle(subarticle);
+                    ARTICLE_SERVICE.createOrUpdate(article);
                     
-                    sub.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
-                    SUBARTICLE_SERVICE.createOrUpdate(sub);
+                    main_subarticle.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
+                    SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
                 }
 
                 // travers each link to extern
@@ -291,7 +282,7 @@ public class TransmitorThread implements Runnable {
                     ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
 
                     if (urlSplit[1].length() > 0) {
-                        // TEST extern link
+                        // TEST subextern link
                         if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
                     
                         SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
@@ -300,35 +291,32 @@ public class TransmitorThread implements Runnable {
                         EXTERN_SERVICE.createOrUpdate(extern);
 
                         // make no sence set the linktype
-                        sub.addLinkToSubExtern(subextern, null);
-                        SUBARTICLE_SERVICE.createOrUpdate(sub);
+                        main_subarticle.addLinkToSubExtern(subextern);
+                        SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
                     } else {
-                        sub.addLinkToExtern(extern, linkToExtern[1]);
-                        SUBARTICLE_SERVICE.createOrUpdate(sub);
+                        main_subarticle.addLinkToExtern(extern, linkToExtern[1]);
+                        SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
                     }
                 }
 
                 // travers each link to categorie, add it to main article
                 for (Map.Entry<String, List<String>> cat_entry : dump_subarticle.getCategories().entrySet()) {
-                    CategorieObject cat = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
+                    CategorieObject categorie = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
                     
                     // travers each link to subcategorie
                     for (String sc:cat_entry.getValue()){
                         // TEST categorie link
                         if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sc);
                         
-                        SubCategorieObject sub_cat = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc, cat_entry.getKey());
-                        
-                        if (!cat.contains(sub_cat)){
-                            // we can change the name to the categorie, if it makes sence
-                            cat.addSubCategorie(sub_cat, null);
-                            CATEGORIE_SERVICE.createOrUpdate(cat);
-                        }
+                        SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc, cat_entry.getKey());
                         
                         // we can change the name to the categorie, if it makes sence
-                        sub_cat.addContained(main_article, null);
-                        SUBCATEGORIE_SERVICE.createOrUpdate(sub_cat);
-                        ARTICLE_SERVICE.createOrUpdate(main_article);
+                        categorie.addSubCategorie(subcategorie);
+                        CATEGORIE_SERVICE.createOrUpdate(categorie);
+                        
+                        // we can change the name to the categorie, if it makes sence
+                        subcategorie.addContained(main_article);
+                        SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
                     }
 
                 }
@@ -354,7 +342,6 @@ public class TransmitorThread implements Runnable {
     
     private Entity searchOrCreateEntity(Entity node, String title, String parent){
         Entity search = null;
-        System.out.println(title + "\t" + parent);
         if (node instanceof ActiveNode){
             String active = title;
             if (active == null) active = activeTitle;

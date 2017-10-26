@@ -299,12 +299,20 @@ public class SeekerThread implements Runnable {
             // add the link if it isn't categorie or other
             String link = temp[0];
             String filetype = "";
-            
-            // if link has special name, safe it
             if (temp.length > 1) filetype = replaceText(temp[1]);
             
-            int pos = link.indexOf(" ");
+            // if link has special description, safe it
+            String description = temp[0];
+            String specialCharakter = " ";
+            while (description.startsWith(specialCharakter)){description = description.substring(1, description.length());}
+            while (description.endsWith(specialCharakter)){description = description.substring(0, description.length()-1);}
+            int pos = description.indexOf(" ");
+            description = description.substring(pos, description.length());
+            description = replaceText(description);
+            
             String linkurl = "";
+            
+            pos = link.indexOf(" ");
             
             // check if a whitespace is following
             if (pos > 0){

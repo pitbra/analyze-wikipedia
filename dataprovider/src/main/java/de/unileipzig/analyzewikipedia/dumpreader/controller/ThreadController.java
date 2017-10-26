@@ -26,6 +26,8 @@ import org.w3c.dom.Document;
  */
 public class ThreadController {
 
+    private static final boolean DEBUG = false;
+    
     private static String[] arguments;
 
     private static final Thread READER = new Thread(new ReaderThread());
@@ -45,6 +47,8 @@ public class ThreadController {
     protected static void initApplication(String[] args) throws Exception {
 
         arguments = checkArguments(args);
+        
+        if (DEBUG) arguments = checkArguments(new String[]{Components.getTestFile()});
 
         if (arguments.length == 0) {
             FileExplorer file_explorer = new FileExplorer();
