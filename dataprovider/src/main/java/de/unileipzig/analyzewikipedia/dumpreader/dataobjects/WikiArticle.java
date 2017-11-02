@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * @author Danilo Morgado
@@ -14,8 +15,14 @@ public class WikiArticle {
     
     private final String articlename;
     
+    private WikiArticle parent;
+    
+    private Queue<String> text;
+    private final List<WikiArticle> subarticles;
+    
     private final List<String[]> wiki_articlelinks;
     private final List<String[]> wiki_sublinks;
+    private final List<String[]> wiki_unknownsublinks;
     private final List<String[]> externlinks;
     private final Map<String, List<String>> categories;
     
@@ -25,7 +32,7 @@ public class WikiArticle {
      */
     public WikiArticle(){
         
-        this("empty");
+        this("");
         
     }
     
@@ -37,12 +44,26 @@ public class WikiArticle {
     public WikiArticle(String name){
         
         this.articlename = name;
-        
+        this.parent = null;
+        this.text = new LinkedList();
+        this.subarticles = new LinkedList();
         this.wiki_articlelinks = new LinkedList();
         this.wiki_sublinks = new LinkedList();
+        this.wiki_unknownsublinks = new LinkedList();
         this.externlinks = new LinkedList();
         this.categories = new HashMap();
                 
+    }
+    
+    /**
+     * METHOD: add subarticle to article
+     * 
+     * @param subarticle as object
+     */
+    public final void addSubArticle(WikiArticle subarticle){
+        
+        this.subarticles.add(subarticle);
+        
     }
     
     /**
@@ -67,6 +88,19 @@ public class WikiArticle {
     public final void addWikiSubLink(String title, String sub, String name){
         
         this.wiki_sublinks.add(new String[]{title, sub, name});
+        
+    }
+    
+    /**
+     * METHOD: add wiki unknown sub link to list
+     * 
+     * @param title as string
+     * @param sub as string
+     * @param name as string
+     */
+    public final void addWikiUnknownSubLink(String title, String sub, String name){
+        
+        this.wiki_unknownsublinks.add(new String[]{title, sub, name});
         
     }
     
@@ -116,6 +150,17 @@ public class WikiArticle {
     }
     
     /**
+     * GETTER: get subarticle list
+     * 
+     * @return wiki subarticles
+     */
+    public final List<WikiArticle> getSubArticles(){
+        
+        return this.subarticles;
+        
+    }
+    
+    /**
      * GETTER: get article link list
      * 
      * @return wiki intern link list
@@ -138,6 +183,17 @@ public class WikiArticle {
     }
     
     /**
+     * GETTER: get article unknown sub link list
+     * 
+     * @return wiki unknown sub link list
+     */
+    public final List<String[]> getWikiUnknownSubLinks(){
+        
+        return this.wiki_unknownsublinks;
+        
+    }
+    
+    /**
      * GETTER: get extern link list
      * 
      * @return extern link list
@@ -156,6 +212,50 @@ public class WikiArticle {
     public final Map<String, List<String>> getCategories(){
         
         return this.categories;
+        
+    }
+    
+    /**
+     * METHOD: get parent of article
+     * 
+     * @return parent article
+     */
+    public final WikiArticle getParent(){
+        
+        return this.parent;
+        
+    }
+    
+    /**
+     * METHOD: get text of article
+     * 
+     * @return text of article
+     */
+    public final Queue<String> getText(){
+        
+        return this.text;
+        
+    }
+    
+    /**
+     * METHOD: set parent of article
+     * 
+     * @param parent as wikiarticle
+     */
+    public final void setParent(WikiArticle parent){
+        
+        this.parent = parent;
+        
+    }
+    
+    /**
+     * METHOD: set text of article
+     * 
+     * @param list as object
+     */
+    public final void setText(Queue<String> list){
+        
+        this.text = list;
         
     }
     

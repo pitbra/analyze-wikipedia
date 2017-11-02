@@ -23,7 +23,8 @@ public class Components {
     
     //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_3pages.xml";
     //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_2reducedPages.xml";
-    private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_crawl2Pages.xml";
+    //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_crawl2Pages.xml";
+    private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_real7Pages.xml";
     
     private final static String MEDIA_TAG = "mediawiki";
     private final static String PAGE_TAG = "page";
@@ -36,7 +37,7 @@ public class Components {
     
     private final static String URL_WIKI = "https://de.wikipedia.org/wiki/";
     
-    private final static int CORES = Runtime.getRuntime().availableProcessors();
+    private final static int CORES = 1;//Runtime.getRuntime().availableProcessors();
     
     private final static String[] FILE_EXTENSION = {"xml"};
     
@@ -48,7 +49,7 @@ public class Components {
     
     // STACK SIZES
     private final static Integer DOC_STACK_LIMIT = 1000;
-    private final static Integer PAGE_STACK_LIMIT = 500;
+    private final static Integer ARTICLE_STACK_LIMIT = 500;
     
     private final static String[] TEXT = {/* 0*/  APPLICATIONNAME,
                             /* 1*/  "Information",
@@ -314,9 +315,9 @@ public class Components {
      * 
      * @return stacklimit as integer
      */
-    public static final Integer getPageStackLimit(){
+    public static final Integer getArticleStackLimit(){
         
-        return PAGE_STACK_LIMIT;
+        return ARTICLE_STACK_LIMIT;
         
     }
     

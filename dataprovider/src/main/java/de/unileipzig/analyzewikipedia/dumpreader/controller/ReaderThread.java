@@ -15,9 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,8 +37,6 @@ public class ReaderThread implements Runnable {
     private static long read_length = 0;
     
     private static long start_time;
-    
-    private Timer infoTimer;
     
     /**
      * KONSTRUCTOR: default
@@ -180,15 +175,6 @@ public class ReaderThread implements Runnable {
             // check first line of mediawiki tag
             if(currentLine.contains("<" + Components.getMediaTag())) {
                 
-                //addTimeHandler();
-                infoTimer = new Timer(true);
-                infoTimer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        generateFilePositionInfo();
-                    }
-                }, 0, Components.getTimerSleepTime());
-                
                 while (currentLine != null){
                     
                     // remember text length
@@ -223,7 +209,7 @@ public class ReaderThread implements Runnable {
                 }
                 
             }
-
+            
             br.close();
 
         } catch (FileNotFoundException ex) {
@@ -262,22 +248,5 @@ public class ReaderThread implements Runnable {
         return doc;
         
     }
-    
-    /**
-     * METHOD: generate the information of current position in file
-     * 
-     */
-    protected void generateFilePositionInfo(){
         
-        long current_time = (System.currentTimeMillis()-start_time)/1000;
-        current_time = (file_length+1)/(read_length+1)*current_time;
-
-        // TEST out the read position in percent for reader task
-        System.out.println("INFO: Readertask read " + 
-                (int)((double)((double)100/file_length)*read_length) + 
-                " % of the file: " + file_name + ".\n      The reader still needs " + current_time + 
-                " seconds to finish.");
-        
-    }
-    
 }

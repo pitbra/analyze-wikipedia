@@ -1,7 +1,7 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
-import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
+import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.dumpreader.windows.FileExplorer;
 
 import java.io.File;
@@ -36,7 +36,7 @@ public class ThreadController {
 
     private static final Queue<File> FILES = new ConcurrentLinkedQueue();
     private static final Queue<Document> DOCS = new ConcurrentLinkedQueue();
-    private static final Queue<WikiPage> PAGES = new ConcurrentLinkedQueue();
+    private static final Queue<WikiArticle> ARTICLES = new ConcurrentLinkedQueue();
 
     /**
      * METHOD: initial the application
@@ -227,20 +227,20 @@ public class ThreadController {
     }
 
     /**
-     * METHOD: add a page to queue
+     * METHOD: add an article to queue
      *
-     * @param page as object
+     * @param article as object
      */
-    protected static void addPage(WikiPage page) {
+    protected static void addArticle(WikiArticle article) {
 
         // MEMORY OPTIMISATION, wait until other threads finished there jobs
-        while (PAGES.size() > Components.getPageStackLimit()) {
+        while (ARTICLES.size() > Components.getArticleStackLimit()) {
 
             waitMillis(Components.getStackLimitTime());
 
         }
 
-        PAGES.add(page);
+        ARTICLES.add(article);
 
     }
 
@@ -267,13 +267,13 @@ public class ThreadController {
     }
 
     /**
-     * METHOD: get the top page of the queue
+     * METHOD: get the top article of the queue
      *
-     * @return page as object
+     * @return article as object
      */
-    protected static WikiPage removePage() {
+    protected static WikiArticle removeArticle() {
 
-        return PAGES.poll();
+        return ARTICLES.poll();
 
     }
 
@@ -300,13 +300,13 @@ public class ThreadController {
     }
 
     /**
-     * METHOD: check if page queue is empty
+     * METHOD: check if article queue is empty
      *
      * @return empty as boolean
      */
-    protected static boolean pageIsEmpty() {
+    protected static boolean articleIsEmpty() {
 
-        return PAGES.isEmpty();
+        return ARTICLES.isEmpty();
 
     }
 
@@ -393,13 +393,13 @@ public class ThreadController {
     }
 
     /**
-     * GETTER: get size of page stack
+     * GETTER: get size of article stack
      *
      * @return size as integer
      */
-    protected static Integer getPageStackSize() {
+    protected static Integer getArticleStackSize() {
 
-        return PAGES.size();
+        return ARTICLES.size();
 
     }
 

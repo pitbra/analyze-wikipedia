@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
+import org.neo4j.ogm.annotation.Relationship;
+import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
 
 @NodeEntity(label = "SubArticle")
 public class SubArticleObject extends Entity implements FromLinkedEntities, ToLinkedEntities {    
@@ -11,6 +13,9 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
     // <editor-fold desc=">> classvariables" defaultstate="collapsed">
     @Property(name = "title")
     String title;
+    
+    @Relationship(type = "HAS", direction = Relationship.OUTGOING)
+    List<HasRelationship> hasRelationships;
     
     List<LinkToReleationship> links;
     // </editor-fold>
@@ -21,11 +26,12 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
     }
     
     public SubArticleObject(String title) {
-        this(title, new ArrayList<LinkToReleationship>());
+        this(title, new ArrayList<HasRelationship>(), new ArrayList<LinkToReleationship>());
     }
     
-    public SubArticleObject(String title, List<LinkToReleationship> links) {
+    public SubArticleObject(String title, List<HasRelationship> hasRelaionships, List<LinkToReleationship> links) {
         this.title = title;
+        this.hasRelationships = hasRelaionships;
         this.links = links;
     }
     // </editor-fold>
@@ -38,6 +44,46 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
                 + ", title='" + title + '\''
                 + ", linksize=" + links.size()
                 + "}";
+    }
+    
+    private boolean contains(SubArticleObject sub_art) {
+        for(int i = 0; i < hasRelationships.size(); ++i) {
+            if(hasRelationships.get(i).getTo() == sub_art){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public SubArticleObject findSub(String title){
+        
+        if (this.title.equals(title)) return this;
+        
+        SubArticleServiceImpl service = new SubArticleServiceImpl();
+        for(HasRelationship has : hasRelationships) {
+            
+            if (has.getTo().getTitle().equals(title)){
+                return (SubArticleObject) has.getTo();
+            }
+            
+            SubArticleObject found = service.find(has.getTo().getId()).findSub(title);
+            if (found != null) return found;
+                        
+        }
+        
+        return null;
+    }
+    
+    public SubArticleObject findHas(String title){
+        
+        for(HasRelationship has : hasRelationships) {
+            
+            if (((SubArticleObject) has.getTo()).getTitle().equals(title)) return (SubArticleObject) has.getTo();
+            
+        }
+        
+        return null;
+        
     }
     // </editor-fold>
     
@@ -80,6 +126,19 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
         link.setFrom(this);
         link.setTo(entity);
         links.add(link);
+    }
+    
+    public void addSubArticle(SubArticleObject subArtcile) {
+        addSubArticle(subArtcile, "");
+    }
+    
+    public void addSubArticle(SubArticleObject subArticle, String title) {
+        if (contains(subArticle)) return;
+        HasRelationship has = new HasRelationship();
+        has.setTitle(title);
+        has.setFrom(this);
+        has.setTo(subArticle);
+        hasRelationships.add(has);
     }
     // </editor-fold>
     

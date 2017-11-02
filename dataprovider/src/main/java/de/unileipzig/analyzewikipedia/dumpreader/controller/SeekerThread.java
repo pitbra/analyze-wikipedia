@@ -2,18 +2,14 @@ package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
-import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 
-import java.net.URLEncoder;
-        
-import java.util.LinkedList;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,19 +19,22 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 /**
  * @author Danilo Morgado
  * 
  * class to use as thread to do diffrent jobs
  */
 public class SeekerThread implements Runnable {
-       
+    
+    private static final String SECTION_SEPERATOR = "=";
+    
     /**
      * KONSTRUCTOR: default
      * 
      */
-    public SeekerThread(){
-        
+    public SeekerThread(){  
     }
     
     /**
@@ -53,7 +52,7 @@ public class SeekerThread implements Runnable {
 
             if (doc != null){
                 
-                readPage(doc);
+                readArticle(doc);
 
             }
             
@@ -66,7 +65,7 @@ public class SeekerThread implements Runnable {
      * 
      * @param doc as document
      */
-    private void readPage(Document doc){
+    private void readArticle(Document doc){
         
         // TEST out the root element name
 //        System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
@@ -92,26 +91,16 @@ public class SeekerThread implements Runnable {
                 
                 // select element by title
                 String title = eElement.getElementsByTagName(Components.getTitleTag()).item(0).getTextContent();
-                WikiPage page = new WikiPage(replaceText(title));
-                
+                title = replaceText(title);
+                title = escapeString(title);
+
                 // select element by text
                 String text = eElement.getElementsByTagName(Components.getTextTag()).item(0).getTextContent();
                 
-                // seperate text in articlesections
-                generateSectionlist(page.getName(), text).forEach((section) -> {
-                    // create new article and add it to page
-                    WikiArticle article = new WikiArticle(section[0]);
-                    page.addArticle(article);
-                    
-                    // search wiki links in text
-                    searchIntLinks(article, section[1]);
-
-                    // search external links in text
-                    searchExtLinks(article, section[1]);
-                });
+                WikiArticle article = generateMainArticle(title, text);
                 
                 // safe page in store
-                ThreadController.addPage(page);
+                ThreadController.addArticle(article);
                 
                 // TESTout the page title and linkcount
 //                System.out.println(page.getName() + " " + page.getIntLinks().size() + ":" + page.getExtLinks().size());
@@ -128,21 +117,26 @@ public class SeekerThread implements Runnable {
      * @param text as string
      * @ return sectionlist
      */
-    private List<String[]> generateSectionlist(String title, String text){
+    private WikiArticle generateMainArticle(String title, String text){
         
-        Queue<String[]> sectionlist = new LinkedList();
+        WikiArticle article = new WikiArticle(title);
         
         BufferedReader br;
         
-        try {
+        String separator = SECTION_SEPERATOR + SECTION_SEPERATOR;
         
+        Queue<String> lines = new LinkedList();
+        
+        try {
+            
             br = new BufferedReader(new StringReader(text));
 
-            String currentLine;
-            String lineStore = "";
-            String currentArticlename = title;
-
+            String currentLine = "";
+            
             while ((currentLine = br.readLine()) != null) {
+                
+                // remove first spaces
+                currentLine = currentLine.replaceFirst("^ *", "");
                 
                 // delete to small sentences for short searching
                 if (currentLine.length() < 3) {
@@ -152,35 +146,139 @@ public class SeekerThread implements Runnable {
                     
                 }
                 
-                // check start of article
-                if( currentLine.length() > 5 &&
-                    currentLine.substring(0,2).contains("==") && 
-                    !currentLine.substring(3,3).equals("=") &&
-                    currentLine.substring(currentLine.length()-2,currentLine.length()).contains("==") &&
-                    !currentLine.substring(currentLine.length()-3,currentLine.length()-2).equals("=") ) {
+                if( currentLine.length() > (separator.length()*2+3) &&
+                    currentLine.substring(0,separator.length()).equals(separator) && 
+                    !currentLine.substring((separator.length()+1),(separator.length()+1)).equals(SECTION_SEPERATOR) &&
+                    currentLine.substring(currentLine.length()-separator.length(),currentLine.length()).equals(separator) &&
+                    !currentLine.substring(currentLine.length()-(separator.length()+1),currentLine.length()-separator.length()).equals(SECTION_SEPERATOR) ) {
+                                        
+                    for (String line : lines){
+                        
+                        // TEST out the search line
+//                        String tabs = "";
+//                        for (int i = 2; i < separator.length()+1; i++) tabs = tabs + "\t";
+//                        System.out.println(tabs + "MAIN: Search> " + line);
+//                        System.out.println();
+                        
+                        // search wiki links
+                        searchIntLinks(article, line);
+
+                        // search external links
+                        searchExtLinks(article, line);
+                    }
                     
-                    // add new article section and clear linestore
-                    sectionlist.add(new String[]{currentArticlename, lineStore});
-                    lineStore = "";
+                    lines.clear();
+                    lines.add(currentLine);
                     
-                    // save new artcile name
-                    currentArticlename = currentLine.substring(3, currentLine.length()-3);
-                    continue;
-                            
+                    while ((currentLine = br.readLine()) != null) {
+                        
+                        // remove first spaces
+                        currentLine = currentLine.replaceFirst("^ *", "");
+
+                        // delete to small sentences for short searching
+                        if (currentLine.length() < 3) {
+
+                            // start again
+                            continue;
+
+                        }
+                
+                        lines.add(currentLine);
+                    }
                 }
                 
                 // store line
-                lineStore = lineStore + currentLine + "\n";
-
+                lines.add(currentLine);
+                
             }
             
-            // add last lines to last article
-            sectionlist.add(new String[]{currentArticlename, lineStore});
+            if (!lines.isEmpty()){
+                article = generateSections(article, lines, separator);
+            }
             
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {}
         
-        return new LinkedList(sectionlist);
+        return article;
+    }
+    
+    /**
+     * METHOD: split give text in article sections
+     * 
+     * @param title as string
+     * @param text as string
+     * @ return sectionlist
+     */
+    private WikiArticle generateSections(WikiArticle article, Queue<String> lines, String separator){
+        List<WikiArticle> subarticles = new LinkedList();
+        WikiArticle subarticle = null;
+        Queue<String> queue = new LinkedList();
+        
+        String currentLine;
+        while ((currentLine = lines.poll()) != null){
+            if( currentLine.length() > (separator.length()*2+3) &&
+                    currentLine.substring(0,separator.length()).equals(separator) && 
+                    !currentLine.substring((separator.length()+1),(separator.length()+1)).equals(SECTION_SEPERATOR) &&
+                    currentLine.substring(currentLine.length()-separator.length(),currentLine.length()).equals(separator) &&
+                    !currentLine.substring(currentLine.length()-(separator.length()+1),currentLine.length()-separator.length()).equals(SECTION_SEPERATOR) ) {
+                
+                String title = currentLine.substring((separator.length()+1), currentLine.length()-(separator.length()+1));
+                title = replaceText(title);
+                title = escapeString(title);
+                subarticle = new WikiArticle(title);
+                article.addSubArticle(subarticle);
+                subarticle.setParent(article);
+                
+                queue = new LinkedList();
+                subarticle.setText(queue);
+                
+                subarticles.add(subarticle);
+                continue;
+            }
+            
+            queue.add(currentLine);
+            
+        }
+        
+        String new_separator = new String(separator + SECTION_SEPERATOR);
+        
+        for (WikiArticle suba : subarticles){
+            
+            int count = 0;
+            for (String line : suba.getText()){
+                
+                if( line.length() > (new_separator.length()*2+3) &&
+                    line.substring(0,new_separator.length()).equals(new_separator) && 
+                    !line.substring((new_separator.length()+1),(new_separator.length()+1)).equals(SECTION_SEPERATOR) &&
+                    line.substring(line.length()-new_separator.length(),line.length()).equals(new_separator) &&
+                    !line.substring(line.length()-(new_separator.length()+1),line.length()-new_separator.length()).equals(SECTION_SEPERATOR) ) {
+                    
+                    break;
+                    
+                }
+                
+                count++;
+                
+                // TEST out the search line
+//                String tabs = "";
+//                for (int i = 2; i < separator.length()+1; i++) tabs = tabs + "\t";
+//                System.out.println(tabs + suba.getName() + ": Search> " + line);
+//                System.out.println();
+                
+                // search wiki links
+                searchIntLinks(suba, line);
+
+                // search external links
+                searchExtLinks(suba, line);
+                
+            }
+            
+            for (int i = 0; i < count; i++) suba.getText().remove();
+            
+            generateSections(suba, suba.getText(), new_separator);
+        }
+        
+        return article;
     }
     
     /**
@@ -212,12 +310,16 @@ public class SeekerThread implements Runnable {
             String name = "";
             
             // if link has special name, safe it
-            if (temp.length > 1) name = replaceText(temp[1]);
+            if (temp.length > 1) {
+                name = replaceText(temp[1]);
+                name = escapeString(name);
+            }
             
-            if(link.contains(":") == false) {
+            if(!link.contains(":") || (link.contains(":") && link.contains("#"))) {
                     
                 link = replaceText(link);
-                
+                link = escapeString(link);
+                                
                 // check if article links on a subarticle
                 int sub = link.indexOf("#");
                 if (sub >= 0){
@@ -226,8 +328,12 @@ public class SeekerThread implements Runnable {
                     if (Components.getTricker(2)){
                         String l = link.substring(0, sub);
                         String s = link.substring(sub+1, link.length());
-                        try { l = URLEncoder.encode(l, "UTF-8"); } catch (UnsupportedEncodingException ex){}
-                        try { s = URLEncoder.encode(s, "UTF-8"); } catch (UnsupportedEncodingException ex){}
+                        
+                        // if no article is given, set this article
+                        WikiArticle parent = article;
+                        while (parent.getParent() != null) parent = parent.getParent();
+                        if (l.length() == 0) l = parent.getName();
+                        
                         article.addWikiSubLink(l, s, name);
                     }
                     
@@ -238,7 +344,6 @@ public class SeekerThread implements Runnable {
                 
                     // add link to page
                     if (Components.getTricker(1)){
-                        try { link = URLEncoder.encode(link, "UTF-8"); } catch (UnsupportedEncodingException ex){}
                         article.addWikiLink(link, name);
                     }
 
@@ -253,9 +358,15 @@ public class SeekerThread implements Runnable {
                     
                     // read the categories
                     String[] categorie_split = link.split(":");
+                    
+                    String main_cat = replaceText(categorie_split[0]);
+                    main_cat = escapeString(main_cat);
+                    
+                    String sub_cat = replaceText(categorie_split[1]);
+                    sub_cat = escapeString(sub_cat);
 
                     // add categorie to page
-                    if (categorie_split.length > 1) article.addCategorieName(replaceText(categorie_split[0]), replaceText(categorie_split[1]));
+                    if (categorie_split.length > 1) article.addCategorieName(main_cat, sub_cat);
 
                     // TEST out categories
 //                    System.out.println("Category:  " + categorie_split[0] + " -> " + categorie_split[1]);
@@ -299,20 +410,24 @@ public class SeekerThread implements Runnable {
             // add the link if it isn't categorie or other
             String link = temp[0];
             String filetype = "";
-            if (temp.length > 1) filetype = replaceText(temp[1]);
+            if (temp.length > 1) {
+                filetype = replaceText(temp[1]);
+                filetype = escapeString(filetype);
+            }
             
             // if link has special description, safe it
-            String description = temp[0];
-            String specialCharakter = " ";
-            while (description.startsWith(specialCharakter)){description = description.substring(1, description.length());}
-            while (description.endsWith(specialCharakter)){description = description.substring(0, description.length()-1);}
-            int pos = description.indexOf(" ");
-            description = description.substring(pos, description.length());
-            description = replaceText(description);
+//            String description = temp[0];
+//            String specialCharakter = " ";
+//            while (description.startsWith(specialCharakter)){description = description.substring(1, description.length());}
+//            while (description.endsWith(specialCharakter)){description = description.substring(0, description.length()-1);}
+//            int pos = description.indexOf(" ");
+//            description = description.substring(pos, description.length());
+//            description = replaceText(description);
+//            description = escapeString(description);
             
             String linkurl = "";
             
-            pos = link.indexOf(" ");
+            int pos = link.indexOf(" ");
             
             // check if a whitespace is following
             if (pos > 0){
@@ -336,8 +451,7 @@ public class SeekerThread implements Runnable {
                 }
                 
             }
-                    
-            // add link to page if it is an url
+                
             if (Components.getTricker(3) && ThreadController.isUrl(linkurl)) article.addExternLink(linkurl, filetype);
 
             // TEST out the external link
@@ -354,11 +468,22 @@ public class SeekerThread implements Runnable {
      * @return replaced text
      */
     public static String replaceText(String text){
+        String replaceCharakter = " ";
         String specialCharakter = "_";
-        String replaced = text.replace(" ", specialCharakter);
+        String replaced = text.replace(replaceCharakter, specialCharakter);
         while (replaced.startsWith(specialCharakter)){replaced = replaced.substring(1, replaced.length());}
         while (replaced.endsWith(specialCharakter)){replaced = replaced.substring(0, replaced.length()-1);}
         return replaced;
+    }
+    
+    /**
+     * METHOD: replace the special character
+     *
+     * @param text as string
+     * @return replaced text
+     */
+    public static String escapeString(String text){
+        return StringEscapeUtils.escapeJava(text);
     }
     
 }

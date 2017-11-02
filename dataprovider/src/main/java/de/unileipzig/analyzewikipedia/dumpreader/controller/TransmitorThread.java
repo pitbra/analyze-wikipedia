@@ -1,7 +1,6 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
-import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiPage;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
@@ -24,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class TransmitorThread implements Runnable {
     
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     
     private static String activeTitle;
     
@@ -53,7 +53,7 @@ public class TransmitorThread implements Runnable {
      */
     public TransmitorThread() throws Exception {
         
-        ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), "Active");
+        ActiveNode active = (ActiveNode) searchOrCreateEntity(ActiveNode.class, "Active");
         activeTitle = active.getTitle();
         ACTIVE_SERVICE.createOrUpdate(active);
         
@@ -66,19 +66,20 @@ public class TransmitorThread implements Runnable {
     @Override
     public void run() {
         
-        WikiPage page;
+        WikiArticle article;
         
         do{
             
-            page = ThreadController.removePage();
+            article = ThreadController.removeArticle();
 
-            if (page != null){
+            if (article != null){
                 
-                sendPageContent(page);
+                System.out.println("ArticleStackSize: " + ThreadController.getArticleStackSize() + "   Removed: " + article.getName());
+                sendArticle(article);
 
             }
             
-        } while(ThreadController.getReaderIsAlive() || ThreadController.getSeekersAreAlive() || (!ThreadController.getSeekersAreAlive() && !ThreadController.pageIsEmpty()) );
+        } while(ThreadController.getReaderIsAlive() || ThreadController.getSeekersAreAlive() || (!ThreadController.getSeekersAreAlive() && !ThreadController.articleIsEmpty()) );
 
     }
     
@@ -112,237 +113,271 @@ public class TransmitorThread implements Runnable {
     }
     
     /**
-     * METHOD: send wikipage content to neo4j graph database
+     * METHOD: seperate the wiki main article
      * 
-     * @param page as object
+     * @param article as object
      */
-    private void sendPageContent(WikiPage dump_page){
+    private void sendArticle(WikiArticle dump_article){
         
-        // TEST stack sizes for output
-        int s_lin = 0, s_sub = 0, s_ext = 0, s_cat = 0;
+        // TEST article name
+        if (DEBUG) System.out.println("Article : " + dump_article.getName());
+
+        ArticleObject main_article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, dump_article.getName());
+
+        if (dump_article.getParent() == null && !main_article.isActive()){
+            ActiveNode active = (ActiveNode) searchOrCreateEntity(ActiveNode.class, null);
+            main_article.setActive(active);
+            ARTICLE_SERVICE.createOrUpdate(main_article);
+        }
+
+        // travers each link to article
+        for (String[] linkToArticle:dump_article.getWikiLinks()){
+            // TEST article link
+            if (DEBUG) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
+
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToArticle[0]);
+
+            main_article.addLinkToArticle(article, linkToArticle[1]);
+            ARTICLE_SERVICE.createOrUpdate(main_article);
+        }
         
-        ArticleObject main_article = null;
-        
-        // create main article
-        if (dump_page.getArticles().size() > 0){
+        // travers each link to subarticle
+        for (String[] linkToSubArticle:dump_article.getWikiSubLinks()){
             
-            WikiArticle dump_article = dump_page.getArticles().get(0);
-            
-            // TEST count the link sizes
-            if (DEBUG) {
-                s_lin += dump_article.getWikiLinks().size();
-                s_sub += dump_article.getWikiSubLinks().size();
-                s_ext += dump_article.getExternLinks().size();
-                s_cat += dump_article.getCategories().size();
+            // TEST subarticle link
+            if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
+
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToSubArticle[0]);
+            SubArticleObject subarticle = article.findSub(linkToSubArticle[1]);
+            if (subarticle == null){
+                dump_article.addWikiUnknownSubLink(linkToSubArticle[0], linkToSubArticle[1], linkToSubArticle[2]);
+                continue;
             }
             
-            // TEST article name
-            if (DEBUG) System.out.println("Article : " + dump_article.getName());
-            
-            main_article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), dump_article.getName());
-            
-            if (!main_article.isActive()){
-                ActiveNode active = (ActiveNode) searchOrCreateEntity(new ActiveNode(), null);
-                main_article.setActive(active);
+            article.addSubArticle(subarticle);
+            ARTICLE_SERVICE.createOrUpdate(article);
+
+            main_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
+            ARTICLE_SERVICE.createOrUpdate(main_article);
+        }
+
+        // travers each link to extern
+        for (String[] linkToExtern:dump_article.getExternLinks()){
+            // TEST extern link
+            if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern)); 
+
+            String[] urlSplit = splitUrl(linkToExtern[0]);
+            ExternObject extern = (ExternObject) searchOrCreateEntity(ExternObject.class, urlSplit[0]);
+
+            if (urlSplit[1].length() > 0) {
+                // TEST subextern link
+                if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
+
+                SubExternObject subextern = (SubExternObject) searchOrCreateEntity(SubExternObject.class, urlSplit[1], urlSplit[0]);
+
+                extern.addSubExtern(subextern);
+                EXTERN_SERVICE.createOrUpdate(extern);
+
+                main_article.addLinkToSubExtern(subextern, linkToExtern[1]);
+                ARTICLE_SERVICE.createOrUpdate(main_article);
+            } else {
+
+                main_article.addLinkToExtern(extern, linkToExtern[1]);
                 ARTICLE_SERVICE.createOrUpdate(main_article);
             }
-            
-            // travers each link to article
-            for (String[] linkToArticle:dump_article.getWikiLinks()){
-                // TEST article link
-                if (DEBUG) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
+        }
+
+        // travers each link to categorie
+        for (Map.Entry<String, List<String>> cat_entry : dump_article.getCategories().entrySet()) {
+            CategorieObject categorie = (CategorieObject) searchOrCreateEntity(CategorieObject.class, cat_entry.getKey());
+
+            // travers each link to subcategorie
+            for (String sub:cat_entry.getValue()){
                 
-                ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
+                // TEST categorie link
+                if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
+
+                SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(SubCategorieObject.class, sub, cat_entry.getKey());
+
+                // we can change the name to the categorie, if it makes sence
+                categorie.addSubCategorie(subcategorie);
+                CATEGORIE_SERVICE.createOrUpdate(categorie);
                 
-                main_article.addLinkToArticle(article, linkToArticle[1]);
-                ARTICLE_SERVICE.createOrUpdate(main_article);
+                // we can change the name to the categorie, if it makes sence
+                subcategorie.addContained(main_article);
+                SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
             }
-            
-            // travers each link to subarticle
-            for (String[] linkToSubArticle:dump_article.getWikiSubLinks()){
-                // TEST subarticle link
-                if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
-                
-                ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);                
-                SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
-    
-                article.addSubArticle(subarticle);
-                ARTICLE_SERVICE.createOrUpdate(article);
-                
-                main_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
-                ARTICLE_SERVICE.createOrUpdate(main_article);
-            }
-            
-            // travers each link to extern
-            for (String[] linkToExtern:dump_article.getExternLinks()){
-                // TEST extern link
-                if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern)); 
-                
-                String[] urlSplit = splitUrl(linkToExtern[0]);
-                ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
-                
-                if (urlSplit[1].length() > 0) {
-                    // TEST subextern link
-                    if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
-                        
-                    SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
-                    
-                    extern.addSubExtern(subextern, linkToExtern[1]);
-                    EXTERN_SERVICE.createOrUpdate(extern);
-                    
-                    // make no sence set the linktype
-                    main_article.addLinkToSubExtern(subextern);
-                    ARTICLE_SERVICE.createOrUpdate(main_article);
-                } else {
-                    
-                    main_article.addLinkToExtern(extern, linkToExtern[1]);
-                    ARTICLE_SERVICE.createOrUpdate(main_article);
-                }
-            }
-            
-            // travers each link to categorie
-            for (Map.Entry<String, List<String>> cat_entry : dump_article.getCategories().entrySet()) {
-                CategorieObject categorie = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
-                
-                // travers each link to subcategorie
-                for (String sub:cat_entry.getValue()){
-                    // TEST categorie link
-                    if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
-                    
-                    SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sub, cat_entry.getKey());
-                    
-//                  // we can change the name to the categorie, if it makes sence
-                    categorie.addSubCategorie(subcategorie);
-                    CATEGORIE_SERVICE.createOrUpdate(categorie);
-                    
-                    // we can change the name to the categorie, if it makes sence
-                    subcategorie.addContained(main_article);
-                    SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
-                }
-                        
-            }
-            
+
         }
         
         // travers each subarticle
-        if (main_article != null){
-            for (int i = 1; i < dump_page.getArticles().size(); i++){
-
-                WikiArticle dump_subarticle = dump_page.getArticles().get(i);
-
-                // TEST count the link sizes
-                if (DEBUG) {
-                    s_lin += dump_subarticle.getWikiLinks().size();
-                    s_sub += dump_subarticle.getWikiSubLinks().size();
-                    s_ext += dump_subarticle.getExternLinks().size();
-                    s_cat += dump_subarticle.getCategories().size();
-                }
-
-                // TEST subarticle name
-                if (DEBUG) System.out.println("Subarticle: " + dump_subarticle.getName());
-                
-                // add subarticle to article
-                SubArticleObject main_subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), dump_subarticle.getName(), main_article.getTitle());
-                
-                main_article.addSubArticle(main_subarticle);
-                ARTICLE_SERVICE.createOrUpdate(main_article);
-                
-                // travers each link to article
-                for (String[] linkToArticle:dump_subarticle.getWikiLinks()){
-                    // TEST article link
-                    if (DEBUG) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
-                    
-                    ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToArticle[0]);
-                
-                    main_subarticle.addLinkToArticle(article, linkToArticle[1]);
-                    SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
-                }
-
-                // travers each link to subarticle
-                for (String[] linkToSubArticle:dump_subarticle.getWikiSubLinks()){
-                    // TEST subarticle link
-                    if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
-                    
-                    ArticleObject article = (ArticleObject) searchOrCreateEntity(new ArticleObject(), linkToSubArticle[0]);
-                    SubArticleObject subarticle = (SubArticleObject) searchOrCreateEntity(new SubArticleObject(), linkToSubArticle[1], linkToSubArticle[0]);
-
-                    article.addSubArticle(subarticle);
-                    ARTICLE_SERVICE.createOrUpdate(article);
-                    
-                    main_subarticle.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
-                    SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
-                }
-
-                // travers each link to extern
-                for (String[] linkToExtern:dump_subarticle.getExternLinks()){
-                    // TEST extern link
-                    if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern));
-                    
-                    String[] urlSplit = splitUrl(linkToExtern[0]);
-                    ExternObject extern = (ExternObject) searchOrCreateEntity(new ExternObject(), urlSplit[0]);
-
-                    if (urlSplit[1].length() > 0) {
-                        // TEST subextern link
-                        if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
-                    
-                        SubExternObject subextern = (SubExternObject) searchOrCreateEntity(new SubExternObject(), urlSplit[1], urlSplit[0]);
-
-                        extern.addSubExtern(subextern, linkToExtern[1]);
-                        EXTERN_SERVICE.createOrUpdate(extern);
-
-                        // make no sence set the linktype
-                        main_subarticle.addLinkToSubExtern(subextern);
-                        SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
-                    } else {
-                        main_subarticle.addLinkToExtern(extern, linkToExtern[1]);
-                        SUBARTICLE_SERVICE.createOrUpdate(main_subarticle);
-                    }
-                }
-
-                // travers each link to categorie, add it to main article
-                for (Map.Entry<String, List<String>> cat_entry : dump_subarticle.getCategories().entrySet()) {
-                    CategorieObject categorie = (CategorieObject) searchOrCreateEntity(new CategorieObject(), cat_entry.getKey());
-                    
-                    // travers each link to subcategorie
-                    for (String sc:cat_entry.getValue()){
-                        // TEST categorie link
-                        if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sc);
-                        
-                        SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(new SubCategorieObject(), sc, cat_entry.getKey());
-                        
-                        // we can change the name to the categorie, if it makes sence
-                        categorie.addSubCategorie(subcategorie);
-                        CATEGORIE_SERVICE.createOrUpdate(categorie);
-                        
-                        // we can change the name to the categorie, if it makes sence
-                        subcategorie.addContained(main_article);
-                        SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
-                    }
-
-                }
-
+        for (WikiArticle dumd_sub_article:dump_article.getSubArticles()){
+            
+            sendArticle(dumd_sub_article, main_article);
+            
+        }
+        
+        // travers each unknown link to subarticle
+        for (String[] unknownLinkToSubArticle:dump_article.getWikiUnknownSubLinks()){
+            
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, unknownLinkToSubArticle[0]);
+            
+            SubArticleObject subarticle = article.findSub(unknownLinkToSubArticle[1]);
+            if (subarticle != null) {
+                article.addLinkToSubArticle(subarticle, unknownLinkToSubArticle[2]);
+                ARTICLE_SERVICE.createOrUpdate(article);
             }
             
         }
         
-        // TEST out the page link stacks
-        if (DEBUG) {
-            System.out.println("STACK -> L-S-E-C: " + 
-                                        String.format("%04d", s_lin) + "-" + 
-                                        String.format("%02d", s_sub) + "-" + 
-                                        String.format("%03d", s_ext) + "-" + 
-                                        String.format("%02d", s_cat) + "\t");
+        // travers each subarticle unknownlink
+        for (WikiArticle dumd_sub_article:dump_article.getSubArticles()){
+            
+            unknownLinks(dumd_sub_article, main_article);
+            
         }
-              
+            
     }
     
-    private Entity searchOrCreateEntity(Entity node, String title){
-        return searchOrCreateEntity(node, title, null);
+    /**
+     * METHOD: seperate the wiki sub articles
+     * 
+     * @param article as object
+     */
+    private void unknownLinks(WikiArticle dump_sub_article, ArticleObject root_article){
+        
+        // travers each unknown link to subarticle
+        for (String[] unknownLinkToSubArticle:dump_sub_article.getWikiUnknownSubLinks()){
+            
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, unknownLinkToSubArticle[0]);
+            
+            SubArticleObject subarticle = article.findSub(unknownLinkToSubArticle[1]);
+            if (subarticle != null) {
+                article.addLinkToSubArticle(subarticle, unknownLinkToSubArticle[2]);
+                ARTICLE_SERVICE.createOrUpdate(article);
+            }
+            
+        }
+        
+        // travers each unknown subarticle
+        for (WikiArticle dumd_sub_sub_article : dump_sub_article.getSubArticles()){
+            
+            unknownLinks(dumd_sub_sub_article, root_article);
+            
+        }
+        
+    }
+     
+    /**
+     * METHOD: seperate the wiki sub articles
+     * 
+     * @param article as object
+     */
+    private void sendArticle(WikiArticle dump_sub_article, ArticleObject root_article){
+        
+        // TEST article name
+        if (DEBUG) System.out.println("Article : " + dump_sub_article.getName());
+        
+        SubArticleObject sub_article = root_article.findSub(dump_sub_article.getName());
+        if (sub_article == null) sub_article = (SubArticleObject) updateSubarticle(dump_sub_article);
+        
+        // travers each link to article
+        for (String[] linkToArticle:dump_sub_article.getWikiLinks()){
+            // TEST article link
+            if (DEBUG) System.out.println("A-Link : " + Arrays.toString(linkToArticle));
+
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToArticle[0]);
+
+            sub_article.addLinkToArticle(article, linkToArticle[1]);
+            SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+        }
+
+        // travers each link to subarticle
+        for (String[] linkToSubArticle:dump_sub_article.getWikiSubLinks()){
+            // TEST subarticle link
+            if (DEBUG) System.out.println("S-Link : " + Arrays.toString(linkToSubArticle));
+
+            ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToSubArticle[0]);
+            SubArticleObject subarticle = article.findSub(linkToSubArticle[1]);
+            if (subarticle == null){
+                dump_sub_article.addWikiUnknownSubLink(linkToSubArticle[0], linkToSubArticle[1], linkToSubArticle[2]);
+                continue;
+            }
+            
+            sub_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
+            SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+                        
+        }
+
+        // travers each link to extern
+        for (String[] linkToExtern:dump_sub_article.getExternLinks()){
+            // TEST extern link
+            if (DEBUG) System.out.println("E-Link : " + Arrays.toString(linkToExtern)); 
+
+            String[] urlSplit = splitUrl(linkToExtern[0]);
+            ExternObject extern = (ExternObject) searchOrCreateEntity(ExternObject.class, urlSplit[0]);
+
+            if (urlSplit[1].length() > 0) {
+                // TEST subextern link
+                if (DEBUG) System.out.println("sE-Link: " + urlSplit[1]);
+
+                SubExternObject subextern = (SubExternObject) searchOrCreateEntity(SubExternObject.class, urlSplit[1], urlSplit[0]);
+
+                extern.addSubExtern(subextern);
+                EXTERN_SERVICE.createOrUpdate(extern);
+
+                sub_article.addLinkToSubExtern(subextern, linkToExtern[1]);
+                SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+            } else {
+
+                sub_article.addLinkToExtern(extern, linkToExtern[1]);
+                SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+            }
+        }
+
+        // travers each link to categorie
+        for (Map.Entry<String, List<String>> cat_entry : dump_sub_article.getCategories().entrySet()) {
+            
+            CategorieObject categorie = (CategorieObject) searchOrCreateEntity(CategorieObject.class, cat_entry.getKey());
+
+            // travers each link to subcategorie
+            for (String sub:cat_entry.getValue()){
+                
+                // TEST categorie link
+                if (DEBUG) System.out.println("C-Link : " + cat_entry.getKey() + " : " + sub);
+
+                SubCategorieObject subcategorie = (SubCategorieObject) searchOrCreateEntity(SubCategorieObject.class, sub, cat_entry.getKey());
+
+                // we can change the name to the categorie, if it makes sence
+                categorie.addSubCategorie(subcategorie);
+                CATEGORIE_SERVICE.createOrUpdate(categorie);
+
+                // we can change the name to the categorie, if it makes sence
+                subcategorie.addContained(root_article);
+                SUBCATEGORIE_SERVICE.createOrUpdate(subcategorie);
+            }
+
+        }
+        
+        // travers each subarticle
+        for (WikiArticle dumd_sub_sub_article : dump_sub_article.getSubArticles()){
+            
+            sendArticle(dumd_sub_sub_article, root_article);
+            
+        }
+            
+    }       
+        
+    private Entity searchOrCreateEntity(Class cl, String title){
+        return searchOrCreateEntity(cl, title, null);
     }
     
-    private Entity searchOrCreateEntity(Entity node, String title, String parent){
+    private Entity searchOrCreateEntity(Class cl, String title, String parent){
         Entity search = null;
-        if (node instanceof ActiveNode){
+        
+        if (DEBUG) System.out.println("searchOrCreateEntity: " + cl.getSimpleName() + " : " + title + " : " + parent);
+        
+        if (cl.isAssignableFrom(ActiveNode.class)){
             String active = title;
             if (active == null) active = activeTitle;
             search = ACTIVE_SERVICE.findByTitle(active);
@@ -351,42 +386,35 @@ public class TransmitorThread implements Runnable {
                 ACTIVE_SERVICE.createOrUpdate((ActiveNode)search);
             }
         }
-        else if (node instanceof ArticleObject){
+        else if (cl.isAssignableFrom(ArticleObject.class)){
             search = ARTICLE_SERVICE.findByTitle(title);
             if (search == null) {
                 search = new ArticleObject(title);
                 ARTICLE_SERVICE.createOrUpdate((ArticleObject)search);
             }
         }
-        else if (node instanceof SubArticleObject){
-            if (parent == null) search = SUBARTICLE_SERVICE.findByTitle(title); else search = SUBARTICLE_SERVICE.findSubTitleNode(parent, title);
-            if (search == null) {
-                search = new SubArticleObject(title);
-                SUBARTICLE_SERVICE.createOrUpdate((SubArticleObject)search);
-            }
-        }
-        else if (node instanceof ExternObject){
+        else if (cl.isAssignableFrom(ExternObject.class)){
             search = EXTERN_SERVICE.findByTitle(title);
             if (search == null) {
                 search = new ExternObject(title);
                 EXTERN_SERVICE.createOrUpdate((ExternObject)search);
             }
         }
-        else if (node instanceof SubExternObject){
+        else if (cl.isAssignableFrom(SubExternObject.class)){
             if (parent == null) search = SUBEXTERN_SERVICE.findByTitle(title); else search = SUBEXTERN_SERVICE.findSubTitleNode(parent, title);
             if (search == null) {
                 search = new SubExternObject(title);
                 SUBEXTERN_SERVICE.createOrUpdate((SubExternObject)search);
             }
         }
-        else if (node instanceof CategorieObject){
+        else if (cl.isAssignableFrom(CategorieObject.class)){
             search = CATEGORIE_SERVICE.findByTitle(title);
             if (search == null) {
                 search = new CategorieObject(title);
                 CATEGORIE_SERVICE.createOrUpdate((CategorieObject)search);
             }
         }
-        else if (node instanceof SubCategorieObject){
+        else if (cl.isAssignableFrom(SubCategorieObject.class)){
             if (parent == null) search = SUBCATEGORIE_SERVICE.findByTitle(title); else search = SUBCATEGORIE_SERVICE.findSubTitleNode(parent, title);
             if (search == null) {
                 search = new SubCategorieObject(title);
@@ -397,4 +425,44 @@ public class TransmitorThread implements Runnable {
         return search;
     }
     
+    private SubArticleObject updateSubarticle(WikiArticle article){
+        
+        List<WikiArticle> list = new LinkedList();
+        
+        list.add(article);
+        WikiArticle parent = article;
+        while(parent.getParent() != null){
+            parent = parent.getParent();
+            list.add(parent);
+        }
+        
+        ArticleObject article_object = (ArticleObject) searchOrCreateEntity(ArticleObject.class, list.get(list.size()-1).getName());
+        
+        String sub_article_title = list.get(list.size()-2).getName();
+        SubArticleObject sub_article_object = article_object.findHas(sub_article_title);
+        if (sub_article_object == null) {
+            sub_article_object = new SubArticleObject(sub_article_title);
+            SUBARTICLE_SERVICE.createOrUpdate(sub_article_object);
+            article_object.addSubArticle(sub_article_object);
+            ARTICLE_SERVICE.createOrUpdate(article_object);
+        }
+                
+        if (list.size() == 2) return sub_article_object;
+        
+        for (int i = list.size()-2; i > 0; i--){
+            sub_article_title = list.get(i-1).getName();
+            SubArticleObject sub_sub_article_object = sub_article_object.findHas(sub_article_title);
+            if (sub_sub_article_object == null) {
+                sub_sub_article_object = new SubArticleObject(sub_article_title);
+                SUBARTICLE_SERVICE.createOrUpdate(sub_sub_article_object);
+                sub_article_object.addSubArticle(sub_sub_article_object);
+                SUBARTICLE_SERVICE.createOrUpdate(sub_article_object);
+            }
+            sub_article_object = sub_sub_article_object;
+        }
+        
+        return sub_article_object;
+        
+    }
+            
 }

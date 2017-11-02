@@ -19,6 +19,12 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     private static final int DEPTH_ENTITY = 1;
     protected Session session = Neo4jSessionFactory.getInstance().getNeo4jSession();
 
+    private String replaceString(String text){
+        String out = SeekerThread.replaceText(text);
+        out = SeekerThread.escapeString(out);
+        return out;
+    }
+    
     @Override
     public Iterable<T> findAll() {
         return session.loadAll(getEntityType(), DEPTH_LIST);
@@ -43,7 +49,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     @Override
     public T findByTitle(String title) {
         Map<String, Object> params = new HashMap<>();
-        params.put("title", SeekerThread.replaceText(title));
+        params.put("title", replaceString(title));
 
         String query = QueryHelper.findByTitle();
 
@@ -53,7 +59,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     @Override
     public T findSubTitleNode(String title, String subtitle) {
         Map<String, Object> params = new HashMap<>();
-        String query = QueryHelper.findSubArtcileByTitle(SeekerThread.replaceText(title), SeekerThread.replaceText(subtitle));
+        String query = QueryHelper.findSubArtcileByTitle(replaceString(title), replaceString(subtitle));
         
         return session.queryForObject(getEntityType(), query, params);
     }
@@ -61,7 +67,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     @Override
     public Iterable<Entity> getAllLinkedNodes(String title) {
         Map<String, Object> params = new HashMap<>();
-        params.put("title", SeekerThread.replaceText(title));
+        params.put("title", replaceString(title));
 
         String query = QueryHelper.findLinkedTo();
         
@@ -71,7 +77,6 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     @Override
     public Integer getNodeCounter() {
         Map<String, Object> params = new HashMap<>();
-        //params.put("title", SeekerThread.replaceText(title));
 
         String query = QueryHelper.countNodes();
         org.neo4j.ogm.model.Result result = session.query(query, params);
@@ -153,7 +158,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     public Iterable<Entity> getShortestPath(String start, String end){
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findShortestPath(SeekerThread.replaceText(start), SeekerThread.replaceText(end));
+        String query = QueryHelper.findShortestPath(replaceString(start), replaceString(end));
         
         return session.query(Entity.class, query, params);
     }
@@ -162,7 +167,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     public Iterable<Entity> getShortestPath(String start, String end, String type){
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findShortestPath(SeekerThread.replaceText(start), SeekerThread.replaceText(end), type);
+        String query = QueryHelper.findShortestPath(replaceString(start), replaceString(end), type);
         
         return session.query(Entity.class, query, params);
     }
@@ -189,7 +194,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     public Iterable<Entity> getWeblinks(String title) {
         Map<String, Object> params = new HashMap<>();
         
-        String query = QueryHelper.findWeblinks(SeekerThread.replaceText(title));
+        String query = QueryHelper.findWeblinks(replaceString(title));
         
         return session.query(Entity.class, query, params);
     }

@@ -63,6 +63,29 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
         }
         return false;
     }
+    
+    public SubArticleObject findSub(String title){
+        
+        for(HasRelationship has : hasRelationships) {
+            
+            return ((SubArticleObject) has.getTo()).findSub(title);
+            
+        }
+        
+        return null;
+    }
+    
+    public SubArticleObject findHas(String title){
+        
+        for(HasRelationship has : hasRelationships) {
+            
+            if (((SubArticleObject) has.getTo()).getTitle().equals(title)) return (SubArticleObject) has.getTo();
+            
+        }
+        
+        return null;
+        
+    }
     // </editor-fold>
     
     // <editor-fold desc=">> adders" defaultstate="collapsed">

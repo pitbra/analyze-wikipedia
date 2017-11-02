@@ -133,8 +133,8 @@ public class Neo4JConsole {
             System.out.println(ent.getTitle());
         }
         
-        result = service_art.getWeblinks("Ang Lee");
-        System.out.println("=== Console 14  ===" + "   Linked nodes to 'Ang Lee'");
+        result = service_art.getWeblinks("Aristoteles");
+        System.out.println("=== Console 14  ===" + "   Weblinks from 'Aristoteles'");
         for (Entity ent : result){
             System.out.println(ent.getTitle());
         }
