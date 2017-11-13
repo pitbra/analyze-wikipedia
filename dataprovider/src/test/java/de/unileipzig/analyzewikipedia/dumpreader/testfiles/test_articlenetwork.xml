@@ -1,0 +1,78 @@
+<mediawiki>
+    <page>
+      <title>Article 1</title>
+      <text xml:space="preserve">
+          '''Article 1'''
+              == Sub 1a ==
+              Text with
+                  - link to articles [[Article 2]]
+              == Sub 1b ==
+              Text
+      </text>
+    </page>
+    <page>
+        <title>Article 2</title>
+        <text xml:space="preserve">
+            '''Article 2'''
+                Text with
+                  - link to articles [[Article 1]] [[Article 3]]
+                == Sub 2a ==
+                Text with
+                    - link to subarticles [[Article 3#Sub 3a]]
+                == Sub 2b ==
+                Text
+        </text>
+    </page>
+    <page>
+        <title>Article 3</title>
+        <text xml:space="preserve">
+            '''Article 3'''
+                Text with
+                    - link to articles [[Article 4]]
+                == Sub 3a ==
+                Text
+                == Sub 3b ==
+                Text
+        </text>
+    </page>
+    <page>
+        <title>Article 4</title>
+        <text xml:space="preserve">
+            '''Article 4'''
+                == Sub 4a ==
+                Text
+                == Sub 4b ==
+                Text with
+                    - link to articles [[Article 3]]
+                    - link to subarticles [[Article 1#Sub 1a]]
+        </text>
+    </page>
+    <page>
+        <title>Article 5</title>
+        <text xml:space="preserve">
+            '''Article 5'''
+                == Sub 5a ==
+                Text
+                    === Sub 5a1 ===
+                    Text with
+                        - link to article [[Article 1]]
+                    === Sub 5a2 ===
+                    Text
+                        ==== Sub 5a2a ====
+                        Text
+                            ===== Sub 5a2a1 =====
+                            Text with
+                                - link to article [[Article 1]]
+                == Sub 5b ==
+                Text with
+                    - link to articles [[Article 4]]
+        </text>
+    </page>
+    <page>
+        <title>Article 6</title>
+        <text xml:space="preserve">
+            '''Article 6'''
+                Text
+        </text>
+    </page>
+</mediawiki>

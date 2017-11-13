@@ -2,137 +2,271 @@ package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 
+import org.neo4j.ogm.model.Result;
+
 /**
- *
  * @author Pit.Braunsdorf
  * @param <T>
  */
 public interface Service<T extends Entity> {
-    Iterable<T> findAll();
-    
-    T find(long id);
-    //T find(String title);
-    
-    void delete(long id);
-    //void delete(String title);
-    
-    T createOrUpdate(T object);
-    
-    T findByTitle(String title);
-    
-    T findSubTitleNode(String title, String subtitle);
     
     /**
-     * Gibt alle Knoten zurück, auf die dieser verlinkt.
+     * Send statement in cypher
      * 
-     * @param title Titel des Knotens
+     * @param statement as string
      * @return 
      */
-    Iterable<Entity> getAllLinkedNodes(String title);
+    Result sendStatement(String statement);
     
     /**
-     * Gibt Anzahl der Knoten zurück
+     * Find all nodes
+     * 
+     * @return 
+     */
+    Iterable<T> findAll();
+    
+    /**
+     * Find node by id
+     * 
+     * @param id as long
+     * @return 
+     */
+    T find(long id);
+    
+    /**
+     * Delete node by id
+     * 
+     * @param title node title 
+     */
+    void delete(long id);
+    
+    /**
+     * Update given node
+     * 
+     * @param object node
+     * @return 
+     */
+    T createOrUpdate(T object);
+    
+    /**
+     * Get node by title
+     * 
+     * @param title node title
+     * @return 
+     */
+    T findByTitle(String title);
+    
+    /**
+     * Get subnode of given node
+     * 
+     * @param title node title
+     * @param subtitle subnode title
+     * @return 
+     */
+    T findSubNode(String title, String subtitle);
+    
+    /**
+     * List all subarticles of article
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getAllSubArticlesOfArticle(String title);
+    
+    /**
+     * List article and all subarticles of this article
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getAllLinksOfNodeAndAllSubArticles(String title);
+    
+    /**
+     * List nodes with title and relationtype
+     * 
+     * @param title node title
+     * @param relationtype of relation
+     * @return 
+     */
+    Iterable<Entity> getTitledNodesWithTypedRelation(String title, String relationtype);
+    
+    /**
+     * List nodes with typed relation to typed nodes
+     * 
+     * @param type node type
+     * @param relationtype of relation
+     * @return 
+     */
+    Iterable<Entity> getNodesWithTypedRelationToTypedNodes(String type, String relationtype);
+    
+    /**
+     * List all typed nodes with typed relation
+     * 
+     * @param starttype startnode type
+     * @param endtype endnode type
+     * @param relationtype relation type
+     * @return 
+     */
+    Iterable<Entity> getTypedNodesWithTypedRelationToTypedNodes(String starttype, String endtype, String relationtype);
+    
+    /**
+     * List all articles and subarticles from given article
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getArticleAndAllSubArticles(String title);
+    
+    /**
+     * List all nodes of type with directed relation
+     * 
+     * @param nodetype node type
+     * @param relationtype relation type
+     * @param direction direction of relation
+     * @return 
+     */
+    Iterable<Entity> getTypedNodesWithTypedRelationInWay(String nodetype, String relationtype, String direction);
+    
+    /**
+     * List all articles and subarticles from given article
+     * 
+     * @param startnodetype startnode type
+     * @param starttitle startnode title
+     * @param endnodetype endnode type
+     * @param endtitle endnode type
+     * @param relationtype relation type
+     * @param reationtitle relation title
+     * @param direction direction of relation
+     * @return 
+     */
+    Iterable<Entity> getSpecificNode(String startnodetype, String starttitle, String endnodetype, String endtitle, String relationtype, String reationtitle, String direction);
+    
+    /**
+     * List all nodes that linked from given title
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getLinkedNodes(String title);
+    
+    /**
+     * List all nodes that linked to given title
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getRelatedNodes(String title);
+            
+    /**
+     * Count all nodes
      * 
      * @return 
      */
     Integer getNodeCounter();
     
     /**
-     * Gibt Anzahl alle Knoten des bestimmten Types zurück
+     * Count all relations
      * 
-     * @param label Label der Knoten
      * @return 
      */
-    Iterable<Entity> getNodesWithLabel(String label);
+    Integer getRelationCounter();
     
     /**
-     * Gibt alle Knoten ohne Verbindung zu anderen Knoten zurück
+     * Get nodes by type and title
+     * 
+     * @param type node type
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getNodes(String type, String title);
+    
+    /**
+     * Get notes by type
+     * 
+     * @param type node type
+     * @return 
+     */
+    Iterable<Entity> getTypedNodes(String type);
+    
+    /**
+     * Get nodes by title
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getTitledNodes(String title);
+    
+    /**
+     * List all nodes without relations
      * 
      * @return 
      */
     Iterable<Entity> getNodesWithoutConnection();
     
     /**
-     * Gibt alle Knoten ohne Verbindung zu anderen Knoten zurück, ausser dem Activen Knoten
+     * List active nodes without connections
      * 
      * @return 
      */
-    Iterable<Entity> getNodesWithOnlyActiveConnection();
+    Iterable<Entity> getEmptyActiveNodes();
     
     /**
-     * Gibt alle aktiven Knoten zurück
+     * List active nodes
      * 
      * @return 
      */
     Iterable<Entity> getActiveNodes();
     
     /**
-     * Gibt alle Knoten mit angegebenner Verbindung zurück
+     * List all nodes with given type and the given title stringsequenze
      * 
-     * @param type Typ der Relation
-     * @param direction to or from node
+     * @param type nodetype
+     * @param sequence searchstring
      * @return 
      */
-    Iterable<Entity> getNodesWithConnection(String type, String direction);
+    Iterable<Entity> getNodesByTypeAndTitlesequence(String type, String sequence);
     
     /**
-     * Gibt alle Knoten mit angegebenner Typ und suchvariable für den Title zurück
+     * List path of shortest way between given nodes of specifiv relation type
      * 
-     * @param label Label der Knoten
-     * @param sequence Suchstring für den Title
-     * @return 
-     */
-    Iterable<Entity> getNodesByLabelAndTitlesequence(String label, String sequence);
-    
-    /**
-     * Gibt alle Knoten mit angegebenner Verbindung zurück
-     * 
-     * @param label Label der Knoten
-     * @param type Typ der Relation
-     * @param direction Zu oder vom Knoten
-     * @return 
-     */
-    Iterable<Entity> getLabeledNodesWithConnection(String label, String type, String direction);
-    
-    /**
-     * Gibt alle Knoten zurück die von einem Subknoten verlinkt sind
-     * 
-     * @return 
-     */
-    Iterable<Entity> getSubNodesWithConnection();
-    
-    /**
-     * Gibt kürzesten Weg zwischen zwei Knoten zurück
-     * 
-     * @param start Titel des Startknotens
-     * @param end Titel des Endknotens
+     * @param start startnode title
+     * @param end endnode title
      * @return 
      */
     Iterable<Entity> getShortestPath(String start, String end);
     
     /**
-     * Gibt kürzesten Weg zwischen zwei Knoten zurück, nur mit bestimmter Relation
+     * List path of shortest way between given nodes of specifiv relation type
      * 
-     * @param start Titel des Startknotens
-     * @param end Titel des Endknotens
-     * @param type Relationstyp
+     * @param start startnode title
+     * @param end endnode title
+     * @param type relationstype
      * @return 
      */
     Iterable<Entity> getShortestPath(String start, String end, String type);
     
     /**
-     * Gibt Knoten mit gesuchter Beschriftung zurück
+     * List all nodes with given title
      * 
-     * @param title Titel der Kante
+     * @param title node title
      * @return 
      */
     Iterable<Entity> getNodesWithTitledConnection(String title);
     
     /**
-     * Gibt alle externen Links des Knotens zurück
+     * List all extern links of the node
      * 
-     * @param title Titel der Kante
+     * @param title node title
      * @return 
      */
     Iterable<Entity> getWeblinks(String title);
+    
+    /**
+     * Returns the domaen of given subdomain
+     * 
+     * @param id of the node
+     * @return 
+     */
+    Iterable<Entity> getDomain(long id);
+    
 }

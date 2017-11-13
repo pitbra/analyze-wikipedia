@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
 
@@ -30,7 +28,7 @@ public class ThreadController {
     
     private static String[] arguments;
 
-    private static final Thread READER = new Thread(new ReaderThread());
+    private static Thread READER;
     private static final Thread[] SEEKERS = new Thread[Components.getCores()];
     private static final Thread[] TRANSMS = new Thread[Components.getCores()];
 
@@ -42,35 +40,53 @@ public class ThreadController {
      * METHOD: initial the application
      *
      * @param args as stringarray
-     * @throws java.lang.Exception
      */
-    protected static void initApplication(String[] args) throws Exception {
-
+    public static void initApplication(String[] args) {
+        
         arguments = checkArguments(args);
         
-        if (DEBUG) arguments = checkArguments(new String[]{Components.getTestFile()});
-
+        if (DEBUG) arguments = checkArguments(Components.getTestFiles());
+        
         if (arguments.length == 0) {
             FileExplorer file_explorer = new FileExplorer();
             file_explorer.setVisible(true);
         } else {
             initThreads();
+            System.exit(0);
         }
 
     }
 
     /**
-     * METHOD: initial the threads
-     *
-     * @throws java.lang.Exception
+     * METHOD: initial the threads for test
+     * 
+     * @param args as stringarray
      */
-    public static void initThreads() throws Exception {
-
+    public static void initThreads(String[] args) {
+    
+        Components.setShowRemovedArticleInCommandline(false);
+        
+        arguments = checkArguments(args);
+                
+        initThreads();
+        
+    }
+    
+    /**
+     * METHOD: initial the threads
+     */
+    public static void initThreads() {
+        
+        READER = new Thread(new ReaderThread());
+        READER.setDaemon(false);
+        
         // initial seeker and transmitor thread
         for (int i = 0; i < Components.getCores(); i++) {
 
             SEEKERS[i] = new Thread(new SeekerThread());
+            SEEKERS[i].setDaemon(false);
             TRANSMS[i] = new Thread(new TransmitorThread());
+            TRANSMS[i].setDaemon(false);
 
         }
 
@@ -113,8 +129,7 @@ public class ThreadController {
             }
 
         }
-
-        System.exit(0);
+        
     }
 
     /**
@@ -127,9 +142,7 @@ public class ThreadController {
         // try to wait a specific time
         try {
             java.util.concurrent.TimeUnit.MILLISECONDS.sleep(millis);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ThreadController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (InterruptedException ex) {}
 
     }
 
@@ -140,12 +153,21 @@ public class ThreadController {
      * @return is url as boolean
      */
     protected static boolean isUrl(String url) {
-
+        return getUrl(url) != null;
+    }
+    
+    /**
+     * METHOD: check if given url has correct form of an url
+     *
+     * @param url as string
+     * @return url, null if not possible
+     */
+    public static URL getUrl(String url) {
+        
         try {
-            URL tmp = new URL(url);
-            return true;
+            return new URL(url);
         } catch (MalformedURLException e) {
-            return false;
+            return null;
         }
 
     }

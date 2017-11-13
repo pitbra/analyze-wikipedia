@@ -32,15 +32,8 @@ import org.xml.sax.SAXException;
  */
 public class ReaderThread implements Runnable {
     
-    private static String file_name = "";
-    private static long file_length = 0;
-    private static long read_length = 0;
-    
-    private static long start_time;
-    
     /**
      * KONSTRUCTOR: default
-     * 
      */
     public ReaderThread(){
         
@@ -48,14 +41,12 @@ public class ReaderThread implements Runnable {
             
     /**
      * METHOD: execution of thread file reader
-     * 
      */
     @Override
     public void run() {
         
         getFiles(ThreadController.getArguments());
         
-        // convert each file to documents
         while (!ThreadController.fileIsEmpty()){
             
             readFile(ThreadController.removeFile());
@@ -108,14 +99,7 @@ public class ReaderThread implements Runnable {
             }
             
         }
-        
-        // set fix test path if arguments are empty
-        if (pathes.length == 0){
-            
-            ThreadController.addFile(new File(Components.getTestFile()));
-            
-        }
-        
+                
     }
     
     /**
@@ -167,18 +151,10 @@ public class ReaderThread implements Runnable {
             String page_text = "";
             String currentLine = br.readLine();
             
-            file_name = file.getName();
-            file_length = file.length();
-            
-            start_time = System.currentTimeMillis();
-            
             // check first line of mediawiki tag
             if(currentLine.contains("<" + Components.getMediaTag())) {
                 
                 while (currentLine != null){
-                    
-                    // remember text length
-                    read_length += currentLine.length();
                     
                     // check start of page
                     if(currentLine.contains("<" + Components.getPageTag() + ">")) {

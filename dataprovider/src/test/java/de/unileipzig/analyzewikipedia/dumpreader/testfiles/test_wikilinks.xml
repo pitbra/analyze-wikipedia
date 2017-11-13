@@ -1,0 +1,22 @@
+<mediawiki>
+    <page>
+        <title>Alan Smithee</title>
+        <text xml:space="preserve">
+            '''Alan Smithee'''
+                == Weblinks ==
+                * {{IMDb|nm0000647}}
+                * [http://www.abc.net.au/rn/arts/atoday/stories/s353584.htm Artikel über Smithee von ABC Online (englisch)]
+                * [http://einestages.spiegel.de/static/topicalbumbackground/13641/der_mann_der_niemals_lebte.html Der Mann, der niemals lebte, Spiegel Online einestages]
+                * [http://dradiowissen.de/beitrag/alan-smithee-die-film-legende-lebt Alan Smithee lebt!, DRadio Wissen]
+                * [http://www.test.org/test/test.html 404-Error]
+        </text>
+    </page>
+    <page>
+        <title>No Links</title>
+        <text xml:space="preserve">
+            '''No Links'''
+                == Weblinks ==
+                Text
+        </text>
+    </page>
+</mediawiki>

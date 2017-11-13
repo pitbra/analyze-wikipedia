@@ -17,6 +17,7 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
     @Relationship(type = "HAS", direction = Relationship.OUTGOING)
     List<HasRelationship> hasRelationships;
     
+    @Relationship(type = "LINKS", direction = Relationship.OUTGOING)
     List<LinkToReleationship> links;
     // </editor-fold>
     
