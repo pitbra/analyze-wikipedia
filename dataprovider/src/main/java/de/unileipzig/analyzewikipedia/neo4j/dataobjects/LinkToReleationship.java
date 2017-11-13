@@ -15,7 +15,7 @@ import org.neo4j.ogm.annotation.StartNode;
  *
  * @author Pit.Braunsdorf
  */
-@RelationshipEntity(type="LINKED_TO")
+@RelationshipEntity(type="LINKS")
 public class LinkToReleationship {
     @GraphId   private Long relationshipId;
     @Property  private String title;

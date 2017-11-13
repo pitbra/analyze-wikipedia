@@ -15,14 +15,13 @@ public class WikiArticle_Test {
     
     private static long timeUsing;
     private static long timeGeneral;
+    private static String methode = "";
     
     // fix data
     private static String parentTitle;
     private static WikiArticle parentArticle;
     private static String articleTitle;
-    // random data
-    private static String randomTitle;
-    private static WikiArticle randomArticle;
+    
     // special data
     private final static String EMPTYSTRING = "";
     private final static String NULLSTRING = null;
@@ -34,17 +33,13 @@ public class WikiArticle_Test {
         parentArticle = new WikiArticle(parentTitle);
         
         articleTitle = "title";
-        do {
-            randomTitle = RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1,10) + 4);
-        } while (articleTitle.equals(randomTitle));
-        
-        randomArticle = new WikiArticle(randomTitle);
         
     }
     
     @AfterClass
     public static void tearDownClass() {
-        System.out.println("\n=== WikiArticle_Test ===\nTesttime of class: " + (timeGeneral / 1000000) + " ms [" + (timeGeneral / 1000) + " us]\n");
+        System.out.format("=== WikiArticle_Test ===%n");
+        System.out.format("Testtime of class: %d ms [%d us]%n", (timeGeneral / 1000000), (timeGeneral / 1000));
     }
     
     @Before
@@ -56,11 +51,12 @@ public class WikiArticle_Test {
     public void tearDown() {
         long time = System.nanoTime();
         timeGeneral += (time - timeUsing);
-        System.out.println("Testtime of methode: " + ((time - timeUsing) / 1000000) + " ms [" + ((time - timeUsing) / 1000) + " us]\n");
+        System.out.format("Time for '%45s': % 4d ms [% 7d us].%n", methode, ((time - timeUsing) / 1000000), ((time - timeUsing) / 1000));
     }
     
     @Test
     public void checkCreateEmptyArticle(){
+        methode = "checkCreateEmptyArticle";
         
         WikiArticle article = new WikiArticle();
         
@@ -78,6 +74,7 @@ public class WikiArticle_Test {
     
     @Test
     public void checkCreateNullStringArticle(){
+        methode = "checkCreateNullStringArticle";
         
         WikiArticle article = new WikiArticle(NULLSTRING);
         
@@ -86,7 +83,19 @@ public class WikiArticle_Test {
     }
     
     @Test
+    public void checkParentArticle(){
+        methode = "checkParentArticle";
+        
+        WikiArticle article = new WikiArticle(articleTitle);
+        article.setParent(parentArticle);
+        
+        assertThat(article.getParent().getName(), is(parentTitle));
+        
+    }
+    
+    @Test
     public void checkCreateRandomArticle(){
+        methode = "checkCreateRandomArticle";
         
         WikiArticle parent = new WikiArticle();
         WikiArticle article = new WikiArticle(articleTitle);
@@ -130,7 +139,7 @@ public class WikiArticle_Test {
         
         int count_catlinks = RandomUtils.nextInt(1,10);
         for (int i = 0; i < count_catlinks; i++){
-            article.addCategorieName(randomValue, randomValue);
+            article.addCategorieName(randomValue + i, randomValue);
         }
         
         assertThat(article.getParent(), is(parent));

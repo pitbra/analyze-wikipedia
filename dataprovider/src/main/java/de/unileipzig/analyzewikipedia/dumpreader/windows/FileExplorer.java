@@ -229,9 +229,8 @@ public class FileExplorer extends JFrame {
                 for (int i = 0; i < obj.length; i++){
                     str[i] = obj[i].toString();
                 }
-                ThreadController.setArguments(str);
                 setVisible(false);
-                ThreadController.initThreads();
+                ThreadController.initApplication(str);
             } catch (Exception ex) {}
         });
         

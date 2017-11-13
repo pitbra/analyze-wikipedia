@@ -1,23 +1,11 @@
 package de.unileipzig.analyzewikipedia.dumpreader.controller;
 
+import de.unileipzig.analyzewikipedia.dumpreader.constants.Components;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ActiveNode;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.CategorieObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubCategorieObject;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.*;
 
-import de.unileipzig.analyzewikipedia.neo4j.service.ActiveServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.ArticleServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.ExternServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.SubExternServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.CategorieServiceImpl;
-import de.unileipzig.analyzewikipedia.neo4j.service.SubCategorieServiceImpl;
+import de.unileipzig.analyzewikipedia.neo4j.service.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,7 +26,7 @@ public class TransmitorThread implements Runnable {
     
     private static String activeTitle;
     
-    private static final ActiveServiceImpl ACTIVE_SERVICE  = new ActiveServiceImpl();;
+    private static final ActiveServiceImpl ACTIVE_SERVICE = new ActiveServiceImpl();
     private static final ArticleServiceImpl ARTICLE_SERVICE = new ArticleServiceImpl();
     private static final SubArticleServiceImpl SUBARTICLE_SERVICE = new SubArticleServiceImpl();
     private static final ExternServiceImpl EXTERN_SERVICE = new ExternServiceImpl();
@@ -48,10 +36,8 @@ public class TransmitorThread implements Runnable {
         
     /**
      * KONSTRUCTOR: default
-     * 
-     * @throws java.lang.Exception
      */
-    public TransmitorThread() throws Exception {
+    public TransmitorThread() {
         
         ActiveNode active = (ActiveNode) searchOrCreateEntity(ActiveNode.class, "Active");
         activeTitle = active.getTitle();
@@ -61,7 +47,6 @@ public class TransmitorThread implements Runnable {
         
     /**
      * METHOD: execution of transmitor thread
-     * 
      */
     @Override
     public void run() {
@@ -74,7 +59,7 @@ public class TransmitorThread implements Runnable {
 
             if (article != null){
                 
-                System.out.println("ArticleStackSize: " + ThreadController.getArticleStackSize() + "   Removed: " + article.getName());
+                if (Components.getShowRemovedArticleInCommandline()) System.out.format("ArticleStackSize: %d\t Removed: %s%n", ThreadController.getArticleStackSize(), article.getName());
                 sendArticle(article);
 
             }
@@ -98,7 +83,7 @@ public class TransmitorThread implements Runnable {
             return null;
         }
         
-        return new String[]{t_url.getHost(), t_url.getPath()};
+        return new String[]{t_url.getProtocol() + "://" + t_url.getHost(), t_url.getPath()};
 
         // EXAMPLE url = "http://example.com:80/docs/books/tutorial/index.html?name=networking#DOWNLOADING"
         // url.getProtocol());      //  http
@@ -117,19 +102,19 @@ public class TransmitorThread implements Runnable {
      * 
      * @param article as object
      */
-    private void sendArticle(WikiArticle dump_article){
+    private static void sendArticle(WikiArticle dump_article){
         
         // TEST article name
         if (DEBUG) System.out.println("Article : " + dump_article.getName());
-
+        
         ArticleObject main_article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, dump_article.getName());
-
-        if (dump_article.getParent() == null && !main_article.isActive()){
-            ActiveNode active = (ActiveNode) searchOrCreateEntity(ActiveNode.class, null);
-            main_article.setActive(active);
-            ARTICLE_SERVICE.createOrUpdate(main_article);
+        
+        ActiveNode active = (ActiveNode) searchOrCreateEntity(ActiveNode.class, null);
+        if (!active.contains(main_article)){
+            active.addArticle(main_article);
+            ACTIVE_SERVICE.createOrUpdate(active);
         }
-
+        
         // travers each link to article
         for (String[] linkToArticle:dump_article.getWikiLinks()){
             // TEST article link
@@ -138,7 +123,7 @@ public class TransmitorThread implements Runnable {
             ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToArticle[0]);
 
             main_article.addLinkToArticle(article, linkToArticle[1]);
-            ARTICLE_SERVICE.createOrUpdate(main_article);
+            main_article = ARTICLE_SERVICE.createOrUpdate(main_article);
         }
         
         // travers each link to subarticle
@@ -158,7 +143,7 @@ public class TransmitorThread implements Runnable {
             ARTICLE_SERVICE.createOrUpdate(article);
 
             main_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
-            ARTICLE_SERVICE.createOrUpdate(main_article);
+            main_article = ARTICLE_SERVICE.createOrUpdate(main_article);
         }
 
         // travers each link to extern
@@ -179,11 +164,11 @@ public class TransmitorThread implements Runnable {
                 EXTERN_SERVICE.createOrUpdate(extern);
 
                 main_article.addLinkToSubExtern(subextern, linkToExtern[1]);
-                ARTICLE_SERVICE.createOrUpdate(main_article);
+                main_article = ARTICLE_SERVICE.createOrUpdate(main_article);
             } else {
 
                 main_article.addLinkToExtern(extern, linkToExtern[1]);
-                ARTICLE_SERVICE.createOrUpdate(main_article);
+                main_article = ARTICLE_SERVICE.createOrUpdate(main_article);
             }
         }
 
@@ -244,7 +229,7 @@ public class TransmitorThread implements Runnable {
      * 
      * @param article as object
      */
-    private void unknownLinks(WikiArticle dump_sub_article, ArticleObject root_article){
+    private static void unknownLinks(WikiArticle dump_sub_article, ArticleObject root_article){
         
         // travers each unknown link to subarticle
         for (String[] unknownLinkToSubArticle:dump_sub_article.getWikiUnknownSubLinks()){
@@ -273,7 +258,7 @@ public class TransmitorThread implements Runnable {
      * 
      * @param article as object
      */
-    private void sendArticle(WikiArticle dump_sub_article, ArticleObject root_article){
+    private static void sendArticle(WikiArticle dump_sub_article, ArticleObject root_article){
         
         // TEST article name
         if (DEBUG) System.out.println("Article : " + dump_sub_article.getName());
@@ -289,7 +274,7 @@ public class TransmitorThread implements Runnable {
             ArticleObject article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, linkToArticle[0]);
 
             sub_article.addLinkToArticle(article, linkToArticle[1]);
-            SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+            sub_article = SUBARTICLE_SERVICE.createOrUpdate(sub_article);
         }
 
         // travers each link to subarticle
@@ -305,7 +290,7 @@ public class TransmitorThread implements Runnable {
             }
             
             sub_article.addLinkToSubArticle(subarticle, linkToSubArticle[2]);
-            SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+            sub_article = SUBARTICLE_SERVICE.createOrUpdate(sub_article);
                         
         }
 
@@ -327,11 +312,11 @@ public class TransmitorThread implements Runnable {
                 EXTERN_SERVICE.createOrUpdate(extern);
 
                 sub_article.addLinkToSubExtern(subextern, linkToExtern[1]);
-                SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+                sub_article = SUBARTICLE_SERVICE.createOrUpdate(sub_article);
             } else {
 
                 sub_article.addLinkToExtern(extern, linkToExtern[1]);
-                SUBARTICLE_SERVICE.createOrUpdate(sub_article);
+                sub_article = SUBARTICLE_SERVICE.createOrUpdate(sub_article);
             }
         }
 
@@ -367,12 +352,19 @@ public class TransmitorThread implements Runnable {
         }
             
     }       
-        
-    private Entity searchOrCreateEntity(Class cl, String title){
+    
+    /**
+     * METHOD: seperate the wiki sub articles
+     * 
+     * @param cl as class
+     * @param title as string
+     * @return the found entity or null
+     */
+    public static Entity searchOrCreateEntity(Class cl, String title){
         return searchOrCreateEntity(cl, title, null);
     }
     
-    private Entity searchOrCreateEntity(Class cl, String title, String parent){
+    private static Entity searchOrCreateEntity(Class cl, String title, String parent){
         Entity search = null;
         
         if (DEBUG) System.out.println("searchOrCreateEntity: " + cl.getSimpleName() + " : " + title + " : " + parent);
@@ -401,7 +393,7 @@ public class TransmitorThread implements Runnable {
             }
         }
         else if (cl.isAssignableFrom(SubExternObject.class)){
-            if (parent == null) search = SUBEXTERN_SERVICE.findByTitle(title); else search = SUBEXTERN_SERVICE.findSubTitleNode(parent, title);
+            if (parent == null) search = SUBEXTERN_SERVICE.findByTitle(title); else search = SUBEXTERN_SERVICE.findSubNode(parent, title);
             if (search == null) {
                 search = new SubExternObject(title);
                 SUBEXTERN_SERVICE.createOrUpdate((SubExternObject)search);
@@ -415,7 +407,7 @@ public class TransmitorThread implements Runnable {
             }
         }
         else if (cl.isAssignableFrom(SubCategorieObject.class)){
-            if (parent == null) search = SUBCATEGORIE_SERVICE.findByTitle(title); else search = SUBCATEGORIE_SERVICE.findSubTitleNode(parent, title);
+            if (parent == null) search = SUBCATEGORIE_SERVICE.findByTitle(title); else search = SUBCATEGORIE_SERVICE.findSubNode(parent, title);
             if (search == null) {
                 search = new SubCategorieObject(title);
                 SUBCATEGORIE_SERVICE.createOrUpdate((SubCategorieObject)search);
@@ -425,7 +417,13 @@ public class TransmitorThread implements Runnable {
         return search;
     }
     
-    private SubArticleObject updateSubarticle(WikiArticle article){
+    /**
+     * METHOD: update the given article
+     * 
+     * @param article as class
+     * @return the subarticle
+     */
+    private static SubArticleObject updateSubarticle(WikiArticle article){
         
         List<WikiArticle> list = new LinkedList();
         

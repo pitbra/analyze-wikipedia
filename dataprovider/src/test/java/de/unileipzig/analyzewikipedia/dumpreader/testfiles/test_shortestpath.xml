@@ -1,0 +1,57 @@
+<mediawiki>
+    <page>
+        <title>Start</title>
+        <text xml:space="preserve">
+            '''Start'''
+                Text with link to articles [[Path 1]] [[Path A|Short cut]]
+        </text>
+    </page>
+    <page>
+        <title>Path A</title>
+        <text xml:space="preserve">
+            '''Path A'''
+                Text with link to articles [[Path B]]
+        </text>
+    </page>
+    <page>
+        <title>Path B</title>
+        <text xml:space="preserve">
+            '''Path B'''
+                Text with link to articles [[End]]
+        </text>
+    </page>
+    <page>
+        <title>Path 1</title>
+        <text xml:space="preserve">
+            '''Path 1'''
+                Text with link to articles [[Path 2]]
+        </text>
+    </page>
+    <page>
+        <title>Path 2</title>
+        <text xml:space="preserve">
+            '''Path 2'''
+                Text with link to articles [[Path 3]]
+        </text>
+    </page>
+    <page>
+        <title>Path 3</title>
+        <text xml:space="preserve">
+            '''Path 3'''
+                Text with link to articles [[Path 4]]
+        </text>
+    </page>
+    <page>
+        <title>Path 4</title>
+        <text xml:space="preserve">
+            '''Path 4'''
+                Text with link to articles [[End]]
+        </text>
+    </page>
+    <page>
+        <title>End</title>
+        <text xml:space="preserve">
+            '''End'''
+        </text>
+    </page>
+</mediawiki>

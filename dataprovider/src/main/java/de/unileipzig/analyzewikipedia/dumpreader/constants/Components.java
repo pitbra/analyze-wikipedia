@@ -1,9 +1,5 @@
 package de.unileipzig.analyzewikipedia.dumpreader.constants;
 
-import de.unileipzig.analyzewikipedia.dumpreader.controller.Starter;
-
-import java.io.File;
-
 /**
  * @author Danilo Morgado
  * 
@@ -15,16 +11,20 @@ public class Components {
     
     private static final boolean [] TRICKER = {false, false, false, false, false};       //0=null   //1=TITLE-LINK   //2=ARTICLE-LINK    //3=EXTERN-LINK   //4=CATEGORIE
     
+    private static boolean SHOW_REMOVED_ARTICLES_IN_COMMANDLINE = true;
+    
     private static final String[][] ARGUMENT = {    /*0*/   {"-h","/h"},    //HELP
                                                     /*1*/   {"-a","/a"},    //TITLE-LINK
                                                     /*2*/   {"-s","/s"},    //ARTICLE-LINK
                                                     /*3*/   {"-e","/e"},    //EXTERN-LINK
                                                     /*4*/   {"-c","/c"}};   //CATEGORIE
     
-    //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_3pages.xml";
-    //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_2reducedPages.xml";
-    //private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_crawl2Pages.xml";
-    private final static String TEST_FILE = new File(new File(Starter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()).getParent() + "/src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_real7Pages.xml";
+    private final static String[] TEST_FILES =  {
+                                                    "src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_3pages.xml", 
+                                                    "src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_2reducedPages.xml", 
+                                                    "src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_crawl2Pages.xml",
+                                                    "src/test/java/de/unileipzig/analyzewikipedia/dumpreader/testfiles/test_real7Pages.xml"
+                                                };
     
     private final static String MEDIA_TAG = "mediawiki";
     private final static String PAGE_TAG = "page";
@@ -150,9 +150,9 @@ public class Components {
      * 
      * @return path as string
      */
-    public static final String getTestFile(){
+    public static final String[] getTestFiles(){
         
-        return TEST_FILE;
+        return TEST_FILES;
         
     }
     
@@ -318,6 +318,28 @@ public class Components {
     public static final Integer getArticleStackLimit(){
         
         return ARTICLE_STACK_LIMIT;
+        
+    }
+    
+    /**
+     * GETTER: get tricker of showing the removed article elements in queue
+     * 
+     * @return status as boolean
+     */
+    public static final Boolean getShowRemovedArticleInCommandline(){
+        
+        return SHOW_REMOVED_ARTICLES_IN_COMMANDLINE;
+        
+    }
+    
+    /**
+     * GETTER: set tricker of showing the removed article elements in queue
+     * 
+     * @param b as boolean
+     */
+    public static final void setShowRemovedArticleInCommandline(Boolean b){
+        
+        SHOW_REMOVED_ARTICLES_IN_COMMANDLINE = b;
         
     }
     

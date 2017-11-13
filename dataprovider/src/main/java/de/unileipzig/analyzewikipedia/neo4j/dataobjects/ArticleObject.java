@@ -13,12 +13,10 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
     @Property(name = "title")
     private String title;
 
-    @Relationship(type = "ACTIVE", direction = Relationship.OUTGOING)
-    ActiveNode active;
-
     @Relationship(type = "HAS", direction = Relationship.OUTGOING)
     List<HasRelationship> hasRelationships;
     
+    @Relationship(type = "LINKS", direction = Relationship.OUTGOING)
     List<LinkToReleationship> links;
     // </editor-fold>
     
@@ -33,7 +31,6 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
     
     public ArticleObject(String title, List<HasRelationship> hasRelaionships, List<LinkToReleationship> links) {
         this.title = title;
-        this.active = null;
         this.hasRelationships = hasRelaionships;
         this.links = links;
     }
@@ -45,14 +42,9 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
         return "Article{"
                 + "id=" + getId()
                 + ", title='" + title + '\''
-                + ", active=" + isActive()
                 + ", subarticlesize=" + hasRelationships.size()
                 + ", linksize=" + links.size()
                 + "}";
-    }
-    
-    public boolean isActive() {
-        return this.active != null;
     }
     
     private boolean contains(SubArticleObject sub_art) {
@@ -153,10 +145,6 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
     // <editor-fold desc=">> setters" defaultstate="collapsed">
     public void setTitle(String title) {
         this.title = title;
-    }
-    
-    public void setActive(ActiveNode active) {
-        this.active = active;
     }
     // </editor-fold>
     

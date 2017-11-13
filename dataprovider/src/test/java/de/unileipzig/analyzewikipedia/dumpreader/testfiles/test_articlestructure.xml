@@ -1,0 +1,38 @@
+<mediawiki>
+    <page>
+        <title>Main Article</title>
+        <text xml:space="preserve">
+            '''Main Article'''
+                Text with
+                    - link to articles [[Article A|To Article A]] [[Article B|To Article B]]
+                    - link to subarticles [[Article A#A-Sub 1]]
+                    - link to extern [http://www.test.com/test1]
+                Text includes categories [[Kategorie:Main-Article|Main-Article]]
+                == Sub 1 ==
+                Text with
+                    - link to articles [[Article C]] [[Article D]]
+                    - link to subarticles [[Article C#Sub 2]]
+                    - link to extern [http://www.test.com/test2]
+                Text includes categories [[Kategorie:C-ArticleA]]
+                == Sub 2 ==
+                Text
+                    === Sub 2 Sub 1 ===
+                    Text
+                    === Sub 2 Sub 2 ===
+                    Text
+                        ==== Sub 2 Sub 2 Sub 1 ====
+                        Text
+                        ==== Sub 2 Sub 2 Sub 2 ====
+                        Text
+                        ==== Sub 2 Sub 2 Sub 3 ====
+                        Text
+                            ===== Sub 2 Sub 2 Sub 3 Sub 1 =====
+                            Text
+                == Sub 3 ==
+                Text with
+                    - link to extern [http://www.test.com/test1]
+                    [[Kategorie:C-ArticleB]]
+                    [[Kategorie:C-ArticleC]]
+        </text>
+    </page>
+</mediawiki>

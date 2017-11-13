@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 
-import java.util.List;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.regex.Matcher;
@@ -32,14 +31,12 @@ public class SeekerThread implements Runnable {
     
     /**
      * KONSTRUCTOR: default
-     * 
      */
     public SeekerThread(){  
     }
     
     /**
      * METHOD: execution of thread link seeker
-     * 
      */
     @Override
     public void run() {
@@ -136,7 +133,7 @@ public class SeekerThread implements Runnable {
             while ((currentLine = br.readLine()) != null) {
                 
                 // remove first spaces
-                currentLine = currentLine.replaceFirst("^ *", "");
+                currentLine = currentLine.trim();
                 
                 // delete to small sentences for short searching
                 if (currentLine.length() < 3) {
@@ -173,7 +170,7 @@ public class SeekerThread implements Runnable {
                     while ((currentLine = br.readLine()) != null) {
                         
                         // remove first spaces
-                        currentLine = currentLine.replaceFirst("^ *", "");
+                        currentLine = currentLine.trim();
 
                         // delete to small sentences for short searching
                         if (currentLine.length() < 3) {
@@ -188,7 +185,7 @@ public class SeekerThread implements Runnable {
                 }
                 
                 // store line
-                lines.add(currentLine);
+                if (currentLine != null) lines.add(currentLine);
                 
             }
             
@@ -210,7 +207,6 @@ public class SeekerThread implements Runnable {
      * @ return sectionlist
      */
     private WikiArticle generateSections(WikiArticle article, Queue<String> lines, String separator){
-        List<WikiArticle> subarticles = new LinkedList();
         WikiArticle subarticle = null;
         Queue<String> queue = new LinkedList();
         
@@ -232,7 +228,6 @@ public class SeekerThread implements Runnable {
                 queue = new LinkedList();
                 subarticle.setText(queue);
                 
-                subarticles.add(subarticle);
                 continue;
             }
             
@@ -242,7 +237,22 @@ public class SeekerThread implements Runnable {
         
         String new_separator = new String(separator + SECTION_SEPERATOR);
         
-        for (WikiArticle suba : subarticles){
+        if (article.getSubArticles().isEmpty() && !queue.isEmpty()) {
+            
+            
+            while (!queue.isEmpty()){
+                String line = queue.remove();
+                
+                // search wiki links
+                searchIntLinks(article, line);
+
+                // search external links
+                searchExtLinks(article, line);
+            }
+            
+        }
+        
+        for (WikiArticle suba : article.getSubArticles()){
             
             int count = 0;
             for (String line : suba.getText()){
@@ -484,6 +494,16 @@ public class SeekerThread implements Runnable {
      */
     public static String escapeString(String text){
         return StringEscapeUtils.escapeJava(text);
+    }
+    
+    /**
+     * METHOD: revert the replacement of special characters
+     *
+     * @param text as string
+     * @return replaced text
+     */
+    public static String unescapeString(String text){
+        return StringEscapeUtils.unescapeJava(text);
     }
     
 }

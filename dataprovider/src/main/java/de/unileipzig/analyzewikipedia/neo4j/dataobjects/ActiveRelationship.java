@@ -8,10 +8,10 @@ import org.neo4j.ogm.annotation.StartNode;
 
 /**
  *
- * @author Pit.Braunsdorf
+ * @author Danilo Morgado
  */
-@RelationshipEntity(type="HAS")
-public class HasRelationship {
+@RelationshipEntity(type="ACTIVE")
+public class ActiveRelationship {
     @GraphId   private Long relationshipId;
     @Property  private String title;
     @StartNode private Entity from;

@@ -14,11 +14,9 @@ public class Starter {
      */
     public static void main(String[] args) {
         
-        try {
-            // load the threads and start work
-            ThreadController.initApplication(args);
-        } catch (Exception ex) {}
-                     
+        // load the threads and start work
+        ThreadController.initApplication(args);
+        
     }
     
 }
