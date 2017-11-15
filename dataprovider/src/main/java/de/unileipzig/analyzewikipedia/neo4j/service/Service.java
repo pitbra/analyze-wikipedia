@@ -2,6 +2,8 @@ package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 
+import java.util.List;
+
 import org.neo4j.ogm.model.Result;
 
 /**
@@ -110,6 +112,14 @@ public interface Service<T extends Entity> {
     Iterable<Entity> getTypedNodesWithTypedRelationToTypedNodes(String starttype, String endtype, String relationtype);
     
     /**
+     * List the articles to given subarticle title
+     * 
+     * @param title node title
+     * @return 
+     */
+    Iterable<Entity> getArticleFromSubarticleTitle(String title);
+    
+    /**
      * List all articles and subarticles from given article
      * 
      * @param title node title
@@ -156,7 +166,16 @@ public interface Service<T extends Entity> {
      * @return 
      */
     Iterable<Entity> getRelatedNodes(String title);
-            
+    
+    /**
+     * List all nodes that linked to given title
+     * 
+     * @param title node title
+     * @param type relatednode type
+     * @return 
+     */
+    Iterable<Entity> getRelatedNodes(String title, String type);
+    
     /**
      * Count all nodes
      * 
@@ -246,6 +265,16 @@ public interface Service<T extends Entity> {
     Iterable<Entity> getShortestPath(String start, String end, String type);
     
     /**
+     * List path of shortest way between given nodes of specifiv relation type
+     * 
+     * @param start startnode title
+     * @param end endnode title
+     * @param types relationstype as array
+     * @return 
+     */
+    Iterable<Entity> getShortestPath(String start, String end, String[] types);
+    
+    /**
      * List all nodes with given title
      * 
      * @param title node title
@@ -254,19 +283,35 @@ public interface Service<T extends Entity> {
     Iterable<Entity> getNodesWithTitledConnection(String title);
     
     /**
+     * List all weblinks of the node
+     * 
+     * @param title node title
+     * @return 
+     */
+    List<String> getWeblinks(String title);
+    
+    /**
      * List all extern links of the node
      * 
      * @param title node title
      * @return 
      */
-    Iterable<Entity> getWeblinks(String title);
+    Iterable<Entity> getExternFiles(String title);
     
     /**
-     * Returns the domaen of given subdomain
+     * Returns the domaen of given subextern
      * 
      * @param id of the node
      * @return 
      */
     Iterable<Entity> getDomain(long id);
+    
+    /**
+     * Returns the domaen of given subextern
+     * 
+     * @param title subextern title
+     * @return 
+     */
+    Iterable<Entity> getDomain(String title);
     
 }

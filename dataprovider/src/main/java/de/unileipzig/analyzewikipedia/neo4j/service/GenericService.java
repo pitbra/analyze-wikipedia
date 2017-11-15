@@ -2,10 +2,12 @@ package de.unileipzig.analyzewikipedia.neo4j.service;
 
 import de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
+import de.unileipzig.analyzewikipedia.neo4j.service.SubExternServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.helper.Neo4jSessionFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +95,16 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
+    public Iterable<Entity> getArticleFromSubarticleTitle(String title){
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", replaceString(title));
+
+        String query = QueryHelper.findArticleFromSubarticleTitle();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
     public Iterable<Entity> getArticleAndAllSubArticles(String title){
         Map<String, Object> params = new HashMap<>();
         params.put("title", replaceString(title));
@@ -148,6 +160,16 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         params.put("title", replaceString(title));
 
         String query = QueryHelper.findLinkedFrom();
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getRelatedNodes(String title, String type) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", replaceString(title));
+
+        String query = QueryHelper.findLinkedFrom(type);
         
         return session.query(Entity.class, query, params);
     }
@@ -268,6 +290,19 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
+    public Iterable<Entity> getShortestPath(String start, String end, String[] types){
+        Map<String, Object> params = new HashMap<>();
+        
+        String type = "";
+        for (String str : types) type = type + str + "|";
+        type = type.substring(0, type.length()-1);
+        
+        String query = QueryHelper.findShortestPath(replaceString(start), replaceString(end), type);
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
     public Iterable<Entity> getTitledNodesWithTypedRelation(String title, String relationtype) {
         Map<String, Object> params = new HashMap<>();
 
@@ -322,10 +357,39 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     }
     
     @Override
-    public Iterable<Entity> getWeblinks(String title) {
+    public List<String> getWeblinks(String title) {
         Map<String, Object> params = new HashMap<>();
         
         String query = QueryHelper.findWeblinks(replaceString(title));
+        
+        Iterable<Entity> result = session.query(Entity.class, query, params);
+        
+        SubExternServiceImpl subextern_service = new SubExternServiceImpl();
+        List<String> list = new LinkedList();
+        for (Entity ent : result){
+            Iterable<Entity> doms = subextern_service.getDomain(ent.getId());
+            for (Entity dom : doms){
+                list.add((dom.getTitle()) + ent.getTitle());
+            }
+        }
+        
+        return list;
+    }
+    
+    @Override
+    public Iterable<Entity> getExternFiles(String title) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findWeblinks(replaceString(title));
+        
+        return session.query(Entity.class, query, params);
+    }
+    
+    @Override
+    public Iterable<Entity> getDomain(String title) {
+        Map<String, Object> params = new HashMap<>();
+        
+        String query = QueryHelper.findDomain(replaceString(title));
         
         return session.query(Entity.class, query, params);
     }
@@ -344,38 +408,43 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
     private static class QueryHelper {
         
         private static String findDomain(long id){
-            return "MATCH (n:Extern)-[r:HAS]->(f) WHERE ID(f) = " + id + " RETURN n";
+            return  "MATCH (n:Extern)-[r:HAS]->(f) WHERE ID(f) = " + id + " RETURN n";
+        }
+        
+        private static String findDomain(String title){
+            return  "MATCH (n:Extern)-[r:HAS]->(f) WHERE f.title = '" + title + "' RETURN n";
         }
         
         private static String findWeblinks(String title){
-            return "MATCH (n)-[r:HAS]->(s)-[rs:LINKS]->(f) WHERE n.title = \"" + title + "\" RETURN f "
-                   + "UNION MATCH (n)-[r:LINKS]->(f:SubExtern) WHERE n.title = \"" + title + "\" RETURN f";
+            return  "MATCH (n)-[r:HAS]->(s)-[rs:LINKS]->(f) WHERE n.title = '" + title + "' RETURN f " + 
+                    "UNION " +
+                    "MATCH (n)-[r:LINKS]->(f:SubExtern) WHERE n.title = '" + title + "' RETURN f";
         }
         
         private static String findShortestPath(String start, String end){
-            return "MATCH (s { title: '" + start + "' }),(d { title: '" + end + "' }), p = shortestPath((s)-[*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
+            return  "MATCH (s { title: '" + start + "' }),(d { title: '" + end + "' }), p = shortestPath((s)-[*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
         
         private static String findShortestPath(String start, String end, String type){
-            return "MATCH (s { title: '"+ start + "' }), (d { title: '" + end + "' }) , p = shortestPath((s)-[r:" + type + "*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
+            return  "MATCH (s { title: '"+ start + "' }), (d { title: '" + end + "' }) , p = shortestPath((s)-[r:" + type + "*]-(d)) WITH p WHERE length(p) > 1 RETURN p";
         }
                 
         private static String findNodesByTypeAndTitlesequence(String type, String sequence){
-            return "MATCH (n) WHERE '" + type + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
+            return  "MATCH (n) WHERE '" + type + "' in LABELS(n) AND n.title =~ '" + sequence + "' RETURN n";
         }
         
         private static String findActiveNodes(){
-            return "MATCH (n)-[:ACTIVE]->(f) RETURN n";
+            return  "MATCH (n)-[:ACTIVE]->(f) RETURN n";
         }
         
         private static String findEmptyActiveNodes(){
-            return "MATCH (n)-[:ACTIVE]->(a) WITH n, SIZE( (n)-[]->() ) as likes WHERE likes = 1 RETURN n";
+            return  "MATCH (n)-[:ACTIVE]->(a) WITH n, SIZE( (n)-[]->() ) as likes WHERE likes = 1 RETURN n";
         }
         
         private static String findSpecificNode(String nodetype, String title){
             if (nodetype != null && nodetype.length() > 0) nodetype = ":"  + nodetype; else nodetype = "";
             if (title != null && title.length() > 0) title = " { title: '" + title + "' } "; else title = "";
-            return "MATCH (s" + nodetype + title + ") RETURN s";
+            return  "MATCH (s" + nodetype + title + ") RETURN s";
         }
               
         private static String findSpecificNode(String startnodetype, String starttitle, String endnodetype, String endtitle, String relationtype, String reationtitle, String direction){
@@ -385,39 +454,51 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
             if (endtitle != null && endtitle.length() > 0) endtitle = " { title: '" + endtitle + "' } "; else endtitle = "";
             if (relationtype != null && relationtype.length() > 0) relationtype = ":"  + relationtype; else relationtype = "";
             if (reationtitle != null && reationtitle.length() > 0) reationtitle = " { title: '" + reationtitle + "' } "; else reationtitle = "";
-            return "MATCH (s" + startnodetype + starttitle + ")" + getDircetion(direction)[0] + "[r" + relationtype + reationtitle + "]" + getDircetion(direction)[1] + "(e" + endnodetype + endtitle + ") RETURN s";
+            return  "MATCH (s" + startnodetype + starttitle + ")" + getDircetion(direction)[0] + "[r" + relationtype + reationtitle + "]" + getDircetion(direction)[1] + "(e" + endnodetype + endtitle + ") RETURN s";
         }
         
         private static String findAllNodesWithoutConnection(){
-            return "MATCH (n) WHERE NOT (n)-[]-() RETURN n";
+            return  "MATCH (n) WHERE NOT (n)-[]-() RETURN n";
         }
         
         private static String countNodes() {
-            return "START n = node(*) RETURN COUNT(n)";
+            return  "START n = node(*) RETURN COUNT(n)";
         }
         
         private static String countRelations() {
-            return "START n = relationship(*) RETURN COUNT(n)";
+            return  "START n = relationship(*) RETURN COUNT(n)";
         }
         
         private static String findByTitle() {
-            return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
+            return  "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
         }
 
         private static String findSubArticleByTitle(String title, String subtitle) {
-            return "MATCH (n { title: '" + title + "'})-[r:HAS]->(f { title: '" + subtitle + "'}) RETURN f";
+            return  "MATCH (n { title: '" + title + "'})-[r:HAS]->(f { title: '" + subtitle + "'}) RETURN f";
         }
 
         private static String findLinkedTo(Long id) {
-            return "MATCH (n)-[r:LINKS]->(f) WHERE ID(n) = " + id + " RETURN f";
+            return  "MATCH (n)-[r:LINKS]->(f) WHERE ID(n) = " + id + " RETURN f";
         }
         
         private static String findLinkedFrom() {
-            return "MATCH (n)-[r:LINKS]->(f) WHERE f.title = {title} RETURN n";
+            return  "MATCH (n)-[r:LINKS]->(f) WHERE f.title = {title} RETURN n";
+        }
+        
+        private static String findLinkedFrom(String type) {
+            if (type != null && type.length() > 0) type = ":"  + type; else type = "";
+            return  "MATCH (n" + type + ")-[r:LINKS]->(f) WHERE f.title = {title} RETURN n";
         }
         
         private static String findLinkedTo() {
-            return "MATCH (n)-[r:LINKS]->(f) WHERE n.title = {title} RETURN f";
+            return  "MATCH (n)-[r:LINKS]->(f) WHERE n.title = {title} RETURN f";
+        }
+        
+        private static String findArticleFromSubarticleTitle(){
+            return  "MATCH (a:Article)-[r*1..]->(s:SubArticle) " +
+                    "WHERE ALL(rel in r WHERE type(rel)= 'HAS') " +
+                    "AND s.title = {title} " +
+                    "RETURN a";
         }
         
         private static String findArticleAndAllSubArticles(){
@@ -428,7 +509,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
         
         private static String findAllSubArticlesOfArticle(){
-            return "MATCH (a:Article)-[r*1..]->(s:SubArticle) " +
+            return  "MATCH (a:Article)-[r*1..]->(s:SubArticle) " +
                     "WHERE ALL(rel in r WHERE type(rel)= 'HAS') " +
                     "AND a.title = {title} " +
                     "RETURN s";

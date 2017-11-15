@@ -254,7 +254,7 @@ public class Controller_Test {
         ThreadController.initThreads(new String[]{test_shortestpath.getPath()});
         
         Integer count = article_service.getNodeCounter();
-        assertThat(count, is(9));
+        assertThat(count, is(10));
         if (DEBUG){
             System.out.println("=== Console 0   ===" + "   Count all nodes");
             System.out.println(count);
@@ -274,22 +274,44 @@ public class Controller_Test {
             }
         }
 
-        Iterable<Entity> result2 = active_service.getShortestPath("Start", "End", "LINKS");
-        String[] expected2 = new String[]{"Start", "Path_A", "Path_B", "End"};
-        List<Entity> list2 = new LinkedList();
-        for (Entity ent : result2) list2.add(ent);
-        for (int i = 0; i < list2.size(); i++){
-            assertThat(list2.get(i).getTitle(), is(expected2[i]));
+        Iterable<Entity> result2a = active_service.getShortestPath("Start", "End", "LINKS");
+        List<Entity> list2a = new LinkedList();
+        for (Entity ent : result2a) list2a.add(ent);
+        assertThat(list2a.size(), is(0));
+        if (DEBUG){
+            System.out.println("=== Console 2a  ===" + "   List shortest path.");
+            System.out.println(list2a.size());
+        }
+        
+        Iterable<Entity> result2b = active_service.getShortestPath("Start", "End", "LINKS|HAS");
+        String[] expected2b = new String[]{"Start", "Sub_Start", "Path_A", "Path_B", "End"};
+        List<Entity> list2b = new LinkedList();
+        for (Entity ent : result2b) list2b.add(ent);
+        for (int i = 0; i < list2b.size(); i++){
+            assertThat(list2b.get(i).getTitle(), is(expected2b[i]));
         }
         if (DEBUG){
-            System.out.println("=== Console 2   ===" + "   List shortest path.");
-            for (Entity ent : result2){
+            System.out.println("=== Console 2b  ===" + "   List shortest path.");
+            for (Entity ent : result2b){
+                System.out.println(ent.getTitle());
+            }
+        }
+        
+        Iterable<Entity> result2c = active_service.getShortestPath("Start", "End", new String[]{"LINKS", "HAS"});
+        List<Entity> list2c = new LinkedList();
+        for (Entity ent : result2c) list2c.add(ent);
+        for (int i = 0; i < list2c.size(); i++){
+            assertThat(list2c.get(i).getTitle(), is(expected2b[i]));
+        }
+        if (DEBUG){
+            System.out.println("=== Console 2c  ===" + "   List shortest path.");
+            for (Entity ent : result2c){
                 System.out.println(ent.getTitle());
             }
         }
         
         Iterable<Entity> result3 = active_service.getNodesWithTitledConnection("Short cut");
-        String[] expected3 = new String[]{"Start", "Path_A"};
+        String[] expected3 = new String[]{"Sub_Start", "Path_A"};
         List<Entity> list3 = new LinkedList();
         for (Entity ent : result3) list3.add(ent);
         for (int i = 0; i < list3.size(); i++){
@@ -324,7 +346,7 @@ public class Controller_Test {
             System.out.println(count);
         }
 
-        Iterable<Entity> result1 = article_service.getWeblinks("Alan Smithee");
+        Iterable<Entity> result1 = article_service.getExternFiles("Alan Smithee");
         String[] expected1 = new String[]{"/test/test.html", "/beitrag/alan-smithee-die-film-legende-lebt", "/static/topicalbumbackground/13641/der_mann_der_niemals_lebte.html", "/rn/arts/atoday/stories/s353584.htm"};
         List<Entity> list1 = new LinkedList();
         for (Entity ent : result1) list1.add(ent);
@@ -339,26 +361,41 @@ public class Controller_Test {
         }
         
         String[] expected2 = new String[]{"http://www.test.org", "http://dradiowissen.de", "http://einestages.spiegel.de", "http://www.abc.net.au"};
-        List<String> list2 = new LinkedList();
-        List<String> list3 = new LinkedList();
+        List<String> list2a = new LinkedList();
+        List<String> list2b = new LinkedList();
         for (Entity ent : result1){
-            Iterable<Entity> doms = subextern_service.getDomain(ent.getId());
-            for (Entity dom : doms){
-                list2.add(dom.getTitle());
-                list3.add((dom.getTitle()) + ent.getTitle());
+            Iterable<Entity> doms_a = subextern_service.getDomain(ent.getId());
+            for (Entity dom : doms_a){
+                list2a.add(dom.getTitle());
+            }
+            Iterable<Entity> doms_b = subextern_service.getDomain(ent.getTitle());
+            for (Entity dom : doms_b){
+                list2b.add(dom.getTitle());
             }
         }
-        for (int i = 0; i < list2.size(); i++){
-            assertThat(list2.get(i), is(expected2[i]));
+        for (int i = 0; i < list2a.size(); i++){
+            assertThat(list2a.get(i), is(expected2[i]));
         }
         if (DEBUG){
-            System.out.println("=== Console 2   ===" + "   Get domain of weblinks for 'Alan Smithee'");
-            for (String str : list2){
+            System.out.println("=== Console 2a  ===" + "   Get domain of weblinks for 'Alan Smithee' [ID]");
+            for (String str : list2a){
+                System.out.println(str);
+            }
+        }
+        for (int i = 0; i < list2b.size(); i++){
+            assertThat(list2b.get(i), is(expected2[i]));
+        }
+        if (DEBUG){
+            System.out.println("=== Console 2b  ===" + "   Get domain of weblinks for 'Alan Smithee' [String]");
+            for (String str : list2b){
                 System.out.println(str);
             }
         }
         
+        Iterable<String> result3b = article_service.getWeblinks("Alan Smithee");
         String[] expected3 = new String[]{"http://www.test.org/test/test.html", "http://dradiowissen.de/beitrag/alan-smithee-die-film-legende-lebt", "http://einestages.spiegel.de/static/topicalbumbackground/13641/der_mann_der_niemals_lebte.html", "http://www.abc.net.au/rn/arts/atoday/stories/s353584.htm"};
+        List<String> list3 = new LinkedList();
+        for (String str : result3b) list3.add(str);
         for (int i = 0; i < list3.size(); i++){
             assertThat(list3.get(i), is(expected3[i]));
         }
@@ -703,7 +740,37 @@ public class Controller_Test {
                 System.out.println(ent.getTitle());
             }
         }
-
+        
+        Iterable<Entity> result12 = subextern_service.getArticleFromSubarticleTitle("Sub 3a");
+        String expected12 = "Article_3";
+        for (Entity ent : result12){
+            assertThat(ent.getTitle(), is(expected12));
+        }
+        if (DEBUG){
+            System.out.println("=== Console 12  ===" + "   List subarticle with has relation from subarticles.");
+            for (Entity ent : result12){
+                System.out.println(ent.getTitle());
+            }
+        }
+        
+        Iterable<Entity> result13 = subextern_service.getRelatedNodes("Article 3", "Article");
+        String[] expected13 = new String[]{"Article_2"};
+        for (Entity ent : result13){
+            Boolean b = false;
+            for (String str : expected13){
+                if (ent.getTitle().equals(str)) {
+                    b = true;
+                    break;
+                }
+            }
+            assertTrue(b);
+        }
+        if (DEBUG){
+            System.out.println("=== Console 13  ===" + "   List direct nb's of article 'Article_3'");
+            for (Entity ent : result13){
+                System.out.println(ent.getTitle());
+            }
+        }
     }
         
 }
