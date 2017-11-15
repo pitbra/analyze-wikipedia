@@ -12,7 +12,7 @@ import org.junit.runners.model.InitializationError;
 public class ControllerRunner extends BlockJUnit4ClassRunner {
     
     // !!!IMPORTANT TRICKER!!! activate only if you want to test the Controller_Test, because it will reset the neo4j database
-    private static final Boolean CLEAN_DB = false;
+    private static final Boolean CLEAN_DB = true;
     
     public ControllerRunner(Class clas) throws InitializationError {
         super(clas);

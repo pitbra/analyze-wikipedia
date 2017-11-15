@@ -3,6 +3,8 @@
         <title>Start</title>
         <text xml:space="preserve">
             '''Start'''
+            Text
+                == Sub Start ==
                 Text with link to articles [[Path 1]] [[Path A|Short cut]]
         </text>
     </page>
