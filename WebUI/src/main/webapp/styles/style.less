@@ -10,17 +10,60 @@ and open the template in the editor.
 @articleBg:#f938ab;
 @articleBorder:#fC3BaD;
 
+@subarticleBg: #FF0000;
+@subarticleBorder: #AA0000;
+
+@externBg: #00FF00;
+@externBorder: #00AA00;
+
+@subexternBg: #00AA00;
+@subexternBorder: #005500;
+
 .footer{
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 60px;
+    height: 56px;
     background-color: #f5f5f5;
 }
 
-.article{
-    background-color: @articleBg;
-    width: 50px;
-    height:50px;
-    border: 1px solid 
+#header{
+    height: 56px;
 }
+
+body{
+}
+
+.nodes{
+    width:100%;
+    height:100%
+}
+
+.Article{
+            background-color: @articleBg;
+            width: 50px;
+            height:50px;
+            border: 1px solid @articleBorder;
+        }
+
+        .Subarticle{
+            background-color: @subarticleBg;
+            width: 50px;
+            height:50px;
+            border: 1px solid @subarticleBorder;
+        }
+
+        .Extern{
+            background-color: @externBg;
+            width: 50px;
+            height:50px;
+            border: 1px solid @externBorder;
+        }
+
+
+        .Subextern{
+            background-color: @externBg;
+            width: 50px;
+            height:50px;
+            border: 1px solid @externBorder;
+        }

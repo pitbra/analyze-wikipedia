@@ -9,9 +9,18 @@ package de.unileipzig.analyzewikipedia.ui.webui.contracts;
  *
  * @author Pit.Braunsdorf
  */
-public class Entity {
+public class EntityViewModel {
     String _name;
     String _type;
+    long _id;
+
+    public long getId() {
+        return _id;
+    }
+
+    public void setId(long _id) {
+        this._id = _id;
+    }
 
     public String getName() {
         return _name;

@@ -1,5 +1,4 @@
-jop
-        package de.unileipzig.analyzewikipedia.dumpreader.dataobjects;
+package de.unileipzig.analyzewikipedia.dumpreader.dataobjects;
 
 import java.util.LinkedList;
 import java.util.Queue;

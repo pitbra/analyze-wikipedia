@@ -37,12 +37,18 @@
             <artifactId>jersey-server</artifactId>
             <version>2.26</version>
         </dependency>
+        <dependency>
+            <groupId>de.uni-leipzig.analyze-wikipedia</groupId>
+            <artifactId>dataprovider</artifactId>
+            <version>1.0.0.0</version>
+            <type>jar</type>
+        </dependency>
         
         <dependency>
-    <groupId>org.glassfish.jersey.inject</groupId>
-    <artifactId>jersey-hk2</artifactId>
-    <version>2.26</version>
-</dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.26</version>
+        </dependency>
 
     </dependencies>
 

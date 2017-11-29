@@ -5,12 +5,67 @@
     <head>
         <title>Analyze Wikipedia</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
         <link rel="stylesheet" href="./styles/style.css" />
-
+        
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
         
+        <script src="./js/arbor.js"></script>
+        <script src="./js/renderer.js"></script>
+        <script src="./js/graphics.js"></script>
+
+        
+        <script>            
+            function search() {
+                var search = $("#inputSearch").val().toLowerCase();
+                var filteredNodes = $(".node").filter(function(index, cur) {
+                    return cur.textContent.toLowerCase().indexOf(search) >= 0;
+                });
+                
+                var allNodes = $(".node");
+                
+                for(var i = 0; i < allNodes.length; ++i) {
+                    if(filteredNodes.index(allNodes[i])===-1){
+                        $("#" + allNodes[i].id).hide();
+                    } else {
+                        $("#" + allNodes[i].id).show();
+                    }
+                }
+            }
+            
+            function useSubArticles() {
+                if( $('#checkSubarticles').is(':visible') ) {
+                    $.ajax({
+                        url: "rest/db/false",
+                        data: null,
+                        success: function (data) {
+                            $("#nodes").html("");
+                            data.forEach(function(item, index) {
+                                $("#nodes").append("<div class=\"node rounded-circle "+item["_type"]+"\" id=\""+item["_id"]+"\">"+item["_name"]+"</div>");
+                            });
+                        },
+                        dataType: "json"
+                    });
+                    $('#checkSubarticles ').hide();
+                }
+                else {
+                    $.ajax({
+                        url: "rest/db/true",
+                        data: null,
+                        success: function (data) {
+                            $("#nodes").html("");
+                            data.forEach(function(item, index) {
+                                $("#nodes").append("<div class=\"node rounded-circle "+item["_type"]+"\" id=\""+item["_id"]+"\">"+item["_name"]+"</div>");
+                            });
+                        },
+                        dataType: "json"
+                    });
+                    $('#checkSubarticles ').show();
+                }
+            }
+        </script>
     </head>
     <body>
         <header id="header">
@@ -30,22 +85,19 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Dropdown
+                                Options
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Something else here</a>
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="javascript:useSubArticles()"><span id="checkSubarticles" class="fa fa-check" style="display: none"></span>Use SubArticles</a>
                             </div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link disabled" href="#">Disabled</a>
                         </li>
                     </ul>
-                    <form class="form-inline my-2 my-lg-0">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    <form class="form-inline my-2 my-lg-0" action="javascript:void(0);">
+                        <input class="form-control mr-sm-2" id="inputSearch" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" onclick="search()">Search</button>
                     </form>
                 </div>
             </nav>

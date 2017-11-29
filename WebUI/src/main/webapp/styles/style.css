@@ -11,13 +11,38 @@ and open the template in the editor.
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 60px;
+  height: 56px;
   background-color: #f5f5f5;
 }
-.article {
+#header {
+  height: 56px;
+}
+.nodes {
+  width: 100%;
+  height: 100%;
+}
+.Article {
   background-color: #f938ab;
   width: 50px;
   height: 50px;
-  border: 1px solid;
+  border: 1px solid #fC3BaD;
+}
+.Subarticle {
+  background-color: #FF0000;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #AA0000;
+}
+.Extern {
+  background-color: #00FF00;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #00AA00;
+}
+.Subextern {
+  background-color: #00FF00;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #00AA00;
 }
 /*# sourceMappingURL=style.css.map */
