@@ -14,6 +14,7 @@ import org.neo4j.ogm.annotation.StartNode;
 public class HasRelationship {
     @GraphId   private Long relationshipId;
     @Property  private String title;
+    @Property  private Integer order_number;
     @StartNode private Entity from;
     @EndNode   private Entity to;
 
@@ -28,9 +29,17 @@ public class HasRelationship {
     public String getTitle() {
         return title;
     }
+    
+    public Integer getOrderNumber() {
+        return order_number;
+    }
 
     public void setTitle(String title) {
         this.title = title;
+    }
+    
+    public void setOrderNumber(Integer number) {
+        this.order_number = number;
     }
 
     public Entity getFrom() {

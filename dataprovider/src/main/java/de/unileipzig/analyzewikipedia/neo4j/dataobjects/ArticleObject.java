@@ -132,6 +132,7 @@ public class ArticleObject extends Entity implements FromLinkedEntities, ToLinke
         has.setFrom(this);
         has.setTo(subArticle);
         hasRelationships.add(has);
+        has.setOrderNumber(hasRelationships.size());
     }
     // </editor-fold>
     

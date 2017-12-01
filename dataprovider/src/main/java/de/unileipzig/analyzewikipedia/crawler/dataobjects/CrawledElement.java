@@ -3,6 +3,7 @@ package de.unileipzig.analyzewikipedia.crawler.dataobjects;
 import java.net.URL;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -13,7 +14,12 @@ public class CrawledElement {
     
     private final URL url;
     
+    private String title;
+    private String web_title;
+    
     private Long neo4j_id;
+    
+    private String language;
     
     private Integer downloadcount;
     
@@ -26,7 +32,13 @@ public class CrawledElement {
     private final Map<Integer, String> CONTENTTYPE = new HashMap();
     private final Map<Integer, String> CONTENTLANGUAGE = new HashMap();
     
-    private final Map<Integer, String> CONTENT = new HashMap();;
+    private final Map<Integer, String> CONTENT = new HashMap();
+    
+    private final Map<Integer, List<String>> REFLISTS = new HashMap();
+    
+    private final Map<Integer, SectionElement> SECTIONS = new HashMap();
+    
+    private final Map<Integer, Map<URL, WebFile>> WEBFILES = new HashMap();
     
     public CrawledElement(URL url){
         this.url = url;
@@ -81,26 +93,56 @@ public class CrawledElement {
         CONTENT.put(downloadcount, content);
     }
     
-    public Long getID()                              { return this.neo4j_id;                                 }
-    public URL getUrl()                              { return this.url;                                      }
-    public Integer getDownloadCount()                { return this.downloadcount;                            }
-    public Integer getRequestCode()                  { return this.REQUESTCODE.get(downloadcount);           }
-    public String getRequestStatus()                 { return this.REQUESTSTATUS.get(downloadcount);         }
-    public Long getLastModified()                    { return this.LASTMODIFIED.get(downloadcount);          }
-    public Long getDownloadDate()                    { return this.DOWNLOADDATE.get(downloadcount);          }
-    public Long getContentLength()                   { return this.CONTENTLENGTH.get(downloadcount);         }
-    public String getContentType()                   { return this.CONTENTTYPE.get(downloadcount);           }
-    public String getContentLanguage()               { return this.CONTENTLANGUAGE.get(downloadcount);       }
-    public String getContent()                       { return this.CONTENT.get(downloadcount);               }
+    public void putSection(SectionElement section){
+        if (section == null) return;
+        if (SECTIONS.containsKey(downloadcount)) downloadcount++;
+        SECTIONS.put(downloadcount, section);
+    }
     
-    public Integer getRequestCode(Integer key)       { return this.REQUESTCODE.get(key);                     }
-    public String getRequestStatus(Integer key)      { return this.REQUESTSTATUS.get(key);                   }
-    public Long getLastModified(Integer key)         { return this.LASTMODIFIED.get(key);                    }
-    public Long getDownloadDate(Integer key)         { return this.DOWNLOADDATE.get(key);                    }
-    public Long getContentLength(Integer key)        { return this.CONTENTLENGTH.get(key);                   }
-    public String getContentType(Integer key)        { return this.CONTENTTYPE.get(key);                     }
-    public String getContentLanguage(Integer key)    { return this.CONTENTLANGUAGE.get(key);                 }
-    public String getContent(Integer key)            { return this.CONTENT.get(key);                         }
+    public void putReflist(List<String> list){
+        if (list == null) return;
+        if (REFLISTS.containsKey(downloadcount)) downloadcount++;
+        REFLISTS.put(downloadcount, list);
+    }
     
-    public void setID(Long id)                       { this.neo4j_id = id;                                   }
+    public void putWebfiles(Map<URL, WebFile> webfiles){
+        if (webfiles == null) return;
+        if (WEBFILES.containsKey(downloadcount)) downloadcount++;
+        WEBFILES.put(downloadcount, webfiles);
+    }
+        
+    public Long getID()                                     { return this.neo4j_id;                                 }
+    public URL getUrl()                                     { return this.url;                                      }
+    public String getTitle()                                { return this.title;                                    }
+    public String getWebtitle()                             { return this.web_title;                                }
+    public String getLanguage()                             { return this.language;                                 }
+    public Integer getDownloadCount()                       { return this.downloadcount;                            }
+    public Integer getRequestCode()                         { return this.REQUESTCODE.get(downloadcount);           }
+    public String getRequestStatus()                        { return this.REQUESTSTATUS.get(downloadcount);         }
+    public Long getLastModified()                           { return this.LASTMODIFIED.get(downloadcount);          }
+    public Long getDownloadDate()                           { return this.DOWNLOADDATE.get(downloadcount);          }
+    public Long getContentLength()                          { return this.CONTENTLENGTH.get(downloadcount);         }
+    public String getContentType()                          { return this.CONTENTTYPE.get(downloadcount);           }
+    public String getContentLanguage()                      { return this.CONTENTLANGUAGE.get(downloadcount);       }
+    public String getContent()                              { return this.CONTENT.get(downloadcount);               }
+    public SectionElement getSections()                     { return this.SECTIONS.get(downloadcount);              }
+    public List<String> getReflist()                        { return this.REFLISTS.get(downloadcount);              }
+    public Map<URL, WebFile> getWebfiles()                  { return this.WEBFILES.get(downloadcount);              }
+    
+    public Integer getRequestCode(Integer key)              { return this.REQUESTCODE.get(key);                     }
+    public String getRequestStatus(Integer key)             { return this.REQUESTSTATUS.get(key);                   }
+    public Long getLastModified(Integer key)                { return this.LASTMODIFIED.get(key);                    }
+    public Long getDownloadDate(Integer key)                { return this.DOWNLOADDATE.get(key);                    }
+    public Long getContentLength(Integer key)               { return this.CONTENTLENGTH.get(key);                   }
+    public String getContentType(Integer key)               { return this.CONTENTTYPE.get(key);                     }
+    public String getContentLanguage(Integer key)           { return this.CONTENTLANGUAGE.get(key);                 }
+    public String getContent(Integer key)                   { return this.CONTENT.get(key);                         }
+    public SectionElement getSections(Integer key)          { return this.SECTIONS.get(key);                        }
+    public List<String> getReflist(Integer key)             { return this.REFLISTS.get(key);                        }
+    public Map<URL, WebFile> getWebfiles(Integer key)       { return this.WEBFILES.get(key);                        }
+    
+    public void setID(Long id)                              { this.neo4j_id = id;                                   }
+    public void setTitle(String title)                      { this.title = title;                                   }
+    public void setWebtitle(String title)                   { this.web_title = title;                               }
+    public void setLanguage(String language)                { this.language = language;                             }
 }

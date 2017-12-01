@@ -112,9 +112,32 @@ public class SeekerThread implements Runnable {
      * 
      * @param title as string
      * @param text as string
-     * @ return sectionlist
+     * @return article with structure
      */
-    private WikiArticle generateMainArticle(String title, String text){
+    public static WikiArticle generateSectionArticle(String title, String text){
+        return generateMainArticle(title, text, false);
+    }
+    
+    /**
+     * METHOD: split give text in article sections
+     * 
+     * @param title as string
+     * @param text as string
+     * @return article with structure
+     */
+    public static WikiArticle generateMainArticle(String title, String text){
+        return generateMainArticle(title, text, true);
+    }
+    
+    /**
+     * METHOD: split give text in article sections
+     * 
+     * @param title as string
+     * @param text as string
+     * @param search as link searcher
+     * @return article with structure
+     */
+    private static WikiArticle generateMainArticle(String title, String text, Boolean search){
         
         WikiArticle article = new WikiArticle(title);
         
@@ -148,21 +171,25 @@ public class SeekerThread implements Runnable {
                     !currentLine.substring((separator.length()+1),(separator.length()+1)).equals(SECTION_SEPERATOR) &&
                     currentLine.substring(currentLine.length()-separator.length(),currentLine.length()).equals(separator) &&
                     !currentLine.substring(currentLine.length()-(separator.length()+1),currentLine.length()-separator.length()).equals(SECTION_SEPERATOR) ) {
-                                        
-                    for (String line : lines){
-                        
-                        // TEST out the search line
-//                        String tabs = "";
-//                        for (int i = 2; i < separator.length()+1; i++) tabs = tabs + "\t";
-//                        System.out.println(tabs + "MAIN: Search> " + line);
-//                        System.out.println();
-                        
-                        // search wiki links
-                        searchIntLinks(article, line);
+                    
+                    if (search){
+                        for (String line : lines){
 
-                        // search external links
-                        searchExtLinks(article, line);
+                            // TEST out the search line
+    //                        String tabs = "";
+    //                        for (int i = 2; i < separator.length()+1; i++) tabs = tabs + "\t";
+    //                        System.out.println(tabs + "MAIN: Search> " + line);
+    //                        System.out.println();
+
+                            // search wiki links
+                            searchIntLinks(article, line);
+
+                            // search external links
+                            searchExtLinks(article, line);
+                        }
                     }
+                    
+                    article.setText(new LinkedList(lines));
                     
                     lines.clear();
                     lines.add(currentLine);
@@ -185,13 +212,18 @@ public class SeekerThread implements Runnable {
                 }
                 
                 // store line
-                if (currentLine != null) lines.add(currentLine);
+                if (currentLine != null) {
+                    lines.add(currentLine);
+                    article.setText(new LinkedList(lines));
+                }
                 
             }
             
             if (!lines.isEmpty()){
-                article = generateSections(article, lines, separator);
+                article = generateSections(article, lines, separator, search);
             }
+            
+            br.close();
             
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {}
@@ -206,7 +238,7 @@ public class SeekerThread implements Runnable {
      * @param text as string
      * @ return sectionlist
      */
-    private WikiArticle generateSections(WikiArticle article, Queue<String> lines, String separator){
+    private static WikiArticle generateSections(WikiArticle article, Queue<String> lines, String separator, Boolean search){
         WikiArticle subarticle = null;
         Queue<String> queue = new LinkedList();
         
@@ -235,21 +267,26 @@ public class SeekerThread implements Runnable {
             
         }
         
-        String new_separator = new String(separator + SECTION_SEPERATOR);
+        String new_separator = separator + SECTION_SEPERATOR;
         
-        if (article.getSubArticles().isEmpty() && !queue.isEmpty()) {
+        if (search) {
+        
+            if (article.getSubArticles().isEmpty() && !queue.isEmpty()) {
             
-            
-            while (!queue.isEmpty()){
-                String line = queue.remove();
+                Queue<String> look = new LinkedList(queue);
                 
-                // search wiki links
-                searchIntLinks(article, line);
+                while (!look.isEmpty()){
+                    String line = look.remove();
 
-                // search external links
-                searchExtLinks(article, line);
+                    // search wiki links
+                    searchIntLinks(article, line);
+
+                    // search external links
+                    searchExtLinks(article, line);
+                }
+
             }
-            
+        
         }
         
         for (WikiArticle suba : article.getSubArticles()){
@@ -283,9 +320,15 @@ public class SeekerThread implements Runnable {
                 
             }
             
-            for (int i = 0; i < count; i++) suba.getText().remove();
+            Queue<String> hold = new LinkedList();
             
-            generateSections(suba, suba.getText(), new_separator);
+            for (int i = 0; i < count; i++) hold.add(suba.getText().remove());
+            
+            Queue<String> keep = new LinkedList(suba.getText());
+            
+            suba.setText(hold);
+            
+            generateSections(suba, keep, new_separator, search);
         }
         
         return article;
@@ -296,7 +339,7 @@ public class SeekerThread implements Runnable {
      *
      * @param text as string
      */
-    private void searchIntLinks(WikiArticle article, String text){
+    private static void searchIntLinks(WikiArticle article, String text){
                 
         // TEST out the article name
 //        System.out.println(article.getName());
@@ -394,7 +437,7 @@ public class SeekerThread implements Runnable {
      *
      * @param text as string
      */
-    private void searchExtLinks(WikiArticle article, String text){
+    private static void searchExtLinks(WikiArticle article, String text){
         
         // TEST out the article name
 //        System.out.println(article.getName());
@@ -483,6 +526,19 @@ public class SeekerThread implements Runnable {
         String replaced = text.replace(replaceCharakter, specialCharakter);
         while (replaced.startsWith(specialCharakter)){replaced = replaced.substring(1, replaced.length());}
         while (replaced.endsWith(specialCharakter)){replaced = replaced.substring(0, replaced.length()-1);}
+        return replaced;
+    }
+    
+    /**
+     * METHOD: replace the special character in a title 
+     *
+     * @param text as string
+     * @return replaced text
+     */
+    public static String unreplaceText(String text){
+        String replaceCharakter = "_";
+        String specialCharakter = " ";
+        String replaced = text.replace(replaceCharakter, specialCharakter);
         return replaced;
     }
     
