@@ -100,9 +100,9 @@ public class TransmitorThread implements Runnable {
     /**
      * METHOD: seperate the wiki main article
      * 
-     * @param article as object
+     * @param dump_article as object
      */
-    private static void sendArticle(WikiArticle dump_article){
+    public static void sendArticle(WikiArticle dump_article){
         
         // TEST article name
         if (DEBUG) System.out.println("Article : " + dump_article.getName());

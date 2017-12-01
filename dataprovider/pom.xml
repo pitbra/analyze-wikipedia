@@ -32,11 +32,6 @@
             <version>2.1.1</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.11.1</version>
-        </dependency>
 
         <!-- Only add if you're using the HTTP driver -->
         <dependency>
@@ -61,12 +56,56 @@
             <version>2.1.1</version>
             <scope>runtime</scope>
         </dependency>
+        
+        <!-- for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
-            <scope>test</scope>
+        </dependency>
+        
+        <!-- language detection and converting text -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>1.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-xmp</artifactId>
+            <version>1.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-langdetect</artifactId>
+            <version>1.16</version>
+        </dependency>
+                
+        <!-- network communication -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        
+        <!-- tokinization and word stemming -->
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-tools</artifactId>
+            <version>1.8.3</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>7.1.0</version>
+            <type>jar</type>
+        </dependency>
+        
     </dependencies>
 </project>

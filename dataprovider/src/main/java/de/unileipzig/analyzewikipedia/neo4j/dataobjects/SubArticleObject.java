@@ -140,6 +140,7 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
         has.setFrom(this);
         has.setTo(subArticle);
         hasRelationships.add(has);
+        has.setOrderNumber(hasRelationships.size());
     }
     // </editor-fold>
     
