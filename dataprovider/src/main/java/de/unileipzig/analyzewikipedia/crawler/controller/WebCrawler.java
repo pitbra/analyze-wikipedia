@@ -221,15 +221,48 @@ public class WebCrawler {
 
         List<WebFile> references = new LinkedList();
 
+        String ref_s = "<ref";
+        String ref_e = "</ref>";
+        
+        String cit_s = "{{";
+        String cit_e = "}}";
+        
         for (String line : list){
 
-            if (line.contains("<ref") && line.contains("</ref>")){
+            line = StringEscapeUtils.unescapeHtml3(line);
+            line = StringEscapeUtils.unescapeHtml4(line);
+            
+            // References
+            while(line.contains(ref_s) && line.contains(ref_e)){
 
-                line = line.substring(line.indexOf("<ref"), line.indexOf("</ref>"));
+                String ref = line.substring(line.indexOf(ref_s) + ref_s.length(), line.indexOf(ref_e));
+                
+                // citacion in reference
+                while(ref.contains(cit_s) && ref.contains(cit_e)){
+                    
+                    String sub = ref.substring(ref.indexOf(cit_s) + cit_s.length(), ref.indexOf(cit_e));
+                    
+                    ref = ref.substring(0, ref.indexOf(cit_s)) + ref.substring(ref.indexOf(cit_e) + cit_e.length());
+                    
+                    String[] split = sub.split("|");
+                    for (String sp : split){
+                        if (sp.contains("=")) {
+                            sp = sp.substring(sp.indexOf("=") + 1);
+                            sp = sp.trim();
+                            if (sp.contains(" ")) sp = sp.substring(0, sp.indexOf(" "));
+                            URL url = getUrl(sp);
+                            if (url != null) {
+                                references.add(new WebFile(url));
+                            }
+                        }
+                    }
+                }
+                
+                line = line.substring(0, line.indexOf(ref_s)) + line.substring(line.indexOf(ref_e) + ref_e.length());
+                
+                ref = ref.replace("[", "").replace("]", "");
 
-                line = line.replace("[", "").replace("]", "");
-
-                String[] split = line.split("\\s+");
+                String[] split = ref.split("\\s+");
 
                 for (String sp : split){
                     if (sp.contains(">")) sp = sp.substring(sp.indexOf(">")+1);
@@ -240,7 +273,39 @@ public class WebCrawler {
                 }
 
             }
-
+            
+            // Citate
+            while(line.contains(cit_s) && line.contains(cit_e)){
+                
+                String cit = line.substring(line.indexOf(cit_s) + ref_s.length(), line.indexOf(cit_e));
+                
+                line = line.substring(0, line.indexOf(cit_s)) + line.substring(line.indexOf(cit_e) + cit_e.length());
+                
+                cit = cit.replace("[[", "").replace("]]", "");
+                
+                String[] split = cit.split("\\s+");
+                
+                for (String sp : split){
+                    URL url = getUrl(sp);
+                    if (url != null) {
+                        references.add(new WebFile(url));
+                        continue;
+                    }
+                    if (sp.contains("=")) sp = sp.substring(sp.indexOf("=")+1);
+                    url = getUrl(sp);
+                    if (url != null) {
+                        references.add(new WebFile(url));
+                        continue;
+                    }
+                    if (sp.contains("[")) sp = sp.substring(sp.indexOf("[")+1);
+                    url = getUrl(sp);
+                    if (url != null) {
+                        references.add(new WebFile(url));
+                    }
+                }
+                
+            }
+            
         }
 
         return references;
