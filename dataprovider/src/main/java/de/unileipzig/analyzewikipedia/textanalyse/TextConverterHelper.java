@@ -42,11 +42,8 @@ public class TextConverterHelper {
         // find language via apache tika
         if (language == null) language = LanguageDetectionHelper.getLanguage(cleaned);
 
-        // lowercase for good stemming
-        cleaned = cleaned.toLowerCase();
-
         // stem via tartarus snowball
-        String stem = StemmerHelper.stem(language, cleaned);
+        String stem = NormalizerHelper.normalize(language, cleaned);
 
         return new Object[]{stem, language};
 
