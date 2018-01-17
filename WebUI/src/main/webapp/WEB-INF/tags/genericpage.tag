@@ -6,64 +6,83 @@
         <title>Analyze Wikipedia</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <link rel="stylesheet" href="./styles/style.css" />
-        
+
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-        
+
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
         <script src="./js/arbor.js"></script>
         <script src="./js/renderer.js"></script>
         <script src="./js/graphics.js"></script>
 
-        
-        <script>            
+
+        <script>
+            $(document).ready(function () {
+                $.ajax({
+                    url: "rest/db/articles",
+                    data: null,
+                    success: function (data) {
+                        $("#inputSearch").autocomplete({
+                            source: data
+                        });
+                    },
+                    dataType: "json"
+                });
+            })
+
             function search() {
-                var search = $("#inputSearch").val().toLowerCase();
-                var filteredNodes = $(".node").filter(function(index, cur) {
-                    return cur.textContent.toLowerCase().indexOf(search) >= 0;
+                var search = $("#inputSearch").val();
+
+                $.ajax({
+                    url: "rest/db/all/" + search,
+                    data: null,
+                    success: function (data) {
+                        $("#error").hide();
+                        clearCanvas();
+                        sys.graft(data);
+                        sys.stop();
+                    },
+                    dataType: "json"
                 });
                 
-                var allNodes = $(".node");
-                
-                for(var i = 0; i < allNodes.length; ++i) {
-                    if(filteredNodes.index(allNodes[i])===-1){
-                        $("#" + allNodes[i].id).hide();
-                    } else {
-                        $("#" + allNodes[i].id).show();
-                    }
-                }
+                $("#nodes").mousemove(function(e){handleMouseMove(e);});
+                $("#nodes").dblclick(function(e){handleDoubleClick(e);});
+                $("#nodes").addEventListener('nodeClicked  ', function(e) {handleClick(e);});
             }
-            
+
             function useSubArticles() {
-                if( $('#checkSubarticles').is(':visible') ) {
+                if ($('#checkSubarticles').is(':visible')) {
                     $.ajax({
                         url: "rest/db/false",
                         data: null,
                         success: function (data) {
-                            $("#nodes").html("");
-                            data.forEach(function(item, index) {
-                                $("#nodes").append("<div class=\"node rounded-circle "+item["_type"]+"\" id=\""+item["_id"]+"\">"+item["_name"]+"</div>");
-                            });
+                            sys.graft(data);
                         },
                         dataType: "json"
                     });
                     $('#checkSubarticles ').hide();
-                }
-                else {
+                } else {
                     $.ajax({
                         url: "rest/db/true",
                         data: null,
                         success: function (data) {
-                            $("#nodes").html("");
-                            data.forEach(function(item, index) {
-                                $("#nodes").append("<div class=\"node rounded-circle "+item["_type"]+"\" id=\""+item["_id"]+"\">"+item["_name"]+"</div>");
-                            });
+                            sys.graft(data);
                         },
                         dataType: "json"
                     });
                     $('#checkSubarticles ').show();
                 }
+            }
+
+            function clearCanvas() {
+                sys.eachNode(function (node, pt) {
+                    //alert(node.data.FullText);
+                    sys.pruneNode(node);
+                });
             }
         </script>
     </head>
@@ -88,7 +107,8 @@
                                 Options
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="javascript:void(0)" onclick="javascript:useSubArticles()"><span id="checkSubarticles" class="fa fa-check" style="display: none"></span>Use SubArticles</a>
+                                <!--<a class="dropdown-item" href="javascript:void(0)" onclick="javascript:useSubArticles()"><span id="checkSubarticles" class="fa fa-check" style="display: none"></span>Use </a>-->
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="javascript:showLegend()"><span id="checkLegend" class="fa fa-check" style="display: none"></span>Show legend</a>
                             </div>
                         </li>
                         <li class="nav-item">
@@ -106,7 +126,7 @@
             <jsp:doBody/>
         </div>
         <footer class="footer">
-            <p id="copyright">Copyright 1927, Future Bits When There Be Bits Inc.</p>
+            <!--<p id="copyright">Copyright 1927, Future Bits When There Be Bits Inc.</p>-->
         </footer>
     </body>
 </html>

@@ -133,8 +133,21 @@
             selected = nearest = dragged = particleSystem.nearest(_mouseP);
 
             if (dragged.node !== null) dragged.node.fixed = true
-
+            
             $(canvas).bind('mousemove', handler.dragged)
+            $(window).bind('mouseup', handler.dropped)
+
+            var event = new Event('nodeClicked', {node: nearest});
+            return false
+          },      
+          hovered: function(e) {
+            var pos = $(canvas).offset();
+            _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+            selected = nearest = dragged = particleSystem.nearest(_mouseP);
+
+            if (dragged.node !== null) dragged.node.fixed = true
+
+            $(canvas).bind('', handler.dragged)
             $(window).bind('mouseup', handler.dropped)
 
             return false

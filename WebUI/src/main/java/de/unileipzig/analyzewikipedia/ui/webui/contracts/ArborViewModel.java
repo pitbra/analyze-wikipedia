@@ -15,7 +15,16 @@ import java.util.List;
  */
 public class ArborViewModel {
     private List<EntityViewModel> nodes;
-    private Hashtable<Long, HashSet<Long>> edges;
+    private Hashtable<Long, HashSet<Long>> linkedEdges;
+    private Hashtable<Long, HashSet<Long>> hasEdges;
+
+    public Hashtable<Long, HashSet<Long>> getHasEdges() {
+        return hasEdges;
+    }
+
+    public void setHasEdges(Hashtable<Long, HashSet<Long>> hasEdges) {
+        this.hasEdges = hasEdges;
+    }
     
     private static final String SHAPE = "dot";
 
@@ -31,11 +40,11 @@ public class ArborViewModel {
     }
 
     public Hashtable<Long, HashSet<Long>> getEdges() {
-        return edges;
+        return linkedEdges;
     }
 
-    public void setEdges(Hashtable<Long, HashSet<Long>> edges) {
-        this.edges = edges;
+    public void setLinkEdges(Hashtable<Long, HashSet<Long>> edges) {
+        this.linkedEdges = edges;
     }
     
     public void AddNode(EntityViewModel node){
@@ -43,7 +52,18 @@ public class ArborViewModel {
     }
         
     public String toJson() {
-        String result = String.format("{%s,%s}", NodesToJson(), EdgesToJson() );
+        //Create only one edgeArray
+        Hashtable<Long, HashSet<Long>> edges = linkedEdges;
+        
+        for(Long key : hasEdges.keySet()) {
+            if( edges.containsKey(key)) {
+                edges.get(key).addAll(hasEdges.get(key));
+            } else {
+                edges.put(key, hasEdges.get(key));
+            }            
+        }
+        
+        String result = String.format("{%s,%s}", NodesToJson(), EdgesToJson(edges, "blue") );
         
         return result;
     }
@@ -52,7 +72,7 @@ public class ArborViewModel {
         String nodeResult = "";
         
         for(EntityViewModel node : nodes) {
-            nodeResult += String.format("\"%s\":{\"color\":\"%s\", \"shape\":\"%s\", \"label\": \"%s\"}", node.getId(), getColorForType(node.getType()), SHAPE, node.getName() );
+            nodeResult += String.format("\"%s\":{\"color\":\"%s\", \"shape\":\"%s\", \"label\": \"%s\", \"FullText\":\"%s\"}", node.getId(), getColorForType(node.getType()), SHAPE, node.getName(), node.getFullName() );
             
             if(nodes.size()-1 != nodes.indexOf(node)) {
                 nodeResult += ",";
@@ -62,7 +82,7 @@ public class ArborViewModel {
         return String.format("\"nodes\":{%s}", nodeResult);
     }
     
-    public String EdgesToJson() {
+    public String EdgesToJson(Hashtable<Long, HashSet<Long>> edges, String color) {
         String edgeResult = "";
         
         int i = 0;
@@ -71,7 +91,7 @@ public class ArborViewModel {
             
             int j = 0;
             for(Long to : edges.get(edge)) {
-                toNodes += String.format("\"%d\":{}", to);
+                toNodes += String.format("\"%d\":{\"color\": \"%s\", \"label\":\"test\"}", to, color);
                 
                 if(edges.get(edge).size() - 1> j) {
                     toNodes += ",";
@@ -92,6 +112,17 @@ public class ArborViewModel {
     }
     
     public String getColorForType(String type) {
-        return "red";
+        switch(type.toLowerCase()){
+            case "article":
+                return "red";
+                
+            case "subarticle":
+                return "green";
+                
+            case "extern":
+                return "black";
+        }
+        
+        return "yellow";
     }
 }

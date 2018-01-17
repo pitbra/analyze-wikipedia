@@ -12,16 +12,15 @@ import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.SubExternObject;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.EntityViewModel;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  *
  * @author Pit.Braunsdorf
  */
 public class MappingHelper {
+
+    private static final int STRING_LENGTH = 20;
 
     public static List<EntityViewModel> MapArticles(Iterable<ArticleObject> artObjects) {
         List<EntityViewModel> entities = new ArrayList<>();
@@ -34,11 +33,22 @@ public class MappingHelper {
     }
 
     public static List<EntityViewModel> MapEntities(Iterable<Entity> subs) {
+        return MapEntities(subs, false);
+    }
+    
+        public static List<EntityViewModel> MapEntities(Iterable<Entity> subs, boolean ellipsis) {
         List<EntityViewModel> entities = new ArrayList<>();
         for (Entity cur : subs) {
             EntityViewModel ent = new EntityViewModel();
 
-            ent.setName(unescapeString(cur.getTitle()));
+            String name = StringHelper.prettyPrintString(cur.getTitle());
+            
+            if(ellipsis) {
+                name = StringHelper.ellipsiereString(name, STRING_LENGTH);
+            }
+            
+            ent.setFullName(StringHelper.prettyPrintString(cur.getTitle()));
+            ent.setName(name);
             ent.setId(cur.getId());
             ent.setType(getCssClass(cur));
 
@@ -73,23 +83,30 @@ public class MappingHelper {
     }
 
     public static EntityViewModel MapArticle(ArticleObject cur) {
-        EntityViewModel ent = new EntityViewModel();
+        return MapArticle(cur, false);
+    }
 
-        ent.setName(unescapeString(cur.getTitle()));
+    public static EntityViewModel MapArticle(ArticleObject cur, boolean ellipsis) {
+        EntityViewModel ent = new EntityViewModel();
+        
+        String name = StringHelper.prettyPrintString(cur.getTitle());
+
+        if (ellipsis) {
+            name = StringHelper.ellipsiereString(name, STRING_LENGTH);
+        }
+
+        ent.setFullName(StringHelper.prettyPrintString(cur.getTitle()));
+        ent.setName(name);
         ent.setType("Article");
         ent.setId(cur.getId());
 
         return ent;
     }
 
-    public static String unescapeString(String text) {
-        return StringEscapeUtils.unescapeJava(text);
-    }
-
     public static EntityViewModel MapEntity(Entity extern) {
         EntityViewModel ent = new EntityViewModel();
 
-        ent.setName(unescapeString(extern.getTitle()));
+        ent.setName(StringHelper.prettyPrintString(extern.getTitle()));
         ent.setId(extern.getId());
         ent.setType(getCssClass(extern));
 

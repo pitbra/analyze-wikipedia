@@ -21,6 +21,7 @@ import de.unileipzig.analyzewikipedia.ui.webui.contracts.EdgesViewModel;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.EntityViewModel;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.RelationshipType;
 import de.unileipzig.analyzewikipedia.ui.webui.helper.MappingHelper;
+import de.unileipzig.analyzewikipedia.ui.webui.helper.StringHelper;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -54,18 +55,18 @@ public class DatabaseResource {
     private SubArticleService subArtService;
 
     private NodeType getTypeForEntity(Entity entity) {
-        if(entity instanceof ArticleObject) {
+        if (entity instanceof ArticleObject) {
             return NodeType.ARTICLE;
         }
-        
-        if(entity instanceof ExternObject) {
+
+        if (entity instanceof ExternObject) {
             return NodeType.EXTERN;
         }
-        
-        if(entity instanceof SubArticleObject) {
+
+        if (entity instanceof SubArticleObject) {
             return NodeType.SUBARTICLE;
         }
-        
+
         return null;
     }
 
@@ -86,46 +87,81 @@ public class DatabaseResource {
      * Retrieves representation of an instance of
      * de.unileipzig.analyzewikipedia.ui.webui.servlets.DatabaseResource
      *
+     * @param node
      * @param subArticle
      * @return an instance of java.lang.String
      */
     @GET
     //@QueryParam("subArticle")
-    @Path("/{subArticle}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getJson(@PathParam("subArticle") boolean subArticle) {
+    @Path("/all/{node}")
+    @Produces("text/plain")
+    public Response getJson(@PathParam("node") String node) {
 
-        Iterable<ArticleObject> artObjects = artService.findAll();
+        boolean subArticle = false;
+        ArticleObject cur = artService.findByTitle(node);
         List<EntityViewModel> entities = new ArrayList<>();
-        Hashtable<Long, HashSet<Long>> edges = new Hashtable<>();
+        Hashtable<Long, HashSet<Long>> linkEdges = new Hashtable<>();
+        Hashtable<Long, HashSet<Long>> hasEdges = new Hashtable<>();
 
-        if (subArticle) {
-            for (ArticleObject cur : artObjects) {
-                Iterable<Entity> subs = artService.getArticleAndAllSubArticles(cur.getTitle());
-                Iterable<Entity> ext = artService.getWeblinks(cur.getTitle());
+        Iterable<Entity> subs = artService.getArticleAndAllSubArticles(cur.getTitle());
+        Iterable<Entity> ext = artService.getWeblinks(cur.getTitle());
 
-                List<EntityViewModel> all = MappingHelper.MapEntities(subs);
-                List<EntityViewModel> externAll = MappingHelper.MapEntities(ext);
+        List<EntityViewModel> all = MappingHelper.MapEntities(subs, true);
+        List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, true);
 
-                if (all.size() > 0) {
-                    entities.addAll(all);
-                } else {
-                    entities.add(MappingHelper.MapArticle(cur));
+        if (all.size() > 0) {
+
+            HashSet<Long> hasTo = new HashSet<>();
+            for (Entity sub : subs) {
+                if (sub.getId() == cur.getId()) {
+                    continue;
                 }
 
-                if (externAll.size() > 0) {
-                    entities.addAll(externAll);
-                }
+                hasTo.add(sub.getId());
             }
+            
+            hasEdges.put(cur.getId(), hasTo);
+            entities.addAll(all);
         } else {
-            getAllRelatedNodes(artObjects, entities, edges);
+            entities.add(MappingHelper.MapArticle(cur, true));
         }
 
+        if (externAll.size() > 0) {
+            entities.addAll(externAll);
+        }
+
+        HashSet<Long> t = new HashSet<>();
+        for (Entity ent : ext) {
+            t.add(ent.getId());
+        }
+        linkEdges.put(cur.getId(), t);
+
+        //getAllRelatedNodes(cur, entities, linkEdges);
         ArborViewModel vm = new ArborViewModel();
 
         vm.setNodes(entities);
-        vm.setEdges(edges);
+        vm.setLinkEdges(linkEdges);
+        vm.setHasEdges(hasEdges);
+
         return Response.status(200).entity(vm.toJson()).build();
+    }
+
+    @GET
+    //@QueryParam("subArticle")
+    @Path("/articles")
+    @Produces("text/plain")
+    public Response getArticles() {
+        Iterable<ArticleObject> artObjects = artService.findAll();
+
+        Gson gson = new Gson();
+
+        HashSet<String> allArticles = new HashSet<>();
+
+        for (ArticleObject article : artObjects) {
+            allArticles.add(StringHelper.prettyPrintString(article.getTitle()));
+        }
+
+        return Response.status(200).entity(gson.toJson(allArticles)).build();
     }
 
     /**
@@ -138,15 +174,13 @@ public class DatabaseResource {
     public void putJson(String content) {
     }
 
-    private void getAllRelatedNodes(Iterable<ArticleObject> artObjects, List<EntityViewModel> entities, Hashtable<Long, HashSet<Long>> edges) {
-        for (ArticleObject cur : artObjects) {
-            EntityViewModel current = MappingHelper.MapArticle(cur);
-            entities.add(current);
-            Iterable<Entity> ext = artService.getRelatedNodes(cur.getTitle());
-            List<EntityViewModel> externAll = MappingHelper.MapEntities(ext);
+    private void getAllRelatedNodes(ArticleObject cur, List<EntityViewModel> entities, Hashtable<Long, HashSet<Long>> edges) {
+        EntityViewModel current = MappingHelper.MapArticle(cur);
+        entities.add(current);
+        Iterable<Entity> ext = artService.getRelatedNodes(cur.getTitle());
+        List<EntityViewModel> externAll = MappingHelper.MapEntities(ext);
 
-            getRelatedNodesForNode(cur.getTitle(), NodeType.ARTICLE, current, entities, edges);
-        }
+        getRelatedNodesForNode(cur.getTitle(), NodeType.ARTICLE, current, entities, edges);
     }
 
     private void getRelatedNodesForNode(String title, NodeType type, EntityViewModel current, List<EntityViewModel> entities, Hashtable<Long, HashSet<Long>> edges) {
@@ -167,15 +201,15 @@ public class DatabaseResource {
 
         for (Entity extern : ext) {
             EntityViewModel curExtern = MappingHelper.MapEntity(extern);
-            
-            if(edges.containsKey(current.getId())) {
+
+            if (edges.containsKey(current.getId())) {
                 edges.get(current.getId()).add(curExtern.getId());
             } else {
                 edges.put(current.getId(), new HashSet<Long>());
                 edges.get(current.getId()).add(curExtern.getId());
             }
             entities.add(curExtern);
-            
+
             getRelatedNodesForNode(extern.getTitle(), getTypeForEntity(extern), curExtern, entities, edges);
         }
     }

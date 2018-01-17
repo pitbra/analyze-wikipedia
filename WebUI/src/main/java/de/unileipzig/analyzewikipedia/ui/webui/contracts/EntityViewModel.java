@@ -10,9 +10,10 @@ package de.unileipzig.analyzewikipedia.ui.webui.contracts;
  * @author Pit.Braunsdorf
  */
 public class EntityViewModel {
-    String _name;
-    String _type;
-    long _id;
+    private String _fullName;
+    private String _name;
+    private String _type;
+    private long _id;
 
     public long getId() {
         return _id;
@@ -37,5 +38,13 @@ public class EntityViewModel {
     public void setType(String _type) {
         this._type = _type;
     }
-    
+
+
+    public String getFullName() {
+        return _fullName;
+    }
+
+    public void setFullName(String fullName) {
+        _fullName = fullName;
+    }    
 }

@@ -45,4 +45,18 @@ and open the template in the editor.
   height: 50px;
   border: 1px solid #00AA00;
 }
+div #error {
+  width: 500px;
+  margin: auto;
+}
+.wa-tooltip {
+  background-color: #FFFFFF;
+  font-size: 12pt;
+}
+.wa_infodialogue_title {
+  background-color: white;
+}
+.wa_infodialogue_title h2 {
+  font-size: 16pt;
+}
 /*# sourceMappingURL=style.css.map */
