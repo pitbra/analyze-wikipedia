@@ -86,20 +86,22 @@ public class LanguageDetectionHelper {
     
     */
     
-    private static LanguageDetector detector;
+    private static LanguageDetector detector = null;
     private static LanguageResult result;
         
     public static String getLanguage(String text) {
         
-        try {
-            detector = new OptimaizeLangDetector().loadModels();
-        } catch (IOException ex) {
-            return "error";
+        if (detector == null) {
+            try {
+                detector = new OptimaizeLangDetector().loadModels();
+            } catch (IOException ex) {
+                return "Detector error";
+            }
         }
         
         result = detector.detect(text);
         
-        return result.getLanguage();
+        return result.getLanguage().toLowerCase();
         
     }
     

@@ -1,10 +1,8 @@
-/*
- * 
- */
 package de.unileipzig.analyzewikipedia.neo4j.dataobjects;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
@@ -44,6 +42,15 @@ public class ExternObject extends Entity implements ToLinkedEntities {
                 ", subexternsize=" + hasRelationships.size() +
                 "}";
     }
+    
+    private boolean contains(SubExternObject subExtern) {
+        for(int i = 0; i < hasRelationships.size(); ++i) {
+            if(hasRelationships.get(i).getTo() == subExtern){
+                return true;
+            }
+        }
+        return false;
+    }
     // </editor-fold>
     
     // <editor-fold desc=">> adders" defaultstate="collapsed">
@@ -52,6 +59,7 @@ public class ExternObject extends Entity implements ToLinkedEntities {
     }
     
     public void addSubExtern(SubExternObject subExtern, String title) {
+        if (contains(subExtern)) return;
         HasRelationship has = new HasRelationship();
         has.setFrom(this);
         has.setTo(subExtern);
