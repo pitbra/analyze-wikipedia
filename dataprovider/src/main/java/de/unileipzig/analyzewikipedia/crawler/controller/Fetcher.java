@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
+import java.nio.charset.StandardCharsets;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.UnknownHostException;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -31,11 +34,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpStatus;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -44,10 +50,12 @@ import org.xml.sax.SAXException;
  */
 public class Fetcher {
     
+    private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
+    
     /**
-     * initialize the fetcher
+     * isnatll trusted certificates
      */
-    protected static void init(){
+    private static void trustAllCertificates(){
         
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[] {
@@ -108,27 +116,35 @@ public class Fetcher {
         BufferedReader in;
         
         try {
+            trustAllCertificates();
             HttpURLConnection connection = (HttpURLConnection) website.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.setConnectTimeout(5 * 1000);
-            connection.connect();
+            connection.setRequestProperty("User-Agent", USERAGENT);
+            connection.setConnectTimeout(2000);
             
-            responsecode = connection.getResponseCode();
+            try {
+                connection.connect();
+                
+                responsecode = connection.getResponseCode();
             
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                if (responsecode >= HttpStatus.SC_BAD_REQUEST) {
+                    in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8));
+                } else {
+                    in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                }
 
-            String inputLine;
+                String inputLine;
 
-            while ((inputLine = in.readLine()) != null) response.append(inputLine);
+                while ((inputLine = in.readLine()) != null) response.append(inputLine);
+
+                in.close();
+
+                connection.disconnect();
             
-            in.close();
-            
-            connection.disconnect();
-            
+            } catch (SocketTimeoutException | UnknownHostException e) {
+            }
+             
         } catch (MalformedURLException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
                 
         return new Object[]{responsecode, response.toString()};
@@ -148,29 +164,37 @@ public class Fetcher {
         CrawledElement crawl = null;
         
         try {
+            trustAllCertificates();
             HttpURLConnection connection = (HttpURLConnection) website.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.setConnectTimeout(5 * 1000);
-            connection.connect();
+            connection.setRequestProperty("User-Agent", USERAGENT);
+            connection.setConnectTimeout(2000);
             
-            crawl = checkConnection(website, connection);
-            
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            try {
+                connection.connect();
 
-            String inputLine;
+                crawl = checkConnection(website, connection);
 
-            while ((inputLine = in.readLine()) != null) response.append(inputLine);
-            
-            in.close();
-            
-            crawl.putContent(response.toString());
-            
-            connection.disconnect();
-            
+                if (connection.getResponseCode() >= HttpStatus.SC_BAD_REQUEST) {
+                    in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8));
+                } else {
+                    in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                }
+
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) response.append(inputLine);
+
+                in.close();
+
+                crawl.putContent(response.toString());
+
+                connection.disconnect();
+                
+            } catch (SocketTimeoutException | UnknownHostException e) {
+            }
+                
         } catch (MalformedURLException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
                 
         return crawl;
@@ -191,27 +215,35 @@ public class Fetcher {
         String text = "";
         
         try {
+            trustAllCertificates();
             HttpURLConnection connection = (HttpURLConnection) website.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.setConnectTimeout(5 * 1000);
-            connection.connect();
+            connection.setRequestProperty("User-Agent", USERAGENT);
+            connection.setConnectTimeout(2000);
             
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            try {
+                connection.connect();
 
-            String inputLine;
+                if (connection.getResponseCode() >= HttpStatus.SC_BAD_REQUEST) {
+                    in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8));
+                } else {
+                    in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                }
 
-            while ((inputLine = in.readLine()) != null) response.append(inputLine);
-            
-            in.close();
-            
-            text = response.toString();
-            
-            connection.disconnect();
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) response.append(inputLine);
+
+                in.close();
+
+                text = response.toString();
+
+                connection.disconnect();
+                
+            } catch (SocketTimeoutException | UnknownHostException e) {
+            }
             
         } catch (MalformedURLException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
         
         Document doc = null;
@@ -297,21 +329,7 @@ public class Fetcher {
     }
     
     public static Boolean checkStatus(Integer code){
-        switch(code/100){
-            case 2:
-                switch(code%100){
-                    case 0:
-                        return true;
-                    default:
-                        return false;
-                }
-            case 1:
-            case 3:
-            case 4:
-            case 5:
-            default:
-                return false;
-        }
+        return code == HttpStatus.SC_OK;
     }
     
 }

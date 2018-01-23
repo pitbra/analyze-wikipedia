@@ -1,19 +1,21 @@
 package de.unileipzig.analyzewikipedia.crawler.controller;
 
-import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper;
 import static de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread.unescapeString;
 import static de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread.unreplaceText;
 import static de.unileipzig.analyzewikipedia.dumpreader.controller.ThreadController.getUrl;
 import static de.unileipzig.analyzewikipedia.dumpreader.controller.TransmitorThread.searchOrCreateEntity;
 import de.unileipzig.analyzewikipedia.crawler.dataobjects.CrawledElement;
+import de.unileipzig.analyzewikipedia.crawler.dataobjects.Measurement;
 import de.unileipzig.analyzewikipedia.crawler.dataobjects.SectionElement;
 import de.unileipzig.analyzewikipedia.crawler.dataobjects.WebFile;
 import de.unileipzig.analyzewikipedia.dumpreader.controller.SeekerThread;
 import de.unileipzig.analyzewikipedia.dumpreader.controller.TransmitorThread;
 import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
+import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper;
 import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper.Language;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.textanalyse.TextConverterHelper;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
+import de.unileipzig.analyzewikipedia.textanalyse.StringSimiliarityHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
@@ -32,17 +35,33 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class WebCrawler {
 
-    private static final boolean NETWORK_AVAILABLE = false;
-
+    private static final CrawlDB CRAWLDB = new CrawlDB();
+    
     //FOR TESTING
     public static void main(String[] args){
         
-        plagiarismDetection(Language.DE, "Alan_Smithee");
+//        plagiarismDetection(Language.DE, "Hohenlauft");
+        plagiarismDetection(Language.EN, "Alan_Smithee");
+//        plagiarismDetection(Language.DE, "Thomas_Rauscher_(Jurist)");
 //        plagiarismDetection(Language.DE, "Zweiter_Weltkrieg");
         
     }
     
-    public static void plagiarismDetection(Language language, String neo4j_title){
+    public static String getArticleText(Language language, String neo4j_title){
+        
+        CrawledElement element = CRAWLDB.get(neo4j_title);
+        
+        if (element == null) plagiarismDetection(language, neo4j_title);
+        
+        element = CRAWLDB.get(neo4j_title);
+        
+        if (element == null) return "FAILURE";
+        
+        return element.getSections().outText();
+        
+    }
+    
+    private static void plagiarismDetection(Language language, String neo4j_title){
         
         String title = unescapeString(neo4j_title);
         String origin_title = title;
@@ -50,9 +69,7 @@ public class WebCrawler {
         origin_title = origin_title.replace(" ", "%20");
 
         ArticleObject article = null;
-        if (NETWORK_AVAILABLE) article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, title);
-
-        Fetcher.init();
+        if (false) article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, title);
 
         String article_language = language.toString().toLowerCase();
         
@@ -66,18 +83,12 @@ public class WebCrawler {
         }
 
         //GET ARTICLE VIA WIKI API
-        CrawledElement api_article;
-        if (NETWORK_AVAILABLE) api_article = Fetcher.downloadAsCrawledElement(api_article_url);
-        else api_article = LimitOnlineHelper.getOriginalArticleAsCrawlElement();
+        CrawledElement api_article = Fetcher.downloadAsCrawledElement(api_article_url);
 
         api_article.setTitle(neo4j_title);
         api_article.setWebtitle(origin_title);
         api_article.setLanguage(article_language);
         
-        //GET WEBLINKS VIA WIKI API
-        if (NETWORK_AVAILABLE) api_article.putReflist(getAPIexternlinks(api_article));
-        else api_article.putReflist(LimitOnlineHelper.getExternLinks());
-
         if (!Fetcher.checkStatus(api_article.getRequestCode())){
 
             //DO ANYTHING BECAUSE ARTICLE WAS NOT DOWNLOADABLE
@@ -91,37 +102,108 @@ public class WebCrawler {
             return;
 
         }
-
+        
+        //GET WEBLINKS VIA WIKI API
+        api_article.putReflist(getAPIexternlinks(api_article));
+        
         transcodeOriginArticle(api_article);
 
         normaliseArticleSections(api_article.getLanguage(), api_article.getSections());
         
         //GET WEBLINKS VIA HTML
-        if (NETWORK_AVAILABLE) api_article.putWebfiles(loadWebfiles(api_article));
-        else api_article.putWebfiles(LimitOnlineHelper.getWebfiles());
-
+        api_article.putWebfiles(loadWebfiles(api_article));
+        
         normaliseWebfiles(api_article);
 
-        checkSectionByReferences(api_article);
+        checkSectionByReferences(api_article, api_article.getSections());
+        
+        CRAWLDB.add(api_article);
 
     }
-
-    private static void checkSectionByReferences(CrawledElement article){
+private static int test = -1;
+    private static void checkSectionByReferences(CrawledElement article, SectionElement section){
+test++;
+System.out.println(new String(new char[test]).replace("\0", " ") + "Section: " + section.getTitle());
         
-        // TODO
-        System.out.println();
+        for (WebFile wf : section.getReferences()){
+            
+System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: " + wf.getUrl());
+System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: " + wf.getStatus() + " -> " + wf.getLanguage());
+                       
+            // check available size and correct language
+            if (Fetcher.checkStatus(wf.getStatus()) && article.getLanguage().equals(wf.getLanguage())) {
+            
+                Measurement m = wordOverlap(section.getNormalized(), wf.getNormalized());
+                wf.addMeasurmant(section, m);
+                
+                // highlighting the text
+                if (    m.getLongestWordSequenze()  > 5     ||
+                        m.getJarowinklerDistance()  > 0.7   ||
+                        m.getLevensteinDistance()   > 0.3   ||
+                        m.getNgramDistance()        > 0.6   ||
+                        m.getNgramFrequenze()       > 0.3){
+                    System.out.println(">>>");
+                    
+                    String highligth = section.outText();
+                    String compare = wf.getCleaned();
+                    List<String> list = new LinkedList();
+                    list.add(compare);
+                    difflib.Patch patch = difflib.DiffUtils.diff(section.getText(), list);
+                    List<String> deltas = patch.getDeltas();
+
+                    section.setHighlighted(highligth);
+                    
+                }
+                
+            }
+            
+        }
+        
+        for(SectionElement subsection : section.getSections()){
+            checkSectionByReferences(article, subsection);
+        }
+test--;        
+    }
+    
+    private static Measurement wordOverlap(String origin, String compare){
+        
+        Measurement m = new Measurement();
+        
+        // if the text is to long, the ngram algorithm will be to long
+        if (origin.split("\\s+").length <= 300){
+            // 0,2s for  300 words
+            // 0,4s for  400 words
+            // 0,8s for  500 words
+            m.setNgramFrequenze(StringSimiliarityHelper.getNgramFrequenze(origin, compare));
+        }
+        
+        // if the text is to long, the ngram algorithm will be to long
+        if (origin.split("\\s+").length <= 40 && compare.split("\\s+").length <= 30){
+            //  0,3s for   30 words
+            //  0,8s for   40 words
+            //  1,7s for   50 words
+            m.setNgramDistance(StringSimiliarityHelper.getNgramDistance(origin, compare));
+        }
+        
+        m.setJarowinklerDistance(StringSimiliarityHelper.getJarowinklerDistance(origin, compare));
+        m.setLevensteinDistance(StringSimiliarityHelper.getLevensteinDistance(origin, compare));
+                
+        m.setWordoverlaptext(StringSimiliarityHelper.getWordOverlapText(origin, compare)); 
+        m.setLongestWordSequenze(StringSimiliarityHelper.getLongestWordSequenze(m.getWordoverlaptext()));
+        
+        return m;
         
     }
 
     private static void normaliseArticleSections(String lang, SectionElement section){
 
-        List<String> stem = new LinkedList();
+        String stem = "";
 
         for (String str : section.getText()){
-            stem.add((String) TextConverterHelper.normaliseText(lang, str)[0]);
+            stem = stem + " " + (String) TextConverterHelper.normaliseText(lang, str)[2];
         }
 
-        section.setNormalized(stem);
+        section.setNormalized(stem.trim());
 
         for (SectionElement sec : section.getSections()){
             normaliseArticleSections(lang, sec);
@@ -136,29 +218,53 @@ public class WebCrawler {
             WebFile webfile = entry.getValue();
 
             // if status not ok, abort
-            if (!Fetcher.checkStatus(webfile.getStatus()) || webfile.getOriginText().length() == 0) continue;
+            if (!Fetcher.checkStatus(webfile.getStatus()) || webfile.getOrigin().length() == 0) continue;
 
-            Object[] obj = TextConverterHelper.normaliseText(null, webfile.getOriginText());
+            Object[] obj = TextConverterHelper.normaliseText(null, webfile.getOrigin());
 
             webfile.setLanguage((String) obj[1]);
-            webfile.setFinalText((String) obj[0]);
+            webfile.setCleaned((String) obj[0]);
+            webfile.setNormalized((String) obj[2]);
 
         }
 
     }
 
+    private static WebFile findWebfileInSections(SectionElement section, URL url){
+        
+        for (WebFile section_webfile : section.getReferences()){
+            if (section_webfile.getUrl().equals(url)){
+                return section_webfile;
+            }
+        }
+        
+        for (SectionElement sub_section : section.getSections()){
+            return findWebfileInSections(sub_section, url);
+        }
+        
+        return new WebFile(url);
+        
+    }
+    
     private static Map<URL, WebFile> loadWebfiles(CrawledElement api_article){
 
         Map<URL, WebFile> webfiles = new HashMap();
 
         for (String ref : api_article.getReflist()){
 
+            while (ref.startsWith(":") || ref.startsWith("/")) ref = ref.substring(1);
+            
             URL url = getUrl(ref);
+            
+            if (url == null) url = getUrl("http://" + ref);
+            
             if (url != null) {
                 Object[] download = Fetcher.download_html(url);
-                WebFile webfile = new WebFile(url);
+                
+                WebFile webfile = findWebfileInSections(api_article.getSections(), url);
                 webfile.setStatus((Integer) download[0]);
-                webfile.setOriginText((String) download[1]);
+                webfile.setOrigin((String) download[1]);
+                
                 webfiles.put(url, webfile);
             }
 
@@ -174,7 +280,7 @@ public class WebCrawler {
 
         WikiArticle wiki_article = SeekerThread.generateSectionArticle(api_article.getTitle(), revtext);
 
-        if (NETWORK_AVAILABLE) TransmitorThread.sendArticle(wiki_article);
+        if (false) TransmitorThread.sendArticle(wiki_article);
         
         SectionElement sec_element = convertArticleToSectionElement(wiki_article);
 

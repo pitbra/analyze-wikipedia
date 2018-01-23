@@ -154,7 +154,7 @@ public class AnalyzerHelper {
             stream.end();
             stream.close();
             
-            ANALYSER.close();
+//            ANALYSER.close();
             
         } catch (IOException ex) {}
         

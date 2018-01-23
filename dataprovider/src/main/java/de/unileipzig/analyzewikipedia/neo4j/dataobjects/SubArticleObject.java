@@ -56,6 +56,15 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
         return false;
     }
     
+    private boolean isLinkedTo(ToLinkedEntities entity){
+        for(int i = 0; i < links.size(); ++i) {
+            if(links.get(i).getTo() == entity){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public SubArticleObject findSub(String title){
         
         if (this.title.equals(title)) return this;
@@ -122,6 +131,7 @@ public class SubArticleObject extends Entity implements FromLinkedEntities, ToLi
     }
     
     private void addLink(ToLinkedEntities entity, String title) {
+        if(isLinkedTo(entity)) return;
         LinkToReleationship link = new LinkToReleationship();
         link.setTitle(title);
         link.setFrom(this);

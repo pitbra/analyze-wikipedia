@@ -1,8 +1,10 @@
 package de.unileipzig.analyzewikipedia.textanalyse;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
@@ -18,8 +20,13 @@ public class TextConverterHelper {
     
     public static String parseText(String text) {
         
+        TikaConfig config = null;
+        try {
+            config = new TikaConfig(new File("src/main/resources/textanalyze/tikaconfig.xml"));
+        } catch (TikaException | IOException | SAXException ex) {}
+                
         BodyContentHandler handler = new BodyContentHandler();
-        AutoDetectParser parser = new AutoDetectParser();
+        AutoDetectParser parser = new AutoDetectParser(config);
         Metadata metadata = new Metadata();
         
         InputStream is = IOUtils.toInputStream(text);
@@ -37,7 +44,7 @@ public class TextConverterHelper {
     public static Object[] normaliseText(String language, String text){
 
         // clean text via apache tika
-        String cleaned = TextConverterHelper.parseText(text);
+        String cleaned = parseText(text);
 
         // find language via apache tika
         if (language == null) language = LanguageDetectionHelper.getLanguage(cleaned);
@@ -45,7 +52,7 @@ public class TextConverterHelper {
         // stem via tartarus snowball
         String stem = NormalizerHelper.normalize(language, cleaned);
 
-        return new Object[]{stem, language};
+        return new Object[]{cleaned, language, stem};
 
     }
     
@@ -60,9 +67,9 @@ public class TextConverterHelper {
 
             String to_end = text.substring(0, end);
 
-            Integer to_start = to_end.lastIndexOf(tag_start);
+            Integer start = to_end.lastIndexOf(tag_start);
             
-            text = text.substring(0, to_start) + text.substring(end + tag_end.length());
+            text = text.substring(0, start) + text.substring(end + tag_end.length());
         
         }
         

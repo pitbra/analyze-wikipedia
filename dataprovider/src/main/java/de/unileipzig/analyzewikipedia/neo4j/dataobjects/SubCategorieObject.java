@@ -41,6 +41,15 @@ public class SubCategorieObject extends Entity implements FromContainsEntity {
                 ", containedsize=" + contained.size() +
                 "}";
     }
+    
+    private boolean contains(ToContainsEntity entity) {
+        for(int i = 0; i < contained.size(); ++i) {
+            if(contained.get(i).getTo() == entity){
+                return true;
+            }
+        }
+        return false;
+    }
     // </editor-fold>
     
     // <editor-fold desc=">> adders" defaultstate="collapsed">
@@ -49,6 +58,7 @@ public class SubCategorieObject extends Entity implements FromContainsEntity {
     }
     
     public void addContained(ToContainsEntity entity, String title) {
+        if (contains(entity)) return;
         ContainsRelationship contain = new ContainsRelationship();
         contain.setFrom(this);
         contain.setTo(entity);
