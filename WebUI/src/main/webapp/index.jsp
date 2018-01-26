@@ -97,7 +97,7 @@
         <div id="error" style="display: none">Bitte suchen Sie nach einem Artikel, vorher wird aufgrund der Größe des Graphen keiner angezeigt.</div>
         <div id="tooltip" class="wa_tooltip" style="position: relative; z-index: 10000000"></div>
         <div id="info_dialogue" class="card wa_infodialogue" style="position: fixed; top: 56px; bottom: 56px; right: 0; width: 400px; display:none;">
-                <h5 id="info_dialogue_title" class="card-header">Artikel</h2>
+                <h5 id="info_dialogue_title" class="card-header">Artikel</h5>
                 <button onclick="compressInfo()" class="btn btn-outline-secondary" style="position: fixed; top: 60px; right: 4px;" title="Compress the Info-Dialogue"><span class="fa fa-compress"></span></button>
             <div>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
         </div>

@@ -151,6 +151,7 @@ public class DatabaseResource {
     @Path("/articles")
     @Produces("text/plain")
     public Response getArticles() {
+        //TODO automatische abfrage während tippen getNodesByTypeAndTitlesequence        
         Iterable<ArticleObject> artObjects = artService.findAll();
 
         Gson gson = new Gson();

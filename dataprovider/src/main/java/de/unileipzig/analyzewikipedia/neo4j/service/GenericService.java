@@ -269,7 +269,7 @@ public abstract class GenericService<T extends Entity> implements Service<T> {
         }
         
         private static String findByTitle() {
-            return "Match (n) WHERE n.title = {title} RETURN n LIMIT 1";
+            return "Match (n) WHERE n.title =~ (?i){title} RETURN n LIMIT 1";
         }
 
         private static String findSubArtcileByTitle(String title, String subtitle) {
