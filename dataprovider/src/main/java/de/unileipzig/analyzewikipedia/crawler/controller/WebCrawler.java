@@ -37,17 +37,13 @@ public class WebCrawler {
 
     private static final CrawlDB CRAWLDB = new CrawlDB();
     
-    //FOR TESTING
-    public static void main(String[] args){
+    public static String getArticleText(Language language, String neo4j_title){
         
-//        plagiarismDetection(Language.DE, "Hohenlauft");
-        plagiarismDetection(Language.EN, "Alan_Smithee");
-//        plagiarismDetection(Language.DE, "Thomas_Rauscher_(Jurist)");
-//        plagiarismDetection(Language.DE, "Zweiter_Weltkrieg");
+        return getArticleText(language, neo4j_title, neo4j_title);
         
     }
     
-    public static String getArticleText(Language language, String neo4j_title){
+    public static String getArticleText(Language language, String neo4j_title, String neo4j_subtitle){
         
         CrawledElement element = CRAWLDB.get(neo4j_title);
         
@@ -57,7 +53,21 @@ public class WebCrawler {
         
         if (element == null) return "FAILURE";
         
-        return element.getSections().outText();
+        return getSectionText(element.getSections(), neo4j_subtitle);
+        
+    }
+    
+    private static String getSectionText(SectionElement section, String title){
+        
+        if (section.getTitle().equals(title)) return section.getText();
+                
+        for (SectionElement subsection : section.getSections()){
+            
+            return getSectionText(subsection, title);
+            
+        }
+        
+        return "";
         
     }
     
@@ -110,26 +120,21 @@ public class WebCrawler {
 
         normaliseArticleSections(api_article.getLanguage(), api_article.getSections());
         
-        //GET WEBLINKS VIA HTML
-        api_article.putWebfiles(loadWebfiles(api_article));
+        CRAWLDB.add(api_article);
         
+        //GET WEBLINKS VIA HTML
+//        Thread webfileThread = new Thread(new WebfileThread(api_article));
+//        webfileThread.start();
+        api_article.putWebfiles(loadWebfiles(api_article));
         normaliseWebfiles(api_article);
-
         checkSectionByReferences(api_article, api_article.getSections());
         
-        CRAWLDB.add(api_article);
-
     }
-private static int test = -1;
-    private static void checkSectionByReferences(CrawledElement article, SectionElement section){
-test++;
-System.out.println(new String(new char[test]).replace("\0", " ") + "Section: " + section.getTitle());
-        
+    
+    protected static void checkSectionByReferences(CrawledElement article, SectionElement section){
+
         for (WebFile wf : section.getReferences()){
-            
-System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: " + wf.getUrl());
-System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: " + wf.getStatus() + " -> " + wf.getLanguage());
-                       
+        
             // check available size and correct language
             if (Fetcher.checkStatus(wf.getStatus()) && article.getLanguage().equals(wf.getLanguage())) {
             
@@ -142,16 +147,6 @@ System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: "
                         m.getLevensteinDistance()   > 0.3   ||
                         m.getNgramDistance()        > 0.6   ||
                         m.getNgramFrequenze()       > 0.3){
-                    System.out.println(">>>");
-                    
-                    String highligth = section.outText();
-                    String compare = wf.getCleaned();
-                    List<String> list = new LinkedList();
-                    list.add(compare);
-                    difflib.Patch patch = difflib.DiffUtils.diff(section.getText(), list);
-                    List<String> deltas = patch.getDeltas();
-
-                    section.setHighlighted(highligth);
                     
                 }
                 
@@ -162,7 +157,7 @@ System.out.println(new String(new char[test]).replace("\0", " ") + " -Webfile: "
         for(SectionElement subsection : section.getSections()){
             checkSectionByReferences(article, subsection);
         }
-test--;        
+        
     }
     
     private static Measurement wordOverlap(String origin, String compare){
@@ -199,7 +194,7 @@ test--;
 
         String stem = "";
 
-        for (String str : section.getText()){
+        for (String str : section.getReftext()){
             stem = stem + " " + (String) TextConverterHelper.normaliseText(lang, str)[2];
         }
 
@@ -211,7 +206,7 @@ test--;
 
     }
 
-    private static void normaliseWebfiles(CrawledElement article){
+    protected static void normaliseWebfiles(CrawledElement article){
 
         for (Map.Entry<URL, WebFile> entry : article.getWebfiles().entrySet()) {
 
@@ -246,7 +241,7 @@ test--;
         
     }
     
-    private static Map<URL, WebFile> loadWebfiles(CrawledElement api_article){
+    protected static Map<URL, WebFile> loadWebfiles(CrawledElement api_article){
 
         Map<URL, WebFile> webfiles = new HashMap();
 
@@ -288,12 +283,12 @@ test--;
 
     }
 
-    private static List<String> convertApiText(List<String> list){
+    private static String convertApiText(List<String> list){
 
-        List<String> clean = new LinkedList();
+        String clean = "";
         
         for(String line : list){
-
+        
             line = StringEscapeUtils.unescapeHtml3(line);
             line = StringEscapeUtils.unescapeHtml4(line);
 
@@ -301,25 +296,25 @@ test--;
             cuts.add(new String[]{"<ref", "</ref>"});
             cuts.add(new String[]{"{{", "}}"});
             cuts.add(new String[]{"{", "}"});
-            
+
             for (String[] cut : cuts) line = TextConverterHelper.cutByTag(line, cut);
 
             List<String[]> reps = new LinkedList();
             reps.add(new String[]{"<u>", "</u>"});
-            
+
             for (String[] rep : reps) line = TextConverterHelper.cleanTag(line, rep);
-            
+
             List<String[]> inserts = new LinkedList();
             inserts.add(new String[]{"[[", "]]", "|"});
             inserts.add(new String[]{"[", "]", " "});
 
             for (String[] insert : inserts) line = TextConverterHelper.insertDuringTag(line, insert);
-
-            clean.add(line);
-
+            
+            clean = clean + " " + line;
+            
         }
-
-        return clean;
+        
+        return clean.trim();
 
     }
 
@@ -424,13 +419,15 @@ test--;
 
         for (String text : article.getText()){
 
-            section.addText(text);
+            section.addReftext(text);
 
         }
 
-        section.setReferences(searchReferences(section.getText()));
+        section.setReferences(searchReferences(section.getReftext()));
 
-        section.setText(convertApiText(section.getText()));
+        section.setText(convertApiText(section.getReftext()));
+        
+        section.setHighlighted(section.getText());
 
         for (WikiArticle sub_article : article.getSubArticles()){
 

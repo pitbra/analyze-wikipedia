@@ -11,7 +11,8 @@ import java.util.List;
 public class SectionElement {
     
     private final String TITLE;
-    private final List<String> TEXT = new LinkedList();
+    private final List<String> REFTEXT = new LinkedList();
+    private String text;
     private String normalized;
     private String highlighted;
     private final List<WebFile> REFERENCES = new LinkedList();
@@ -22,28 +23,22 @@ public class SectionElement {
         this.normalized = "";
         this.highlighted = "";
     }
-    
-    public String outText() {
-        String text = "";
-        for (String str : TEXT){
-            text = text + " " + str;
-        }
-        return text;
-    }
-    
-    public void addText(String text)                    {   this.TEXT.add(text);                    }
+        
+    public void addReftext(String text)                 {   this.REFTEXT.add(text);                 }
     public void addReference(URL ref)                   {   this.REFERENCES.add(new WebFile(ref));  }
     public void addSection(SectionElement sec)          {   this.SECTIONS.add(sec);                 }
     
     public String getTitle()                            {   return this.TITLE;                      }
-    public List<String> getText()                       {   return this.TEXT;                       }
+    public String getText()                             {   return this.text;                       }
+    public List<String> getReftext()                    {   return this.REFTEXT;                    }
     public String getNormalized()                       {   return this.normalized;                 }
-    public String getHighlighted()                      {   return this.highlighted;               }
+    public String getHighlighted()                      {   return this.highlighted;                }
     public List<WebFile> getReferences()                {   return this.REFERENCES;                 }
     public List<SectionElement> getSections()           {   return this.SECTIONS;                   }
     
-    public void setText(List<String> list)              {   this.TEXT.clear();
-                                                            this.TEXT.addAll(list);                 }
+    public void setReftext(List<String> list)           {   this.REFTEXT.clear();
+                                                            this.REFTEXT.addAll(list);              }
+    public void setText(String text)                    {   this.text = text;                       }
     public void setNormalized(String normalized)        {   this.normalized = normalized;           }
     public void setHighlighted(String highlighted)      {   this.highlighted = highlighted;         }
     public void setReferences(List<WebFile> list)       {   this.REFERENCES.clear();
