@@ -22,15 +22,21 @@
 
         <script>
             $(document).ready(function () {
-                $.ajax({
-                    url: "rest/db/articles",
-                    data: null,
-                    success: function (data) {
-                        $("#inputSearch").autocomplete({
-                            source: data
+                $('#inputSearch').on('keyup', function () {
+                    var text = $("#inputSearch").val();
+
+                    if (text.length === 3) {
+                        $.ajax({
+                            url: "rest/db/articles/" + text,
+                            data: null,
+                            success: function (data) {
+                                $("#inputSearch").autocomplete({
+                                    source: data
+                                });
+                            },
+                            dataType: "json"
                         });
-                    },
-                    dataType: "json"
+                    }
                 });
             })
 
@@ -48,10 +54,16 @@
                     },
                     dataType: "json"
                 });
-                
-                $("#nodes").mousemove(function(e){handleMouseMove(e);});
-                $("#nodes").dblclick(function(e){handleDoubleClick(e);});
-                $("#nodes").addEventListener('nodeClicked  ', function(e) {handleClick(e);});
+
+                $("#nodes").mousemove(function (e) {
+                    handleMouseMove(e);
+                });
+                $("#nodes").dblclick(function (e) {
+                    handleDoubleClick(e);
+                });
+                $("#nodes").addEventListener('nodeClicked  ', function (e) {
+                    handleClick(e);
+                });
             }
 
             function useSubArticles() {

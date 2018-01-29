@@ -148,17 +148,17 @@ public class DatabaseResource {
 
     @GET
     //@QueryParam("subArticle")
-    @Path("/articles")
+    @Path("/articles/{title}")
     @Produces("text/plain")
-    public Response getArticles() {
+    public Response getArticles(@PathParam("title") String title) {
         //TODO automatische abfrage während tippen getNodesByTypeAndTitlesequence        
-        Iterable<ArticleObject> artObjects = artService.findAll();
+        Iterable<Entity> artObjects = artService.getNodesByTypeAndTitlesequence("Article", ".*"+title+".*");
 
         Gson gson = new Gson();
 
         HashSet<String> allArticles = new HashSet<>();
 
-        for (ArticleObject article : artObjects) {
+        for (Entity article : artObjects) {
             allArticles.add(StringHelper.prettyPrintString(article.getTitle()));
         }
 
