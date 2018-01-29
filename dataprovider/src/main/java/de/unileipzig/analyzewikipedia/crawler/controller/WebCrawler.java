@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 public class WebCrawler {
 
     private static final CrawlDB CRAWLDB = new CrawlDB();
-    
+        
     public static String getArticleText(Language language, String neo4j_title){
         
         return getArticleText(language, neo4j_title, neo4j_title);
@@ -134,7 +134,7 @@ public class WebCrawler {
     protected static void checkSectionByReferences(CrawledElement article, SectionElement section){
 
         for (WebFile wf : section.getReferences()){
-        
+                                  
             // check available size and correct language
             if (Fetcher.checkStatus(wf.getStatus()) && article.getLanguage().equals(wf.getLanguage())) {
             
@@ -319,7 +319,7 @@ public class WebCrawler {
     }
 
     private static List<WebFile> searchReferences(List<String> list){
-
+        
         List<WebFile> references = new LinkedList();
 
         String ref_s = "<ref";
@@ -378,7 +378,44 @@ public class WebCrawler {
             // Citate
             while(line.contains(cit_s) && line.contains(cit_e)){
                 
-                String cit = line.substring(line.indexOf(cit_s) + ref_s.length(), line.indexOf(cit_e));
+                String cit = line.substring(line.indexOf(cit_s) + cit_s.length(), line.indexOf(cit_e));
+                
+                // inliner fix, remove it
+                if (cit.contains(cit_s)){
+                    
+                    int inlinerStart = line.indexOf(cit_s);
+                    int inlinerEnd = inlinerStart + cit_e.length();
+                    
+                    int countS = 1;
+                    int countE = 0;
+                    
+                    while(countS > countE){
+                        if (inlinerEnd + cit_e.length() > line.length()) {
+                            inlinerEnd = line.length() - cit_e.length();
+                            break;
+                        }
+                        
+                        String compare = line.substring(inlinerEnd, inlinerEnd + cit_e.length());
+                        if (compare.equals(cit_s)) {
+                            countS++;
+                            inlinerEnd+=cit_s.length();
+                            continue;
+                        }
+                        if (compare.equals(cit_e)) {
+                            countE++;
+                            inlinerEnd+=cit_e.length();
+                            continue;
+                        }
+                        inlinerEnd++;
+                    }
+                    
+                    //System.out.println("Error line:" + line.substring(inlinerStart, inlinerEnd));
+                    
+                    line = line.substring(0, inlinerStart) + line.substring(inlinerEnd + cit_e.length(), line.length());
+                    
+                    continue;
+                    
+                }
                 
                 line = line.substring(0, line.indexOf(cit_s)) + line.substring(line.indexOf(cit_e) + cit_e.length());
                 
