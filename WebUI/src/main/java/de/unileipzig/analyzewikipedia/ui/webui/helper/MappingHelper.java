@@ -32,11 +32,11 @@ public class MappingHelper {
         return entities;
     }
 
-    public static List<EntityViewModel> MapEntities(Iterable<Entity> subs) {
-        return MapEntities(subs, false);
+    public static List<EntityViewModel> MapEntities(Iterable<Entity> subs, String mainArticle) {
+        return MapEntities(subs, mainArticle, false);
     }
     
-        public static List<EntityViewModel> MapEntities(Iterable<Entity> subs, boolean ellipsis) {
+        public static List<EntityViewModel> MapEntities(Iterable<Entity> subs, String mainArticle, boolean ellipsis) {
         List<EntityViewModel> entities = new ArrayList<>();
         for (Entity cur : subs) {
             EntityViewModel ent = new EntityViewModel();
@@ -51,6 +51,7 @@ public class MappingHelper {
             ent.setName(name);
             ent.setId(cur.getId());
             ent.setType(getCssClass(cur));
+            ent.setMainArticle(mainArticle);
 
             entities.add(ent);
         }

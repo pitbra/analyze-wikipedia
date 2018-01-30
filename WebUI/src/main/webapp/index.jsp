@@ -64,7 +64,18 @@
                 var nearest = sys.nearest(point);
 
                 if (nearest.distance < 50) {
-                    $("#info_dialogue_title").html(nearest.node.data.FullText);
+                    var article = nearest.node.data.FullText;
+                    var type = nearest.node.data.Type;
+                    var subArticle = (type === "Article" || type === "article") ? null : nearest.node.data.MainArticle;
+                    $("#info_dialogue_title").html(article);
+                    $.ajax({
+                            url: "rest/db/checkArticle?title=" + article + "&type=" + type + "&mainArticle=" + subArticle,
+                            data: null,
+                            success: function (data) {
+                                $("#info_dialogue_text").html(data);
+                            },
+                            dataType: "json"
+                        });
                     expandInfo();
                 }
             }
@@ -99,7 +110,7 @@
         <div id="info_dialogue" class="card wa_infodialogue" style="position: fixed; top: 56px; bottom: 56px; right: 0; width: 400px; display:none;">
                 <h5 id="info_dialogue_title" class="card-header">Artikel</h5>
                 <button onclick="compressInfo()" class="btn btn-outline-secondary" style="position: fixed; top: 60px; right: 4px;" title="Compress the Info-Dialogue"><span class="fa fa-compress"></span></button>
-            <div>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
+            <div id="info_dialogue_text"></div>
         </div>
         <div id="info_dialogue_show" class="wa_infodialogue" style="position: fixed; top:60px; right:4px; display:none;">
             <button onclick="expandInfo()" class="btn btn-outline-secondary" title="Expand the Info-Dialogue"><span class="fa fa-expand"></span></button>
@@ -109,14 +120,14 @@
             <h5 class="card-header">Legend</h5>
             <div class="card-body">
                 <h6 class="card-subtitle mb-2 text-muted">Nodes</h6>
-                Article: ||||||<br />
-                SubArticle: ||||||<br />
-                Externe: ||||||<br />
-                SubExterne: ||||||<br />
+                <div class="row"><div class="col-sm-5">Article: </div><div class="col-sm-1"><div style="background-color: red; width:75px; height: 20px;"></div></div></div>
+                <div class="row"><div class="col-sm-5">SubArticle: </div><div class="col-sm-1"><div style="background-color: green; width:75px; height: 20px;"></div></div></div>
+                <!--<div class="row"><div class="col-sm-5">Externe: </div><div class="col-sm-1"><div style="background-color: green; width:75px; height: 20px;">
+                <div class="row"><div class="col-sm-5">SubExterne: <div class="col-sm-1"><div style="background-color: green; width:75px; height: 20px;">
                 <br />
                 <h6 class="card-subtitle mb-2 text-muted">Edges</h6>
                 Has: ||||||<br />
-                LinkTo: ||||||<br />
+                LinkTo: ||||||<br />-->
             </div>
         </div>
     </jsp:body>

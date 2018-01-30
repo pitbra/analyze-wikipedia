@@ -13,6 +13,15 @@ public class EntityViewModel {
     private String _fullName;
     private String _name;
     private String _type;
+    private String _mainArticle;
+
+    public String getMainArticle() {
+        return _mainArticle;
+    }
+
+    public void setMainArticle(String _mainArticle) {
+        this._mainArticle = _mainArticle;
+    }
     private long _id;
 
     public long getId() {

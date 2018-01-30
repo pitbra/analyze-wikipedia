@@ -72,7 +72,7 @@ public class ArborViewModel {
         String nodeResult = "";
         
         for(EntityViewModel node : nodes) {
-            nodeResult += String.format("\"%s\":{\"color\":\"%s\", \"shape\":\"%s\", \"label\": \"%s\", \"FullText\":\"%s\"}", node.getId(), getColorForType(node.getType()), SHAPE, node.getName(), node.getFullName() );
+            nodeResult += String.format("\"%s\":{\"color\":\"%s\", \"shape\":\"%s\", \"label\": \"%s\", \"FullText\":\"%s\", \"Type\": \"%s\", \"MainArticle\": \"%s\"}", node.getId(), getColorForType(node.getType()), SHAPE, node.getName(), node.getFullName(),  node.getType(), node.getMainArticle());
             
             if(nodes.size()-1 != nodes.indexOf(node)) {
                 nodeResult += ",";

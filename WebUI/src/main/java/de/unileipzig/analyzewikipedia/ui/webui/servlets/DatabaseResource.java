@@ -108,7 +108,7 @@ public class DatabaseResource {
         Iterable<Entity> subs = artService.getArticleAndAllSubArticles(cur.getTitle());
         Iterable<String> ext = artService.getWeblinks(cur.getTitle());
 
-        List<EntityViewModel> all = MappingHelper.MapEntities(subs, true);
+        List<EntityViewModel> all = MappingHelper.MapEntities(subs, cur.getTitle(), true);
         //List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, true);
 
         if (all.size() > 0) {
@@ -131,7 +131,6 @@ public class DatabaseResource {
         /*if (externAll.size() > 0) {
             entities.addAll(externAll);
         }*/
-
         HashSet<Long> t = new HashSet<>();
         /*for (Entity ent : ext) {
             t.add(ent.getId());
@@ -168,12 +167,15 @@ public class DatabaseResource {
     }
 
     @GET
-    @Path("/checkArticle/{title}")
+    @Path("/checkArticle")
     @Produces("text/plain")
-    public Response checkArticle(@PathParam("title") String title) {
-        title = "Alan_Smithee";
-        String text = WebCrawler.getArticleText(MediaWikiLanguageHelper.Language.DE, title);
-
+    public Response checkArticle(@QueryParam("title") String title, @QueryParam("mainArticle") String mainArticle, @QueryParam("type") String type) {
+        String text = "Shit, that should not happen";
+        if (mainArticle == null || mainArticle.equalsIgnoreCase("null")) {
+            text = WebCrawler.getArticleText(MediaWikiLanguageHelper.Language.DE, title);
+        } else {
+            text = WebCrawler.getArticleText(MediaWikiLanguageHelper.Language.DE, mainArticle, title);
+        }
         Gson gson = new Gson();
 
         return Response.status(200).entity(gson.toJson(text)).build();
@@ -194,7 +196,7 @@ public class DatabaseResource {
         EntityViewModel current = MappingHelper.MapArticle(cur);
         entities.add(current);
         Iterable<Entity> ext = artService.getRelatedNodes(cur.getTitle());
-        List<EntityViewModel> externAll = MappingHelper.MapEntities(ext);
+        List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, cur.getTitle());
 
         getRelatedNodesForNode(cur.getTitle(), NodeType.ARTICLE, current, entities, edges);
     }
