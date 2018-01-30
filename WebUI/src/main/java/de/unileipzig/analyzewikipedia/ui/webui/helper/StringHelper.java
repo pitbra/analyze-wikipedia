@@ -16,6 +16,10 @@ public class StringHelper {
     public static String unescapeString(String text) {
         return StringEscapeUtils.unescapeJava(text);
     }
+    
+    public static String escapeString(String text) {
+        return StringEscapeUtils.escapeJava(text);
+    }
 
     public static String prettyPrintString(String text) {
         String result = unescapeString(text);

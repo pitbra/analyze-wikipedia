@@ -6,6 +6,7 @@
 package de.unileipzig.analyzewikipedia.ui.webui.servlets;
 
 import com.google.gson.Gson;
+import de.unileipzig.analyzewikipedia.crawler.controller.WebCrawler;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.Entity;
 import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ExternObject;
@@ -16,6 +17,7 @@ import de.unileipzig.analyzewikipedia.neo4j.service.ExternService;
 import de.unileipzig.analyzewikipedia.neo4j.service.ExternServiceImpl;
 import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleService;
 import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
+import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.ArborViewModel;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.EdgesViewModel;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.EntityViewModel;
@@ -104,10 +106,10 @@ public class DatabaseResource {
         Hashtable<Long, HashSet<Long>> hasEdges = new Hashtable<>();
 
         Iterable<Entity> subs = artService.getArticleAndAllSubArticles(cur.getTitle());
-        Iterable<Entity> ext = artService.getWeblinks(cur.getTitle());
+        Iterable<String> ext = artService.getWeblinks(cur.getTitle());
 
         List<EntityViewModel> all = MappingHelper.MapEntities(subs, true);
-        List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, true);
+        //List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, true);
 
         if (all.size() > 0) {
 
@@ -119,21 +121,21 @@ public class DatabaseResource {
 
                 hasTo.add(sub.getId());
             }
-            
+
             hasEdges.put(cur.getId(), hasTo);
             entities.addAll(all);
         } else {
             entities.add(MappingHelper.MapArticle(cur, true));
         }
 
-        if (externAll.size() > 0) {
+        /*if (externAll.size() > 0) {
             entities.addAll(externAll);
-        }
+        }*/
 
         HashSet<Long> t = new HashSet<>();
-        for (Entity ent : ext) {
+        /*for (Entity ent : ext) {
             t.add(ent.getId());
-        }
+        }*/
         linkEdges.put(cur.getId(), t);
 
         //getAllRelatedNodes(cur, entities, linkEdges);
@@ -152,7 +154,7 @@ public class DatabaseResource {
     @Produces("text/plain")
     public Response getArticles(@PathParam("title") String title) {
         //TODO automatische abfrage während tippen getNodesByTypeAndTitlesequence        
-        Iterable<Entity> artObjects = artService.getNodesByTypeAndTitlesequence("Article", ".*"+title+".*");
+        Iterable<Entity> artObjects = artService.getNodesByTypeAndTitlesequence("Article", ".*" + title + ".*");
 
         Gson gson = new Gson();
 
@@ -165,6 +167,18 @@ public class DatabaseResource {
         return Response.status(200).entity(gson.toJson(allArticles)).build();
     }
 
+    @GET
+    @Path("/checkArticle/{title}")
+    @Produces("text/plain")
+    public Response checkArticle(@PathParam("title") String title) {
+        title = "Alan_Smithee";
+        String text = WebCrawler.getArticleText(MediaWikiLanguageHelper.Language.DE, title);
+
+        Gson gson = new Gson();
+
+        return Response.status(200).entity(gson.toJson(text)).build();
+    }
+
     /**
      * PUT method for updating or creating an instance of DatabaseResource
      *
@@ -172,7 +186,8 @@ public class DatabaseResource {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void putJson(String content) {
+    public void putJson(String content
+    ) {
     }
 
     private void getAllRelatedNodes(ArticleObject cur, List<EntityViewModel> entities, Hashtable<Long, HashSet<Long>> edges) {
