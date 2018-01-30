@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 public class WebCrawler {
 
     private static final CrawlDB CRAWLDB = new CrawlDB();
-        
+    
     public static String getArticleText(Language language, String neo4j_title){
         
         return getArticleText(language, neo4j_title, neo4j_title);
@@ -59,7 +59,7 @@ public class WebCrawler {
     
     private static String getSectionText(SectionElement section, String title){
         
-        if (section.getTitle().equals(title)) return section.getText();
+        if (section.getTitle().equals(title)) return section.getHighlighted();
                 
         for (SectionElement subsection : section.getSections()){
             
@@ -130,11 +130,13 @@ public class WebCrawler {
         checkSectionByReferences(api_article, api_article.getSections());
         
     }
-    
+
     protected static void checkSectionByReferences(CrawledElement article, SectionElement section){
+        
+        List<String> urls = new LinkedList();
 
         for (WebFile wf : section.getReferences()){
-                                  
+       
             // check available size and correct language
             if (Fetcher.checkStatus(wf.getStatus()) && article.getLanguage().equals(wf.getLanguage())) {
             
@@ -147,12 +149,18 @@ public class WebCrawler {
                         m.getLevensteinDistance()   > 0.3   ||
                         m.getNgramDistance()        > 0.6   ||
                         m.getNgramFrequenze()       > 0.3){
+
+                    urls.add(wf.getUrl().toString());
                     
                 }
                 
             }
             
         }
+        
+        String span = "<span";
+        for (String url : urls) span = span + " title=" + url;
+        if (!urls.isEmpty()) section.setHighlighted(span + ">" + section.getText() + "</span>");
         
         for(SectionElement subsection : section.getSections()){
             checkSectionByReferences(article, subsection);
