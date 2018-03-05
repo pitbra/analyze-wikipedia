@@ -1,35 +1,133 @@
 package de.unileipzig.analyzewikipedia.textanalyse;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Danilo Morgado
  */
 public class NGramHelper {
     
-    protected static String getWortoverlapText(String origin, String comp, String replace){
+    private static void addMapElement(Map<String, List<String>> map, String ngram, String norm){
         
-        Queue<String> wordsOfOriginGramm = new ConcurrentLinkedQueue();
-        Queue<String> wordsOfComparGramm = new ConcurrentLinkedQueue();
+        if (map.get(norm) == null){
+            List<String> list = new LinkedList();
+            list.add(ngram);
+            map.put(norm, list);
+        } else {
+            if (!map.get(norm).contains(ngram)) map.get(norm).add(ngram);
+        }
         
-        for (String ngram : ngrams(1, origin)) wordsOfOriginGramm.add(ngram);
-        for (String ngram : ngrams(1, comp)) wordsOfComparGramm.add(ngram);
+    }
+    
+    
+    public static List<String> getOverlapedPassages(String origintext, String overlaptext, int minphrasecount){
         
-        for (String word : wordsOfComparGramm){
-            if(!wordsOfOriginGramm.contains(word)) {
-                wordsOfComparGramm.remove(word);
+        List<String> passages = new LinkedList();
+        
+        String[] words = overlaptext.split("\\s+");
+        
+        String tmp = "";
+        int count = 0;
+        for (String word : words){
+            if (word.equals(StringSimiliarityHelper.REPLACE_STRING)){
+                if (tmp.trim().length() > 0 && count >= minphrasecount) passages.addAll(checkPhraseInText(origintext, tmp.trim(), minphrasecount));
+                tmp = "";
+                count = 0;
+            } else {
+                tmp = tmp + " " + word;
+                count++;
+            }
+        }
+        if (tmp.trim().length() > 0) passages.add(tmp.trim());
+        
+        return passages;
+        
+    }
+    
+    private static List<String> checkPhraseInText(String text, String phrase, int phrasecount){
+        
+        List<String> found = new LinkedList();
+        
+        String[] words = phrase.split("\\s+");
+        
+        int start = 0;
+        int end = phrasecount - 1;
+        String tmp;
+        String rem = "";
+        
+        while(true){
+            tmp = "";
+            for (int i = start; i <= end; i++) tmp = tmp + " " + words[i];
+            tmp = tmp.trim();
+            
+            if(text.contains(tmp)) {
+                rem = tmp;
+                end++;
+                if (end >= words.length) break;
+            } else {
+                if (rem.length() > 0) {
+                    if (!found.contains(rem)) found.add(rem);
+                    rem = "";
+                }
+                if (end - start > phrasecount){
+                    start = end;
+                    end = start + phrasecount;
+                    if (end >= words.length) break;
+                } else {
+                    start++;
+                    end++;
+                    if (end >= words.length) break;
+                }
+            }        
+        }
+        
+        if (rem.length() > 0) {
+            if (!found.contains(rem)) found.add(rem);
+            rem = "";
+        }
+        
+        return found;
+        
+    }
+    
+    protected static String getWortoverlapText(String origin, String comp){
+        
+        Map<String, List<String>> wordsOfOriginGramm = new ConcurrentHashMap<>();
+        Map<String, List<String>> wordsOfComparGramm = new ConcurrentHashMap<>();
+        
+        for (String ngram : ngrams(1, origin)) {
+            String norm = ngram.toLowerCase().replaceAll("\\p{Punct}", "");
+            addMapElement(wordsOfOriginGramm, ngram, norm);
+        }
+        
+        for (String ngram : ngrams(1, comp)) {
+            String norm = ngram.toLowerCase().replaceAll("\\p{Punct}", "");
+            addMapElement(wordsOfComparGramm, ngram, norm);
+        }
+        
+        for (Map.Entry<String, List<String>> entry : wordsOfComparGramm.entrySet()) {
+            if(!wordsOfOriginGramm.containsKey(entry.getKey())) {
+                wordsOfComparGramm.remove(entry.getKey());
             }
         }
         
-        for (String word : wordsOfOriginGramm){
-            if(!wordsOfComparGramm.contains(word)) {
-                origin = origin.replace(word, replace);
-                wordsOfOriginGramm.remove(word);
+        for (Map.Entry<String, List<String>> entry : wordsOfOriginGramm.entrySet()) {
+            if(wordsOfComparGramm.containsKey(entry.getKey())) {
+                wordsOfOriginGramm.remove(entry.getKey());
             }
         }
+        
+        origin = " " + origin + " ";
+        for (Map.Entry<String, List<String>> entry : wordsOfOriginGramm.entrySet()) {
+            for (String word : entry.getValue()){
+                origin = origin.replace(" " + word + " ", " " + StringSimiliarityHelper.REPLACE_STRING + " ");
+            }
+        }
+        origin = origin.trim();
         
         return origin;
         
@@ -93,7 +191,7 @@ public class NGramHelper {
         return val;
     }
     
-    private static List<String> ngrams(int n, String str) {
+    public static List<String> ngrams(int n, String str) {
         List<String> ngrams = new ArrayList<>();
         String[] words = str.split("\\s+");
         for (int i = 0; i < words.length - n + 1; i++)

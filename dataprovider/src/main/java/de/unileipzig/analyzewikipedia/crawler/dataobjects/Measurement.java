@@ -1,9 +1,11 @@
 package de.unileipzig.analyzewikipedia.crawler.dataobjects;
 
+import java.io.Serializable;
+
 /**
  * @author Danilo Morgado
  */
-public class Measurement {
+public class Measurement implements Serializable {
     
     private double ngramDistance;
     private double ngramFrequenze;

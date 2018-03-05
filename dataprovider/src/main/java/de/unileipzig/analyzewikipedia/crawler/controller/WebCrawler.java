@@ -14,8 +14,9 @@ import de.unileipzig.analyzewikipedia.dumpreader.dataobjects.WikiArticle;
 import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper;
 import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper.Language;
 import de.unileipzig.analyzewikipedia.textanalyse.TextConverterHelper;
-import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
+import de.unileipzig.analyzewikipedia.textanalyse.NGramHelper;
 import de.unileipzig.analyzewikipedia.textanalyse.StringSimiliarityHelper;
+import de.unileipzig.analyzewikipedia.neo4j.dataobjects.ArticleObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -63,11 +65,12 @@ public class WebCrawler {
                 
         for (SectionElement subsection : section.getSections()){
             
-            return getSectionText(subsection, title);
+            String out = getSectionText(subsection, title);
+            if (out!= null) return out;
             
         }
         
-        return "";
+        return null;
         
     }
     
@@ -130,27 +133,37 @@ public class WebCrawler {
         checkSectionByReferences(api_article, api_article.getSections());
         
     }
-
+    
     protected static void checkSectionByReferences(CrawledElement article, SectionElement section){
         
-        List<String> urls = new LinkedList();
+        List<URL> urls = new LinkedList();
 
-        for (WebFile wf : section.getReferences()){
-       
+        for (URL url : section.getReferences()){
+            
+            WebFile wf = article.getWebfiles().get(url);
+                      
             // check available size and correct language
             if (Fetcher.checkStatus(wf.getStatus()) && article.getLanguage().equals(wf.getLanguage())) {
             
-                Measurement m = wordOverlap(section.getNormalized(), wf.getNormalized());
-                wf.addMeasurmant(section, m);
+                Measurement m_text = wordOverlap(section.getText(), wf.getOrigin());
+                Measurement m_norm = wordOverlap(section.getNormalized(), wf.getNormalized());
+                wf.addMeasurmantText(section, m_text);
+                wf.addMeasurmantNorm(section, m_norm);
                 
                 // highlighting the text
-                if (    m.getLongestWordSequenze()  > 5     ||
-                        m.getJarowinklerDistance()  > 0.7   ||
-                        m.getLevensteinDistance()   > 0.3   ||
-                        m.getNgramDistance()        > 0.6   ||
-                        m.getNgramFrequenze()       > 0.3){
+                if (    m_text.getLongestWordSequenze()  > 5     ||
+//                        m_text.getJarowinklerDistance()  > 0.7   ||
+//                        m_text.getLevensteinDistance()   > 0.3   ||
+//                        m_text.getNgramDistance()        > 0.6   ||
+//                        m_text.getNgramFrequenze()       > 0.3   ||
+                        m_norm.getLongestWordSequenze()  > 5     //||
+//                        m_norm.getJarowinklerDistance()  > 0.7   ||
+//                        m_norm.getLevensteinDistance()   > 0.3   ||
+//                        m_norm.getNgramDistance()        > 0.6   ||
+//                        m_norm.getNgramFrequenze()       > 0.3
+                        ){
 
-                    urls.add(wf.getUrl().toString());
+                    urls.add(wf.getUrl());
                     
                 }
                 
@@ -158,9 +171,29 @@ public class WebCrawler {
             
         }
         
-        String span = "<span";
-        for (String url : urls) span = span + " title=" + url;
-        if (!urls.isEmpty()) section.setHighlighted(span + ">" + section.getText() + "</span>");
+        String span = "";
+        
+        for (URL url : urls){
+            
+            String weboverlap = article.getWebfiles().get(url).getMeasurementText().get(section).getWordoverlaptext();
+            
+            String webtext = article.getWebfiles().get(url).getCleaned();
+            
+            List<String> passages = NGramHelper.getOverlapedPassages(webtext, weboverlap, 3);
+            
+            if (passages.isEmpty()) continue;
+            
+            span = span + "<ul title=\"" + url + "\">\n";
+            
+            for (String passage : passages){
+                span = span + "\t<li>" + passage + "</li>\n";
+            }
+            
+            span = span + "</ul>\n";
+            
+        }
+        
+        if (!urls.isEmpty()) section.setHighlighted(span + section.getText());
         
         for(SectionElement subsection : section.getSections()){
             checkSectionByReferences(article, subsection);
@@ -172,24 +205,24 @@ public class WebCrawler {
         
         Measurement m = new Measurement();
         
-        // if the text is to long, the ngram algorithm will be to long
-        if (origin.split("\\s+").length <= 300){
-            // 0,2s for  300 words
-            // 0,4s for  400 words
-            // 0,8s for  500 words
-            m.setNgramFrequenze(StringSimiliarityHelper.getNgramFrequenze(origin, compare));
-        }
-        
-        // if the text is to long, the ngram algorithm will be to long
-        if (origin.split("\\s+").length <= 40 && compare.split("\\s+").length <= 30){
-            //  0,3s for   30 words
-            //  0,8s for   40 words
-            //  1,7s for   50 words
-            m.setNgramDistance(StringSimiliarityHelper.getNgramDistance(origin, compare));
-        }
-        
-        m.setJarowinklerDistance(StringSimiliarityHelper.getJarowinklerDistance(origin, compare));
-        m.setLevensteinDistance(StringSimiliarityHelper.getLevensteinDistance(origin, compare));
+//        // if the text is to long, the ngram algorithm will be to long
+//        if (origin.split("\\s+").length <= 300 && compare.split("\\s+").length <= 300){
+//            // 0,2s for  300 words
+//            // 0,4s for  400 words
+//            // 0,8s for  500 words
+//            m.setNgramFrequenze(StringSimiliarityHelper.getNgramFrequenze(origin, compare));
+//        }
+//        
+//        // if the text is to long, the ngram algorithm will be to long
+//        if (origin.split("\\s+").length <= 40 && compare.split("\\s+").length <= 30){
+//            //  0,3s for   30 words
+//            //  0,8s for   40 words
+//            //  1,7s for   50 words
+//            m.setNgramDistance(StringSimiliarityHelper.getNgramDistance(origin, compare));
+//        }
+//        
+//        m.setJarowinklerDistance(StringSimiliarityHelper.getJarowinklerDistance(origin, compare));
+//        m.setLevensteinDistance(StringSimiliarityHelper.getLevensteinDistance(origin, compare));
                 
         m.setWordoverlaptext(StringSimiliarityHelper.getWordOverlapText(origin, compare)); 
         m.setLongestWordSequenze(StringSimiliarityHelper.getLongestWordSequenze(m.getWordoverlaptext()));
@@ -233,19 +266,15 @@ public class WebCrawler {
 
     }
 
-    private static WebFile findWebfileInSections(SectionElement section, URL url){
+    private static WebFile findWebfileInSections(CrawledElement article, URL url){
         
-        for (WebFile section_webfile : section.getReferences()){
-            if (section_webfile.getUrl().equals(url)){
-                return section_webfile;
-            }
-        }
+        WebFile webfile = null;
         
-        for (SectionElement sub_section : section.getSections()){
-            return findWebfileInSections(sub_section, url);
-        }
+        if (article.getWebfiles() != null) webfile = article.getWebfiles().get(url);
         
-        return new WebFile(url);
+        if (webfile == null) webfile = new WebFile(url);
+        
+        return webfile;
         
     }
     
@@ -259,16 +288,17 @@ public class WebCrawler {
             
             URL url = getUrl(ref);
             
-            if (url == null) url = getUrl("http://" + ref);
+            if (url == null) url = getUrl("http://" + ref) ;
             
             if (url != null) {
                 Object[] download = Fetcher.download_html(url);
                 
-                WebFile webfile = findWebfileInSections(api_article.getSections(), url);
+                WebFile webfile = findWebfileInSections(api_article, url);
                 webfile.setStatus((Integer) download[0]);
                 webfile.setOrigin((String) download[1]);
                 
                 webfiles.put(url, webfile);
+                
             }
 
         }
@@ -302,6 +332,7 @@ public class WebCrawler {
 
             List<String[]> cuts = new LinkedList();
             cuts.add(new String[]{"<ref", "</ref>"});
+            cuts.add(new String[]{"<ref", "/>"});
             cuts.add(new String[]{"{{", "}}"});
             cuts.add(new String[]{"{", "}"});
 
@@ -326,13 +357,53 @@ public class WebCrawler {
 
     }
 
-    private static List<WebFile> searchReferences(List<String> list){
+    private static String getReferences(List<URL> references, String line, String ref_s, String ref_e, String cit_s, String cit_e){
         
-        List<WebFile> references = new LinkedList();
+        String ref = line.substring(line.indexOf(ref_s) + ref_s.length(), line.indexOf(ref_e));
+                
+        // citacion in reference
+        while(ref.contains(cit_s) && ref.contains(cit_e)){
 
-        String ref_s = "<ref";
-        String ref_e = "</ref>";
+            String sub = ref.substring(ref.indexOf(cit_s) + cit_s.length(), ref.indexOf(cit_e));
+
+            ref = ref.substring(0, ref.indexOf(cit_s)) + ref.substring(ref.indexOf(cit_e) + cit_e.length());
+
+            String[] split = sub.split(Pattern.quote("|"));
+            for (String sp : split){
+                if (sp.contains("=")) {
+                    sp = sp.substring(sp.indexOf("=") + 1);
+                    sp = sp.trim();
+                    if (sp.contains(" ")) sp = sp.substring(0, sp.indexOf(" "));
+                    URL url = getUrl(sp);
+                    if (url != null) {
+                        references.add(url);
+                    }
+                }
+            }
+        }
+
+        line = line.substring(0, line.indexOf(ref_s)) + line.substring(line.indexOf(ref_e) + ref_e.length());
+
+        ref = ref.replace("[", "").replace("]", "");
+
+        String[] split = ref.split("\\s+");
+
+        for (String sp : split){
+            if (sp.contains(">")) sp = sp.substring(sp.indexOf(">")+1);
+            URL url = getUrl(sp);
+            if (url != null) {
+                references.add(url);
+            }
+        }
         
+        return line;
+        
+    }
+    
+    private static List<URL> searchReferences(List<String> list){
+        
+        List<URL> references = new LinkedList();
+
         String cit_s = "{{";
         String cit_e = "}}";
         
@@ -341,46 +412,24 @@ public class WebCrawler {
             line = StringEscapeUtils.unescapeHtml3(line);
             line = StringEscapeUtils.unescapeHtml4(line);
             
+            String ref_s = "<ref";
+            String ref_e = "</ref>";
+        
             // References
             while(line.contains(ref_s) && line.contains(ref_e)){
 
-                String ref = line.substring(line.indexOf(ref_s) + ref_s.length(), line.indexOf(ref_e));
-                
-                // citacion in reference
-                while(ref.contains(cit_s) && ref.contains(cit_e)){
-                    
-                    String sub = ref.substring(ref.indexOf(cit_s) + cit_s.length(), ref.indexOf(cit_e));
-                    
-                    ref = ref.substring(0, ref.indexOf(cit_s)) + ref.substring(ref.indexOf(cit_e) + cit_e.length());
-                    
-                    String[] split = sub.split("|");
-                    for (String sp : split){
-                        if (sp.contains("=")) {
-                            sp = sp.substring(sp.indexOf("=") + 1);
-                            sp = sp.trim();
-                            if (sp.contains(" ")) sp = sp.substring(0, sp.indexOf(" "));
-                            URL url = getUrl(sp);
-                            if (url != null) {
-                                references.add(new WebFile(url));
-                            }
-                        }
-                    }
-                }
-                
-                line = line.substring(0, line.indexOf(ref_s)) + line.substring(line.indexOf(ref_e) + ref_e.length());
-                
-                ref = ref.replace("[", "").replace("]", "");
+                line = getReferences(references, line, ref_s, ref_e, cit_s, cit_e);
 
-                String[] split = ref.split("\\s+");
+            }
+            
+            ref_s = "<ref";
+            ref_e = "/>";
+        
+            // References
+            while(line.contains(ref_s) && line.contains(ref_e)){
 
-                for (String sp : split){
-                    if (sp.contains(">")) sp = sp.substring(sp.indexOf(">")+1);
-                    URL url = getUrl(sp);
-                    if (url != null) {
-                        references.add(new WebFile(url));
-                    }
-                }
-
+                line = getReferences(references, line, ref_s, ref_e, cit_s, cit_e);
+                
             }
             
             // Citate
@@ -434,19 +483,19 @@ public class WebCrawler {
                 for (String sp : split){
                     URL url = getUrl(sp);
                     if (url != null) {
-                        references.add(new WebFile(url));
+                        references.add(url);
                         continue;
                     }
                     if (sp.contains("=")) sp = sp.substring(sp.indexOf("=")+1);
                     url = getUrl(sp);
                     if (url != null) {
-                        references.add(new WebFile(url));
+                        references.add(url);
                         continue;
                     }
                     if (sp.contains("[")) sp = sp.substring(sp.indexOf("[")+1);
                     url = getUrl(sp);
                     if (url != null) {
-                        references.add(new WebFile(url));
+                        references.add(url);
                     }
                 }
                 

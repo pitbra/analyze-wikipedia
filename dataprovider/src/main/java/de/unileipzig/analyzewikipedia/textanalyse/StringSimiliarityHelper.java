@@ -9,7 +9,7 @@ import org.apache.lucene.search.spell.LevensteinDistance;
  */
 public class StringSimiliarityHelper {
     
-    private static final String REPLACE_STRING = "...";
+    public static final String REPLACE_STRING = "...";
     
     public static int getLongestWordSequenze(String replacedtext){
         
@@ -31,7 +31,7 @@ public class StringSimiliarityHelper {
     }
     
     public static String getWordOverlapText(String origin, String comp){
-        return NGramHelper.getWortoverlapText(origin, comp, REPLACE_STRING);
+        return NGramHelper.getWortoverlapText(origin, comp);
     }
     
     // shows a logarithmic near field ngram model in percent, threshold over 0.3    [0.0 -> 1.0]
