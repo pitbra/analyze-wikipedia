@@ -2,6 +2,8 @@ package de.unileipzig.analyzewikipedia.textanalyse;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class for supporting by stemming a given text
  */
 public class NormalizerHelper {
     

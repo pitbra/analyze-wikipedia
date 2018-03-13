@@ -39,12 +39,27 @@ public class WebCrawler {
 
     private static final CrawlDB CRAWLDB = new CrawlDB();
     
+    /**
+     * METHOD: main article text with overlapping phrases
+     * 
+     * @param language as enumeration
+     * @param neo4j_title as string from the neo4g-db
+     * @return maintext as string
+     */
     public static String getArticleText(Language language, String neo4j_title){
         
         return getArticleText(language, neo4j_title, neo4j_title);
         
     }
     
+    /**
+     * METHOD: subarticle text with overlapping phrases
+     * 
+     * @param language as enumeration
+     * @param neo4j_title as string from the neo4g-db
+     * @param neo4j_subtitle as string from the neo4g-db
+     * @return subtext as string
+     */
     public static String getArticleText(Language language, String neo4j_title, String neo4j_subtitle){
         
         CrawledElement element = CRAWLDB.get(neo4j_title);
@@ -59,9 +74,19 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: section text with overlapping phrases
+     * 
+     * @param section as object
+     * @param title of section
+     * @return text
+     */
     private static String getSectionText(SectionElement section, String title){
         
-        if (section.getTitle().equals(title)) return section.getHighlighted();
+        if (section.getTitle().equals(title)) {
+            String out = getPhrasesForHighlighting(section) + section.getText();
+            return out;
+        }
                 
         for (SectionElement subsection : section.getSections()){
             
@@ -74,6 +99,41 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: generate html list of urls and phrases
+     * 
+     * @param section as object
+     * @return text
+     */
+    private static String getPhrasesForHighlighting(SectionElement section){
+        
+        String span = "";
+        
+        for (Map.Entry<URL, List<String>> entry : section.getOverlapphrases().entrySet()) {
+
+            URL url = entry.getKey();
+            List<String> list = entry.getValue();
+            
+            span = span + "<ul title=\"" + url + "\">\n";
+            
+            for (String passage : list){
+                span = span + "\t<li>" + passage + "</li>\n";
+            }
+            
+            span = span + "</ul>\n";
+            
+        }
+        
+        return span;
+        
+    }
+    
+    /**
+     * METHOD: kernel for getting not seen article in db queue
+     * 
+     * @param language as enumeration
+     * @param neo4j_title as string from the neo4g-db
+     */
     private static void plagiarismDetection(Language language, String neo4j_title){
         
         String title = unescapeString(neo4j_title);
@@ -81,6 +141,7 @@ public class WebCrawler {
         origin_title = unreplaceText(origin_title);
         origin_title = origin_title.replace(" ", "%20");
 
+        // IN FUTURE YOU GRAP ORIGINAL ELEMENT IN NEO4G DB HERE, TO MODIFY IT
         ArticleObject article = null;
         if (false) article = (ArticleObject) searchOrCreateEntity(ArticleObject.class, title);
 
@@ -134,6 +195,12 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: mapping phase to find the overlapping phrases in webdocuments
+     * 
+     * @param article as object
+     * @param section as object
+     */
     protected static void checkSectionByReferences(CrawledElement article, SectionElement section){
         
         List<URL> urls = new LinkedList();
@@ -171,8 +238,6 @@ public class WebCrawler {
             
         }
         
-        String span = "";
-        
         for (URL url : urls){
             
             String weboverlap = article.getWebfiles().get(url).getMeasurementText().get(section).getWordoverlaptext();
@@ -181,19 +246,9 @@ public class WebCrawler {
             
             List<String> passages = NGramHelper.getOverlapedPassages(webtext, weboverlap, 3);
             
-            if (passages.isEmpty()) continue;
-            
-            span = span + "<ul title=\"" + url + "\">\n";
-            
-            for (String passage : passages){
-                span = span + "\t<li>" + passage + "</li>\n";
-            }
-            
-            span = span + "</ul>\n";
+            if (!passages.isEmpty()) section.addOverlapphrases(url, passages);
             
         }
-        
-        if (!urls.isEmpty()) section.setHighlighted(span + section.getText());
         
         for(SectionElement subsection : section.getSections()){
             checkSectionByReferences(article, subsection);
@@ -201,6 +256,14 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: calculation and creation for measurment of similiarity
+     *         default: only longest wordsequence, each extra methode needs time
+     * 
+     * @param origin text as string
+     * @param compare text as string
+     * @return measurement as object
+     */
     private static Measurement wordOverlap(String origin, String compare){
         
         Measurement m = new Measurement();
@@ -231,6 +294,13 @@ public class WebCrawler {
         
     }
 
+    /**
+     * METHOD: normalise article recursive
+     * 
+     * @param lang as string
+     * @param section as object
+     * @return
+     */
     private static void normaliseArticleSections(String lang, SectionElement section){
 
         String stem = "";
@@ -247,6 +317,11 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: normalise all webdocuments
+     * 
+     * @param article as object
+     */
     protected static void normaliseWebfiles(CrawledElement article){
 
         for (Map.Entry<URL, WebFile> entry : article.getWebfiles().entrySet()) {
@@ -266,6 +341,12 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: to find all references in text
+     * 
+     * @param article as object
+     * @param url of the webfile
+     */
     private static WebFile findWebfileInSections(CrawledElement article, URL url){
         
         WebFile webfile = null;
@@ -278,6 +359,12 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: download the webdocument
+     * 
+     * @param api_article as object
+     * @return map of webdocuments
+     */
     protected static Map<URL, WebFile> loadWebfiles(CrawledElement api_article){
 
         Map<URL, WebFile> webfiles = new HashMap();
@@ -307,12 +394,18 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: convert the downloaded original article document to a section object
+     * 
+     * @param api_article as object
+     */
     private static void transcodeOriginArticle(CrawledElement api_article){
 
         String revtext = getRevisionText(api_article);
 
         WikiArticle wiki_article = SeekerThread.generateSectionArticle(api_article.getTitle(), revtext);
 
+        // IN FUTURE YOU UPDATE ORIGINAL ELEMENT IN NEO4G DB HERE
         if (false) TransmitorThread.sendArticle(wiki_article);
         
         SectionElement sec_element = convertArticleToSectionElement(wiki_article);
@@ -321,6 +414,12 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: convert original article to human readable text 
+     * 
+     * @param list as object
+     * @return text
+     */
     private static String convertApiText(List<String> list){
 
         String clean = "";
@@ -357,6 +456,17 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: grap all references in text
+     * 
+     * @param references as list
+     * @param line as string
+     * @param ref_s as start reference
+     * @param ref_e as end reference
+     * @param cit_s as start citation
+     * @param cit_e as end citation
+     * @return references as text
+     */
     private static String getReferences(List<URL> references, String line, String ref_s, String ref_e, String cit_s, String cit_e){
         
         String ref = line.substring(line.indexOf(ref_s) + ref_s.length(), line.indexOf(ref_e));
@@ -400,6 +510,12 @@ public class WebCrawler {
         
     }
     
+    /**
+     * METHOD: search references in the given text
+     * 
+     * @param list
+     * @return url as list
+     */
     private static List<URL> searchReferences(List<String> list){
         
         List<URL> references = new LinkedList();
@@ -507,6 +623,12 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: convert original article to section element
+     * 
+     * @param article as object
+     * @return section as object
+     */
     private static SectionElement convertArticleToSectionElement(WikiArticle article){
 
         SectionElement section = new SectionElement(article.getName());
@@ -521,8 +643,6 @@ public class WebCrawler {
 
         section.setText(convertApiText(section.getReftext()));
         
-        section.setHighlighted(section.getText());
-
         for (WikiArticle sub_article : article.getSubArticles()){
 
             if ( !MediaWikiLanguageHelper.isNotMediawikiBaseTitle(sub_article.getName())){
@@ -535,6 +655,12 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: get the revision text by using API call
+     * 
+     * @param article as object
+     * @return text
+     */
     private static String getRevisionText(CrawledElement article){
 
         List<String> rev = new LinkedList();
@@ -624,6 +750,12 @@ public class WebCrawler {
 
     }
 
+    /**
+     * METHOD: use API call to get extern urls
+     * 
+     * @param article as object
+     * @return urls as list
+     */
     private static List<String> getAPIexternlinks(CrawledElement article){
 
         List<String> list = new LinkedList<>();

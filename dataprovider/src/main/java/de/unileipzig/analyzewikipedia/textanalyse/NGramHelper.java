@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class for supporting by building diffrent ngram methods
  */
 public class NGramHelper {
     

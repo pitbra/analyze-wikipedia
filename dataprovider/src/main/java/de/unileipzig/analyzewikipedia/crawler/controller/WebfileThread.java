@@ -8,7 +8,7 @@ import de.unileipzig.analyzewikipedia.crawler.dataobjects.CrawledElement;
 /**
  * @author Danilo Morgado
  * 
- * class to use as thread to do diffrent jobs
+ * class to use as thread to do the job for diffrent articles
  */
 public class WebfileThread implements Runnable {
     

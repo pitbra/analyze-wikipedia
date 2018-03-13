@@ -24,6 +24,9 @@ public class CrawlDB {
     // save serialized object in root folder
     private final static String SAVEPATH = "crawlDB.dat";
     
+    /**
+     * METHOD: save the database
+     */
     protected void saveDB(){
         ObjectOutputStream oos = null;
         FileOutputStream fos = null;
@@ -46,6 +49,9 @@ public class CrawlDB {
         }
     }
     
+    /**
+     * METHOD: load the database
+     */
     protected void loadDB(){
         ObjectInputStream ois = null;
         FileInputStream fis = null;
@@ -81,6 +87,11 @@ public class CrawlDB {
         }
     }
     
+    /**
+     * METHOD: add element to database queue
+     * 
+     * @param element as object
+     */
     public void add(CrawledElement element){
         
         ELEMENTS.add(element);
@@ -89,6 +100,12 @@ public class CrawlDB {
                 
     }
     
+    /**
+     * METHOD: get an existing crawled element
+     * 
+     * @param title of article
+     * @return element as object
+     */
     public CrawledElement get(String title){
         
         for(CrawledElement element : ELEMENTS) {

@@ -15,9 +15,17 @@ import org.xml.sax.SAXException;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class convert html document text via tika to plain text
  */
 public class TextConverterHelper {
     
+    /**
+     * METHOD: convert text to a plaintext format
+     * 
+     * @param text as string
+     * @return plaintext
+     */
     public static String parseText(String text) {
         
         TikaConfig config = null;
@@ -41,6 +49,13 @@ public class TextConverterHelper {
         
     }
     
+    /**
+     * METHOD: get the language of given text
+     * 
+     * @param language as string
+     * @param text as string
+     * @return object containing plaintext, language and stemmedtext
+     */
     public static Object[] normaliseText(String language, String text){
 
         // clean text via apache tika
@@ -56,6 +71,13 @@ public class TextConverterHelper {
 
     }
     
+    /**
+     * METHOD: get a textpassage by cutting it on tagframe
+     * 
+     * @param text as string
+     * @param cut as stringarray[start, end]
+     * @return text
+     */
     public static String cutByTag(String text, String[] cut){
 
         String tag_start = cut[0];
@@ -77,6 +99,13 @@ public class TextConverterHelper {
         
     }
     
+    /**
+     * METHOD: clean text for given tags
+     * 
+     * @param text as string
+     * @param tags as stringarray
+     * @return text
+     */
     public static String cleanTag(String text, String[] tags){
         
         for (String tag : tags){
@@ -89,6 +118,13 @@ public class TextConverterHelper {
         
     }
     
+    /**
+     * METHOD: modify text by inserting between tags
+     * 
+     * @param text as string
+     * @param inserts as stringarray
+     * @return text
+     */
     public static String insertDuringTag(String text, String[] inserts){
         
         String tag_start = inserts[0];

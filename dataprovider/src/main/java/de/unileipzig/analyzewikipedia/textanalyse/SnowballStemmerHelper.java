@@ -37,6 +37,8 @@ import org.tartarus.snowball.ext.TurkishStemmer;
 
 /**
  * @author Danilo Morgado
+ * 
+ * supporting by stemming a text
  */
 public class SnowballStemmerHelper {
     
@@ -66,6 +68,11 @@ public class SnowballStemmerHelper {
     private static final SwedishStemmer SNOWBALL_SWEDISH = new SwedishStemmer();
     private static final TurkishStemmer SNOWBALL_TURKISH = new TurkishStemmer();
     
+    /**
+     * METHOD: initialise the language
+     * 
+     * @param lang as string
+     */
     protected static void init(String lang){
         
         STEMMERS.clear();
@@ -150,12 +157,23 @@ public class SnowballStemmerHelper {
         
     }
     
+    /**
+     * METHOD: check language is usable
+     * 
+     * @return boolean
+     */
     protected static Boolean isUsable(){
         
         return !STEMMERS.isEmpty();
         
     }
     
+    /**
+     * METHOD: stem a word
+     * 
+     * @param word as string
+     * @return stemmed word
+     */
     private static String stem(String word){
         
         for (SnowballProgram st : STEMMERS){
@@ -168,6 +186,12 @@ public class SnowballStemmerHelper {
         
     }
     
+    /**
+     * METHOD: stem a text
+     * 
+     * @param sentence as string
+     * @return stemmed text
+     */
     protected static String analyze(String sentence){
         
         String analysed = "";
