@@ -35,6 +35,8 @@ import org.apache.lucene.analysis.sv.SwedishAnalyzer;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class helps to analyse the crawled webdocuments
  */
 public class AnalyzerHelper {
     
@@ -42,6 +44,11 @@ public class AnalyzerHelper {
     
     private static StopwordAnalyzerBase ANALYSER;
     
+    /**
+     * METHOD: initialize the analyzer helper for special language
+     * 
+     * @param lang
+     */
     protected static void init(String lang){
         
         language = lang.toLowerCase().trim();
@@ -50,6 +57,9 @@ public class AnalyzerHelper {
         
     }
     
+    /**
+     * METHOD: set the analyzer helper for special language
+     */
     private static void setAnalyser(){
         
         switch(language){
@@ -128,12 +138,22 @@ public class AnalyzerHelper {
         
     }
     
+    /**
+     * METHOD: check if language is usable
+     * @return language exist
+     */
     protected static Boolean isUsable(){
         
         return ANALYSER != null;
         
     }
     
+    /**
+     * METHOD: analyse the given text
+     * 
+     * @param sentence as string
+     * @return text
+     */
     protected static String analyze(String sentence){
           
         String analysed = "";
@@ -154,13 +174,17 @@ public class AnalyzerHelper {
             stream.end();
             stream.close();
             
-//            ANALYSER.close();
-            
         } catch (IOException ex) {}
         
         return analysed;
     }
     
+    /**
+     * METHOD: standard method for analysing
+     * 
+     * @param sentence as string
+     * @return text
+     */
     protected static String standard(String sentence){
         
         String standard = "";

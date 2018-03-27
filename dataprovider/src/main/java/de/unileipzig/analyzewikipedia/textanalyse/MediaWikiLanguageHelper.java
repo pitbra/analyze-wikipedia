@@ -2,9 +2,14 @@ package de.unileipzig.analyzewikipedia.textanalyse;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class for reducing sectioning by deleting special subarticles in diffrent languages
  */
 public class MediaWikiLanguageHelper {
     
+    /**
+     * ENUMERATION: supported languages
+     */
     public enum Language {
         DE          (0),
         EN          (1),
@@ -33,6 +38,12 @@ public class MediaWikiLanguageHelper {
     
     private static final String[][] LANGUAGE = new String[][]{DE_TITLE, EN_TITLE, ES_TITLE};
     
+    /**
+     * METHOD: get not supported mediawiki titles
+     * 
+     * @param title as string
+     * @return boolean
+     */
     public static Boolean isNotMediawikiBaseTitle(String title){
         
         for(String[] lang : LANGUAGE){
@@ -49,6 +60,12 @@ public class MediaWikiLanguageHelper {
         
     }
     
+    /**
+     * METHOD: check if title is a weblink
+     * 
+     * @param title as string
+     * @return boolean
+     */
     public static Boolean isMediawikiWeblink(String title){
         
         for(String name : WEBLINKS){

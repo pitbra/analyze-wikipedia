@@ -1,5 +1,7 @@
 package de.unileipzig.analyzewikipedia.crawler.dataobjects;
 
+import java.io.Serializable;
+
 import java.net.URL;
 
 import java.util.HashMap;
@@ -10,7 +12,7 @@ import java.util.Map;
 /**
  * @author Danilo Morgado
  */
-public class CrawledElement {
+public class CrawledElement implements Serializable {
     
     private final URL url;
     

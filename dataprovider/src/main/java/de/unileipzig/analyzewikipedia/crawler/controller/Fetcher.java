@@ -53,7 +53,7 @@ public class Fetcher {
     private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
     
     /**
-     * isnatll trusted certificates
+     * METHOD: isnatll trusted certificates
      */
     private static void trustAllCertificates(){
         
@@ -104,7 +104,7 @@ public class Fetcher {
     
     
     /**
-     * download HTML site and return it as string value
+     * METHOD: download HTML site and return it as string value
      * 
      * @param website as string
      * @return html site as string
@@ -152,7 +152,7 @@ public class Fetcher {
     }
     
     /**
-     * download HTML site and return it as string value
+     * METHOD: download HTML site and return it as string value
      * 
      * @param website as string
      * @return html site as string
@@ -202,7 +202,7 @@ public class Fetcher {
     }
     
     /**
-     * download HTML site and return it as string value
+     * METHOD: download HTML site and return it as string value
      * 
      * @param website as string
      * @param search the including xml tag

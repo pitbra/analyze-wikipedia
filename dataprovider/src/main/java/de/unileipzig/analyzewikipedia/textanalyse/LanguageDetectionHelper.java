@@ -8,10 +8,12 @@ import org.apache.tika.language.detect.LanguageResult;
 
 /**
  * @author Danilo Morgado
+ * 
+ * class for detection a lnguage of given text
  */
 public class LanguageDetectionHelper {
     
-    /* supportet languiages
+    /* supportet languages
     
         Code        Language
     
@@ -88,7 +90,13 @@ public class LanguageDetectionHelper {
     
     private static LanguageDetector detector = null;
     private static LanguageResult result;
-        
+    
+    /**
+     * METHOD: get language of the given text
+     * 
+     * @param text as string
+     * @return language as string
+     */
     public static String getLanguage(String text) {
         
         if (detector == null) {
