@@ -51,7 +51,7 @@ public class MappingHelper {
             ent.setName(name);
             ent.setId(cur.getId());
             ent.setType(getCssClass(cur));
-            ent.setMainArticle(mainArticle);
+            ent.setMainArticle(StringHelper.prettyPrintString(mainArticle));
 
             entities.add(ent);
         }

@@ -111,9 +111,9 @@
                         <li class="nav-item active">
                             <a class="nav-link" href="index.jsp">Home <span class="sr-only">(current)</span></a>
                         </li>
-                        <li class="nav-item">
+                        <!--li class="nav-item">
                             <a class="nav-link" href="#">Link</a>
-                        </li>
+                        </li-->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Options
@@ -123,9 +123,9 @@
                                 <a class="dropdown-item" href="javascript:void(0)" onclick="javascript:showLegend()"><span id="checkLegend" class="fa fa-check" style="display: none"></span>Show legend</a>
                             </div>
                         </li>
-                        <li class="nav-item">
+                        <!--li class="nav-item">
                             <a class="nav-link disabled" href="#">Disabled</a>
-                        </li>
+                        </li-->
                     </ul>
                     <form class="form-inline my-2 my-lg-0" action="javascript:void(0);">
                         <input class="form-control mr-sm-2" id="inputSearch" type="search" placeholder="Search" aria-label="Search">
