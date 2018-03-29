@@ -30,6 +30,7 @@ public class TextConverterHelper {
         
         TikaConfig config = null;
         try {
+            //TODO: Anpassung Pfades
             config = new TikaConfig(new File("D:/develop/uni/analyze-wikipedia-netbeans/analyze-wikipedia/src/dataprovider/src/main/resources/textanalyze/tikaconfig.xml"));
         } catch (TikaException | IOException | SAXException ex) {}
                 
