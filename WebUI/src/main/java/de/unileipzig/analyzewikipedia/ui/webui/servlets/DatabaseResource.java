@@ -19,27 +19,21 @@ import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleService;
 import de.unileipzig.analyzewikipedia.neo4j.service.SubArticleServiceImpl;
 import de.unileipzig.analyzewikipedia.textanalyse.MediaWikiLanguageHelper;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.ArborViewModel;
-import de.unileipzig.analyzewikipedia.ui.webui.contracts.EdgesViewModel;
 import de.unileipzig.analyzewikipedia.ui.webui.contracts.EntityViewModel;
-import de.unileipzig.analyzewikipedia.ui.webui.contracts.RelationshipType;
 import de.unileipzig.analyzewikipedia.ui.webui.helper.MappingHelper;
 import de.unileipzig.analyzewikipedia.ui.webui.helper.StringHelper;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import javax.json.Json;
+import java.util.Objects;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -109,13 +103,11 @@ public class DatabaseResource {
         Iterable<String> ext = artService.getWeblinks(cur.getTitle());
 
         List<EntityViewModel> all = MappingHelper.MapEntities(subs, cur.getTitle(), true);
-        //List<EntityViewModel> externAll = MappingHelper.MapEntities(ext, true);
-
         if (all.size() > 0) {
 
             HashSet<Long> hasTo = new HashSet<>();
             for (Entity sub : subs) {
-                if (sub.getId() == cur.getId()) {
+                if (Objects.equals(sub.getId(), cur.getId())) {
                     continue;
                 }
 
@@ -181,16 +173,6 @@ public class DatabaseResource {
         return Response.status(200).entity(gson.toJson(text)).build();
     }
 
-    /**
-     * PUT method for updating or creating an instance of DatabaseResource
-     *
-     * @param content representation for the resource
-     */
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void putJson(String content
-    ) {
-    }
 
     private void getAllRelatedNodes(ArticleObject cur, List<EntityViewModel> entities, Hashtable<Long, HashSet<Long>> edges) {
         EntityViewModel current = MappingHelper.MapArticle(cur);

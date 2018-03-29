@@ -30,7 +30,7 @@ public class TextConverterHelper {
         
         TikaConfig config = null;
         try {
-            config = new TikaConfig(new File("C:/develop/uni/analyze-wikipedia-netbeans/analyze-wikipedia/src/dataprovider/src/main/resources/textanalyze/tikaconfig.xml"));
+            config = new TikaConfig(new File("D:/develop/uni/analyze-wikipedia-netbeans/analyze-wikipedia/src/dataprovider/src/main/resources/textanalyze/tikaconfig.xml"));
         } catch (TikaException | IOException | SAXException ex) {}
                 
         BodyContentHandler handler = new BodyContentHandler();

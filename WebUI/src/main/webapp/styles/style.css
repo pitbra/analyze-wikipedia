@@ -59,4 +59,19 @@ div #error {
 .wa_infodialogue_title h2 {
   font-size: 16pt;
 }
+div#wa_links {
+  width: 350px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+div#info_dialogue_text {
+  overflow-y: scroll;
+}
+div#info_dialogue_text ul li {
+  display: none;
+}
+.highlighted {
+  background-color: #00FFFF;
+}
 /*# sourceMappingURL=style.css.map */

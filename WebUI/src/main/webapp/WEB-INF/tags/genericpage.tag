@@ -25,7 +25,7 @@
                 $('#inputSearch').on('keyup', function () {
                     var text = $("#inputSearch").val();
 
-                    if (text.length === 3) {
+                    if (text.length >= 3) {
                         $.ajax({
                             url: "rest/db/articles/" + text,
                             data: null,
@@ -60,9 +60,6 @@
                 });
                 $("#nodes").dblclick(function (e) {
                     handleDoubleClick(e);
-                });
-                $("#nodes").addEventListener('nodeClicked  ', function (e) {
-                    handleClick(e);
                 });
             }
 

@@ -14,7 +14,7 @@
         </div>
 
         <script>
-
+            var unchanged;
             var sys;
 
             $(function () {
@@ -69,14 +69,61 @@
                     var subArticle = (type === "Article" || type === "article") ? null : nearest.node.data.MainArticle;
                     $("#info_dialogue_title").html(article);
                     $.ajax({
-                            url: "rest/db/checkArticle?title=" + article + "&type=" + type + "&mainArticle=" + subArticle,
-                            data: null,
-                            success: function (data) {
-                                $("#info_dialogue_text").html(data);
-                            },
-                            dataType: "json"
-                        });
+                        url: "rest/db/checkArticle?title=" + article + "&type=" + type + "&mainArticle=" + subArticle,
+                        data: null,
+                        success: function (data) {
+                            unchanged = data;
+                            $("#info_dialogue_text").html(data);
+                            setupView();
+                        },
+                        dataType: "json"
+                    });
                     expandInfo();
+                }
+            }
+
+            function setupView() {
+                var lists = $("ul", "#info_dialogue_text");
+                var spans = "";
+
+                for (var i = 0; i < lists.length; ++i) {
+                    spans += "<a href='" + lists[i].title + "' onmouseover=\"highlightText('" + lists[i].title + "')\">" + lists[i].title + "</a><br />";
+                }
+
+                $("#wa_links").html(spans);
+            }
+
+            function highlightText(title) {
+                var content = $("#info_dialogue_text");
+                var uls = $("ul", content);
+                var i = 0
+
+                for (; i < uls.length; ++i) {
+                    if (uls[i].title === title) {
+                        break;
+                    }
+                }
+
+                if (i < uls.length) {
+                    highlightPlagiation(uls[i]);
+                }
+            }
+
+            function highlightPlagiation(ul) {
+                var lis = $("li", ul);
+                var content = unchanged;
+
+                for (var i = 0; i < lis.length; ++i) {
+                    var start = content.lastIndexOf("</ul>");
+                    var text = lis[i].innerHTML;
+
+                    var current = content.indexOf(text, start);
+                    var stringBefore = content.substring(0, current);
+                    var stringAfter = content.substring(current + text.length);
+
+                    content = stringBefore + "<span class='highlighted'>" + text + "</span>" + stringAfter;
+
+                    $("#info_dialogue_text").html(content);
                 }
             }
 
@@ -108,8 +155,9 @@
         <div id="error" style="display: none">Bitte suchen Sie nach einem Artikel, vorher wird aufgrund der Größe des Graphen keiner angezeigt.</div>
         <div id="tooltip" class="wa_tooltip" style="position: relative; z-index: 10000000"></div>
         <div id="info_dialogue" class="card wa_infodialogue" style="position: fixed; top: 56px; bottom: 56px; right: 0; width: 400px; display:none;">
-                <h5 id="info_dialogue_title" class="card-header">Artikel</h5>
-                <button onclick="compressInfo()" class="btn btn-outline-secondary" style="position: fixed; top: 60px; right: 4px;" title="Compress the Info-Dialogue"><span class="fa fa-compress"></span></button>
+            <h5 id="info_dialogue_title" class="card-header">Artikel</h5>
+            <button onclick="compressInfo()" class="btn btn-outline-secondary" style="position: fixed; top: 60px; right: 4px;" title="Compress the Info-Dialogue"><span class="fa fa-compress"></span></button>
+            <div id="wa_links"></div>
             <div id="info_dialogue_text"></div>
         </div>
         <div id="info_dialogue_show" class="wa_infodialogue" style="position: fixed; top:60px; right:4px; display:none;">

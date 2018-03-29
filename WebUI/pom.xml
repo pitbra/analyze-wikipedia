@@ -40,7 +40,7 @@
         <dependency>
             <groupId>de.uni-leipzig.analyze-wikipedia</groupId>
             <artifactId>dataprovider</artifactId>
-            <version>1.0.0.0</version>
+            <version>1.0.0.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         
@@ -54,6 +54,21 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.4.v20141103</version>
+                <configuration>
+                    <httpConnector>
+                        <!-- make jetty listen on 127.0.0.1 for better security -->
+                        <!--host>127.0.0.1</host-->
+                    </httpConnector>
+                    <scanIntervalSeconds>3</scanIntervalSeconds>
+                    <webAppConfig>
+                        <!-- defaultsDescriptor>src/test/resources/jetty-maven-plugin-webdefault.xml</defaultsDescriptor -->
+                    </webAppConfig>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

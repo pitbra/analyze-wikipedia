@@ -117,6 +117,7 @@ public class ThreadController {
         try {
             READER.join();
         } catch (InterruptedException e) {
+                String t = "test";
         }
 
         // block main programm during thread execution
@@ -126,6 +127,7 @@ public class ThreadController {
                 SEEKERS[i].join();
                 TRANSMS[i].join();
             } catch (InterruptedException e) {
+                String t = "test";
             }
 
         }
